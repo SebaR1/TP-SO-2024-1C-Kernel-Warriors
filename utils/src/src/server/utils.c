@@ -4,7 +4,7 @@ t_log* logger;
 
 int initServer(char* port)
 {
-	struct addrinfo hints,*servinfo, *p;
+	struct addrinfo hints,*servinfo;
 
 	logger=log_create("log.log", "utils_server",1, LOG_LEVEL_INFO );
 	if (logger == NULL) 
@@ -13,7 +13,7 @@ int initServer(char* port)
         return -1;
     }
 
-	memset(&hints, 0, sizeof(&hints));
+	memset(&hints, 0, sizeof(hints));
 
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -40,7 +40,7 @@ int initServer(char* port)
     }
 
 	// Escuchamos las conexiones entrantes
-	if(listen(socketServer, SOMAXCONN)==-1);
+	if(listen(socketServer, SOMAXCONN)==-1)
 	{
 		log_error(logger, "Error al escuchar las conexiones entrantes");
         close(socketServer);
@@ -50,22 +50,15 @@ int initServer(char* port)
 
 	freeaddrinfo(servinfo);
 
-	log_trace(logger, "Listo para escuchar a mi cliente");
-
-	log_destroy(logger);
+	log_info(logger, "Listo para escuchar a mi cliente");
 
 	return socketServer;
 }
 
 int waitClient(int socketServer)
 {
-	//almacenar información sobre la dirección del cliente que se conecta al servidor
-	struct sockaddr_in dir_cliente;
-
-    int sizeDirection = sizeof(struct sockaddr_in);
-
 	// Aceptamos un nuevo cliente
-    int socketClient = accept(socketServer, (struct sockaddr *)&dir_cliente, sizeDirection);
+    int socketClient = accept(socketServer, NULL, NULL);
     if (socketClient == -1) {
         log_error(logger, "Error al aceptar la conexión del cliente");
         return -1;
@@ -75,16 +68,17 @@ int waitClient(int socketServer)
     return socketClient;
 }
 
-int getOperation(int socketClient)
+operationCode getOperation(int socketClient)
 {
-	int opCode;
+	operationCode opCode;
 	if(recv(socketClient, &opCode, sizeof(int), MSG_WAITALL) > 0)
 		return opCode;
 	else
 	{
 		close(socketClient);
-		return -1;
+		return ERROR;
 	}
+
 }
 
 void* getBuffer(int* size, int socketClient)

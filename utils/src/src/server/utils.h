@@ -14,6 +14,7 @@
 
 typedef enum
 {
+	ERROR=-1,
 	MESSAGE,
 	PACKAGE
 } operationCode;
