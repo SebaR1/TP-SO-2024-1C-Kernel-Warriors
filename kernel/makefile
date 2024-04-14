@@ -5,6 +5,7 @@ CC=gcc
 
 # Set prerrequisites
 SRCS_C += $(shell find src/ -iname "*.c")
+# SRCS_C += $(shell find ../utils/src/utils/client/ -iname "*.c")
 SRCS_H += $(shell find src/ -iname "*.h")
 DEPS = $(foreach STL,$(STATIC_LIBPATHS),$(STL:%=%/bin/lib$(notdir $(STL)).a))
 
