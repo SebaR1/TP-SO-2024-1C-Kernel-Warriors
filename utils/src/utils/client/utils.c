@@ -1,6 +1,5 @@
 #include "utils.h"
 
-t_log* logger;
 
 void* serializePackage(t_package* package, int bytes)
 {

@@ -1,8 +1,31 @@
 #include "kernel.h"
-#include <../../utils/src/utils/client/utils.h>
+//#include <../../utils/src/utils/client/utils.h>
+#include "utils/client/utils.h"
+#include "config.h"
+#include "logger.h"
+
+
 
 int main ()
 {
+    // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
+    initLogger("kernel.log", "kernel", true, LOG_LEVEL_INFO);
+
+    // Obtengo la configuracion general del kernel.
+    initKernelConfig("kernel.config");
+
+
+
+
+
+
+    /*
+
+
+
+
+
+
 
     int socketClient = createConection(IP, Port);
     if (socketClient == -1) 
@@ -29,6 +52,16 @@ int main ()
 
      // Cerrar la conexión
     releaseConnection(socketClient);
+
+
+
+
+
+    */
+
+
+
+
 
     return 0;
 }

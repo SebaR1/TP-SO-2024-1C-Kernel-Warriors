@@ -1,17 +1,10 @@
 #include "utils.h"
 
-t_log* logger;
 
-int initServer(char* port)
+int initServer(t_log* logger, char* port)
 {
 	struct addrinfo hints,*servinfo;
 
-	logger=log_create("log.log", "utils_server",1, LOG_LEVEL_INFO );
-	if (logger == NULL) 
-	{
-        printf("Error: No se pudo crear el logger.\n");
-        return -1;
-    }
 
 	memset(&hints, 0, sizeof(hints));
 
@@ -55,7 +48,7 @@ int initServer(char* port)
 	return socketServer;
 }
 
-int waitClient(int socketServer)
+int waitClient(t_log* logger, int socketServer)
 {
 	// Aceptamos un nuevo cliente
     int socketClient = accept(socketServer, NULL, NULL);
@@ -92,7 +85,7 @@ void* getBuffer(int* size, int socketClient)
 	return buffer;
 }
 
-void getMessage(int socketClient)
+void getMessage(t_log* logger, int socketClient)
 {
 	int size;
 	char* buffer = getBuffer(&size, socketClient);

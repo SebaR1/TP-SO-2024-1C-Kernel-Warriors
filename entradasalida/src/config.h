@@ -1,0 +1,40 @@
+#ifndef IO_CONFIG_H_
+#define IO_CONFIG_H_
+
+#include <commons/collections/list.h>
+#include <commons/config.h>
+
+// Configuracion del archivo de configuracion de la entrada/salida
+typedef struct
+{
+    char* TIPO_INTERFAZ;
+    int TIEMPO_UNIDAD_TRABAJO;
+    char* IP_KERNEL;
+    int PUERTO_KERNEL;
+    char* IP_MEMORIA;
+    int PUERTO_MEMORIA;
+    char* PATH_BASE_DIALFS;
+    int BLOCK_SIZE;
+    int BLOCK_COUNT;
+} ioConfig;
+
+
+extern ioConfig* _ioConfig;
+extern t_config* _configFile;
+
+
+// Retorna un puntero a la struct propia de la configuracion, la cual deberia contener la informacion de la configuracion del modulo en el que se encuentre. Llame a la funcion init propia de cada modulo antes de usar esta funcion.
+ioConfig* getIOConfig();
+
+
+// Obtiene la configuracion del archivo de configuracion especificado en el parametro "path", y los settea en una variable.
+// Para obtener esa variable, llame a la funcion get propio de cada modulo. Debe llamar a esta funcion una sola vez en todo el programa, excepto que el archivo de configuracion se modifique en tiempo de ejecucion (que no deberia ocurrir).
+void initIOConfig(char* path);
+
+
+// Libera la memoria usada que almacenaba la configuracion del modulo en el que se esta parado.
+void freeIOConfig();
+
+
+
+#endif

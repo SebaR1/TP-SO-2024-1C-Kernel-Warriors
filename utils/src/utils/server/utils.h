@@ -1,5 +1,5 @@
-#ifndef UTILS_HELLO_H_
-#define UTILS_HELLO_H_
+#ifndef SERVER_H_
+#define SERVER_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,10 +22,10 @@ typedef enum
 
 void* getBuffer(int* size, int socketClient);
 
-int initServer(char* port);
-int waitClient(int socketServer);
+int initServer(t_log* logger, char* port);
+int waitClient(t_log* logger, int socketServer);
 t_list* getPackage(int socketClient);
-void getMessage(int socketClient);
+void getMessage(t_log* logger, int socketClient);
 int getOperation(int socketClient);
 
 

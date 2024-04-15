@@ -1,19 +1,28 @@
 #include "cpu.h"
+#include "logger.h"
 
-t_list* list;
 
 int main() 
 {
+    // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
+    initLogger("CPU.log", "CPU", true, LOG_LEVEL_INFO);
+
+    // Obtengo la configuracion general.
+    initCPUConfig("CPU.config");
+
+
+
+    t_list* list;
 
     // Iniciar el servidor
-    int socketServer = initServer(port);
+    int socketServer = initServer(cpuLogger, port);
     if (socketServer == -1) {
         //log_error(logger,"Error: no se pudo iniciar el servidor.\n" );
         return 1;
     }
 
     // Esperar la conexión de un cliente
-    int socketClient = waitClient(socketServer);
+    int socketClient = waitClient(cpuLogger, socketServer);
     if (socketClient == -1) {
         //log_error(logger, "Error al esperar cliente.\n");
         return 1;
@@ -25,7 +34,7 @@ int main()
     {
         case MESSAGE:
             printf("caso 0");
-            getMessage(socketClient);
+            getMessage(cpuLogger, socketClient);
             break;
         case PACKAGE:
             list= getPackage(socketClient);
