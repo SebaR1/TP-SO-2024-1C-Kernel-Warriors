@@ -25,13 +25,13 @@ void initCPUConfig(char* path)
 
     _cpuConfig = (cpuConfig*) malloc(sizeof(cpuConfig));
 
-    _getIOData();
+    _getCPUData();
 
     log_info(cpuLogger, "Datos obtenidos con exito");
 }
 
 // Posible riesgo de memory leak o de Segmentation Fault en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak o un Segmentation Fault en los testeos
-void freeIOConfig()
+void freeCPUConfig()
 {
     log_info(cpuLogger, "Liberando la memoria usada para el archivo de configuracion");
 
@@ -43,7 +43,7 @@ void freeIOConfig()
 
 
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
-void _getIOData()
+void _getCPUData()
 {
     _cpuConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
 

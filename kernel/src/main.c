@@ -61,7 +61,9 @@ int main ()
 
 
 
-
+    // Liberando todos los recursos
+    freeKernelConfig();
+    destroyLogger();
 
     return 0;
 }

@@ -11,7 +11,7 @@ int main()
     initCPUConfig("CPU.config");
 
 
-
+    /*
     t_list* list;
 
     // Iniciar el servidor
@@ -49,6 +49,14 @@ int main()
             //log_error(logger, "operación no reconocida.\n");
             break;
     }
+    */
+
+
+    // Liberando todos los recursos
+    freeCPUConfig();
+    destroyLogger();
+    
+    return 0;
 }
 
 /*void iterator(char* value) 

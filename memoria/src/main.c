@@ -13,7 +13,9 @@ int main(int argc, char* argv[])
     initMemoryConfig("memoria.config");
 
 
-
+    // Liberando todos los recursos
+    freeMemoryConfig();
+    destroyLogger();
 
     return 0;
 }

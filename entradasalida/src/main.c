@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <utils/client/utils.h>
+#include "logger.h"
+#include "config.h"
 
 int main(int argc, char* argv[])
 {
@@ -10,6 +12,10 @@ int main(int argc, char* argv[])
     // Obtengo la configuracion general.
     initIOConfig("IO.config");
 
+
+    // Liberando todos los recursos
+    freeIOConfig();
+    destroyLogger();
 
     return 0;
 }

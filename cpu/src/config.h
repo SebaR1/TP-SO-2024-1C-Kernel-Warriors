@@ -30,7 +30,7 @@ void initCPUConfig(char* path);
 
 
 // Libera la memoria usada que almacenaba la configuracion del modulo en el que se esta parado.
-void freeIOConfig();
+void freeCPUConfig();
 
 
 

@@ -5,11 +5,12 @@
 #include <commons/log.h>
 
 
-// Debe ser inicializada usando la funcion log_create de las commons.
 extern t_log* cpuLogger;
 
+// Inicializa el logger
 void initLogger(char* file, char* processName, bool isActiveConsole, t_log_level level);
 
+// Destruye el logger
 void destroyLogger();
 
 
