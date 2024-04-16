@@ -16,6 +16,19 @@ memoryConfig* getMemoryConfig()
     return _memoryConfig;
 }
 
+// FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
+void _getMemoryData()
+{
+    _memoryConfig->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
+
+    _memoryConfig->TAM_MEMORIA = config_get_int_value(_configFile, "TAM_MEMORIA");
+
+    _memoryConfig->TAM_PAGINA = config_get_int_value(_configFile, "TAM_PAGINA");
+
+    _memoryConfig->PATH_INSTRUCCIONES = config_get_string_value(_configFile, "PATH_INSTRUCCIONES");
+
+    _memoryConfig->RETARDO_RESPUESTA = config_get_int_value(_configFile, "RETARDO_RESPUESTA");
+}
 
 void initMemoryConfig(char* path)
 {
@@ -42,16 +55,3 @@ void freeMemoryConfig()
 }
 
 
-// FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
-void _getMemoryData()
-{
-    _memoryConfig->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
-
-    _memoryConfig->TAM_MEMORIA = config_get_int_value(_configFile, "TAM_MEMORIA");
-
-    _memoryConfig->TAM_PAGINA = config_get_int_value(_configFile, "TAM_PAGINA");
-
-    _memoryConfig->PATH_INSTRUCCIONES = config_get_string_value(_configFile, "PATH_INSTRUCCIONES");
-
-    _memoryConfig->RETARDO_RESPUESTA = config_get_int_value(_configFile, "RETARDO_RESPUESTA");
-}

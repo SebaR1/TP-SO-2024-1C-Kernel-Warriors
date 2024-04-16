@@ -16,6 +16,27 @@ ioConfig* getIOConfig()
     return _ioConfig;
 }
 
+// FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
+void _getIOData()
+{
+    _ioConfig->TIPO_INTERFAZ = config_get_string_value(_configFile, "TIPO_INTERFAZ");
+
+    _ioConfig->TIEMPO_UNIDAD_TRABAJO = config_get_int_value(_configFile, "TIEMPO_UNIDAD_TRABAJO");
+
+    _ioConfig->IP_KERNEL = config_get_string_value(_configFile, "IP_KERNEL");
+
+    _ioConfig->PUERTO_KERNEL = config_get_int_value(_configFile, "PUERTO_KERNEL");
+
+    _ioConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
+
+    _ioConfig->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+
+    _ioConfig->PATH_BASE_DIALFS = config_get_string_value(_configFile, "PATH_BASE_DIALFS");
+
+    _ioConfig->BLOCK_SIZE = config_get_int_value(_configFile, "BLOCK_SIZE");
+
+    _ioConfig->BLOCK_COUNT = config_get_int_value(_configFile, "BLOCK_COUNT");
+}
 
 void initIOConfig(char* path)
 {
@@ -42,24 +63,3 @@ void freeIOConfig()
 }
 
 
-// FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
-void _getIOData()
-{
-    _ioConfig->TIPO_INTERFAZ = config_get_string_value(_configFile, "TIPO_INTERFAZ");
-
-    _ioConfig->TIEMPO_UNIDAD_TRABAJO = config_get_int_value(_configFile, "TIEMPO_UNIDAD_TRABAJO");
-
-    _ioConfig->IP_KERNEL = config_get_string_value(_configFile, "IP_KERNEL");
-
-    _ioConfig->PUERTO_KERNEL = config_get_int_value(_configFile, "PUERTO_KERNEL");
-
-    _ioConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
-
-    _ioConfig->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
-
-    _ioConfig->PATH_BASE_DIALFS = config_get_string_value(_configFile, "PATH_BASE_DIALFS");
-
-    _ioConfig->BLOCK_SIZE = config_get_int_value(_configFile, "BLOCK_SIZE");
-
-    _ioConfig->BLOCK_COUNT = config_get_int_value(_configFile, "BLOCK_COUNT");
-}

@@ -16,6 +16,21 @@ cpuConfig* getCPUConfig()
     return _cpuConfig;
 }
 
+// FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
+void _getCPUData()
+{
+    _cpuConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
+
+    _cpuConfig->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+
+    _cpuConfig->PUERTO_ESCUCHA_DISPATCH = config_get_int_value(_configFile, "PUERTO_ESCUCHA_DISPATCH");
+
+    _cpuConfig->PUERTO_ESCUCHA_INTERRUPT = config_get_int_value(_configFile, "PUERTO_ESCUCHA_INTERRUPT");
+
+    _cpuConfig->CANTIDAD_ENTRADAS_TLB = config_get_int_value(_configFile, "CANTIDAD_ENTRADAS_TLB");
+
+    _cpuConfig->ALGORITMO_TLB = config_get_string_value(_configFile, "ALGORITMO_TLB");
+}
 
 void initCPUConfig(char* path)
 {
@@ -42,18 +57,3 @@ void freeCPUConfig()
 }
 
 
-// FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
-void _getCPUData()
-{
-    _cpuConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
-
-    _cpuConfig->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
-
-    _cpuConfig->PUERTO_ESCUCHA_DISPATCH = config_get_int_value(_configFile, "PUERTO_ESCUCHA_DISPATCH");
-
-    _cpuConfig->PUERTO_ESCUCHA_INTERRUPT = config_get_int_value(_configFile, "PUERTO_ESCUCHA_INTERRUPT");
-
-    _cpuConfig->CANTIDAD_ENTRADAS_TLB = config_get_int_value(_configFile, "CANTIDAD_ENTRADAS_TLB");
-
-    _cpuConfig->ALGORITMO_TLB = config_get_string_value(_configFile, "ALGORITMO_TLB");
-}

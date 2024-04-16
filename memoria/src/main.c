@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     initLogger("memoria.log", "memoria", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
-    initMemoryConfig("memoria.config");
+    initMemoryConfig("../memoria.config");
 
 
     // Liberando todos los recursos

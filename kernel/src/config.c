@@ -16,34 +16,6 @@ kernelConfig* getKernelConfig()
     return _kernelConfig;
 }
 
-
-void initKernelConfig(char* path)
-{
-    log_info(kernelLogger, "Obteniendo los datos del archivo de configuracion");
-
-    _configFile = config_create(path);
-
-    _kernelConfig = (kernelConfig*) malloc(sizeof(kernelConfig));
-
-    _getKernelData();
-
-    log_info(kernelLogger, "Datos obtenidos con exito");
-}
-
-// Posible riesgo de memory leak en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak en los testeos.
-void freeKernelConfig()
-{
-    log_info(kernelLogger, "Liberando la memoria usada para el archivo de configuracion");
-
-    list_destroy_and_destroy_elements(_kernelConfig->RECURSOS, free);
-    list_destroy(_kernelConfig->INSTANCIAS_RECURSOS);
-    config_destroy(_configFile);
-    free(_kernelConfig);
-
-    log_info(kernelLogger, "Memoria liberada con exito");
-}
-
-
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getKernelData()
 {
@@ -69,3 +41,38 @@ void _getKernelData()
 
     _kernelConfig->GRADO_MULTIPROGRAMACION = config_get_int_value(_configFile, "GRADO_MULTIPROGRAMACION");
 }
+
+
+void initKernelConfig(char* path)
+{
+    log_info(kernelLogger, "Obteniendo los datos del archivo de configuracion");
+
+    _configFile = config_create(path);
+
+    if (_configFile == NULL){
+        log_info(kernelLogger, "FAllo en la creación del config");
+        exit(1);
+    }
+
+    _kernelConfig = (kernelConfig*) malloc(sizeof(kernelConfig));
+
+    _getKernelData();
+
+    log_info(kernelLogger, "Datos obtenidos con exito");
+}
+
+
+
+// Posible riesgo de memory leak en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak en los testeos.
+void freeKernelConfig()
+{
+    log_info(kernelLogger, "Liberando la memoria usada para el archivo de configuracion");
+
+    list_destroy_and_destroy_elements(_kernelConfig->RECURSOS, free);
+    list_destroy(_kernelConfig->INSTANCIAS_RECURSOS);
+    config_destroy(_configFile);
+    free(_kernelConfig);
+
+    log_info(kernelLogger, "Memoria liberada con exito");
+}
+
