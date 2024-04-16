@@ -19,15 +19,15 @@ memoryConfig* getMemoryConfig()
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getMemoryData()
 {
-    _memoryConfig->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
+    getMemoryConfig()->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
 
-    _memoryConfig->TAM_MEMORIA = config_get_int_value(_configFile, "TAM_MEMORIA");
+    getMemoryConfig()->TAM_MEMORIA = config_get_int_value(_configFile, "TAM_MEMORIA");
 
-    _memoryConfig->TAM_PAGINA = config_get_int_value(_configFile, "TAM_PAGINA");
+    getMemoryConfig()->TAM_PAGINA = config_get_int_value(_configFile, "TAM_PAGINA");
 
-    _memoryConfig->PATH_INSTRUCCIONES = config_get_string_value(_configFile, "PATH_INSTRUCCIONES");
+    getMemoryConfig()->PATH_INSTRUCCIONES = config_get_string_value(_configFile, "PATH_INSTRUCCIONES");
 
-    _memoryConfig->RETARDO_RESPUESTA = config_get_int_value(_configFile, "RETARDO_RESPUESTA");
+    getMemoryConfig()->RETARDO_RESPUESTA = config_get_int_value(_configFile, "RETARDO_RESPUESTA");
 }
 
 void initMemoryConfig(char* path)
@@ -49,7 +49,7 @@ void freeMemoryConfig()
     log_info(memoryLogger, "Liberando la memoria usada para el archivo de configuracion");
 
     config_destroy(_configFile);
-    free(_memoryConfig);
+    free(getMemoryConfig());
 
     log_info(memoryLogger, "Memoria liberada con exito");
 }

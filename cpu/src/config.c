@@ -19,17 +19,17 @@ cpuConfig* getCPUConfig()
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getCPUData()
 {
-    _cpuConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
+    getCPUConfig()->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
 
-    _cpuConfig->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+    getCPUConfig()->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
 
-    _cpuConfig->PUERTO_ESCUCHA_DISPATCH = config_get_int_value(_configFile, "PUERTO_ESCUCHA_DISPATCH");
+    getCPUConfig()->PUERTO_ESCUCHA_DISPATCH = config_get_int_value(_configFile, "PUERTO_ESCUCHA_DISPATCH");
 
-    _cpuConfig->PUERTO_ESCUCHA_INTERRUPT = config_get_int_value(_configFile, "PUERTO_ESCUCHA_INTERRUPT");
+    getCPUConfig()->PUERTO_ESCUCHA_INTERRUPT = config_get_int_value(_configFile, "PUERTO_ESCUCHA_INTERRUPT");
 
-    _cpuConfig->CANTIDAD_ENTRADAS_TLB = config_get_int_value(_configFile, "CANTIDAD_ENTRADAS_TLB");
+    getCPUConfig()->CANTIDAD_ENTRADAS_TLB = config_get_int_value(_configFile, "CANTIDAD_ENTRADAS_TLB");
 
-    _cpuConfig->ALGORITMO_TLB = config_get_string_value(_configFile, "ALGORITMO_TLB");
+    getCPUConfig()->ALGORITMO_TLB = config_get_string_value(_configFile, "ALGORITMO_TLB");
 }
 
 void initCPUConfig(char* path)
@@ -51,7 +51,7 @@ void freeCPUConfig()
     log_info(cpuLogger, "Liberando la memoria usada para el archivo de configuracion");
 
     config_destroy(_configFile);
-    free(_cpuConfig);
+    free(getCPUConfig());
 
     log_info(cpuLogger, "Memoria liberada con exito");
 }

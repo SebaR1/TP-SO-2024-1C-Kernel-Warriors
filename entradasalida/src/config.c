@@ -19,23 +19,23 @@ ioConfig* getIOConfig()
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getIOData()
 {
-    _ioConfig->TIPO_INTERFAZ = config_get_string_value(_configFile, "TIPO_INTERFAZ");
+    getIOConfig()->TIPO_INTERFAZ = config_get_string_value(_configFile, "TIPO_INTERFAZ");
 
-    _ioConfig->TIEMPO_UNIDAD_TRABAJO = config_get_int_value(_configFile, "TIEMPO_UNIDAD_TRABAJO");
+    getIOConfig()->TIEMPO_UNIDAD_TRABAJO = config_get_int_value(_configFile, "TIEMPO_UNIDAD_TRABAJO");
 
-    _ioConfig->IP_KERNEL = config_get_string_value(_configFile, "IP_KERNEL");
+    getIOConfig()->IP_KERNEL = config_get_string_value(_configFile, "IP_KERNEL");
 
-    _ioConfig->PUERTO_KERNEL = config_get_int_value(_configFile, "PUERTO_KERNEL");
+    getIOConfig()->PUERTO_KERNEL = config_get_int_value(_configFile, "PUERTO_KERNEL");
 
-    _ioConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
+    getIOConfig()->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
 
-    _ioConfig->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+    getIOConfig()->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
 
-    _ioConfig->PATH_BASE_DIALFS = config_get_string_value(_configFile, "PATH_BASE_DIALFS");
+    getIOConfig()->PATH_BASE_DIALFS = config_get_string_value(_configFile, "PATH_BASE_DIALFS");
 
-    _ioConfig->BLOCK_SIZE = config_get_int_value(_configFile, "BLOCK_SIZE");
+    getIOConfig()->BLOCK_SIZE = config_get_int_value(_configFile, "BLOCK_SIZE");
 
-    _ioConfig->BLOCK_COUNT = config_get_int_value(_configFile, "BLOCK_COUNT");
+    getIOConfig()->BLOCK_COUNT = config_get_int_value(_configFile, "BLOCK_COUNT");
 }
 
 void initIOConfig(char* path)
@@ -57,7 +57,7 @@ void freeIOConfig()
     log_info(ioLogger, "Liberando la memoria usada para el archivo de configuracion");
 
     config_destroy(_configFile);
-    free(_ioConfig);
+    free(getIOConfig());
 
     log_info(ioLogger, "Memoria liberada con exito");
 }

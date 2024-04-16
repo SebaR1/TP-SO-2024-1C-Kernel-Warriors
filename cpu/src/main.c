@@ -1,4 +1,3 @@
-#include "cpu.h"
 #include "logger.h"
 #include "config.h"
 
@@ -9,7 +8,7 @@ int main()
     initLogger("CPU.log", "CPU", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
-    initCPUConfig("../CPU.config");
+    initCPUConfig("CPU.config");
 
 
     /*

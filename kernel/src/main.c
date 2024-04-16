@@ -1,5 +1,3 @@
-#include "kernel.h"
-//#include <../../utils/src/utils/client/utils.h>
 #include "utils/client/utils.h"
 #include "config.h"
 #include "logger.h"
@@ -12,7 +10,7 @@ int main ()
     initLogger("kernel.log", "kernel", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general del kernel.
-    initKernelConfig("../kernel.config");
+    initKernelConfig("kernel.config");
 
 
 

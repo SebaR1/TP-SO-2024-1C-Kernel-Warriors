@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     initLogger("IO.log", "entrada salida", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
-    initIOConfig("../IO.config");
+    initIOConfig("IO.config");
 
 
     // Liberando todos los recursos

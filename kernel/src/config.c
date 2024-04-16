@@ -19,27 +19,27 @@ kernelConfig* getKernelConfig()
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getKernelData()
 {
-    _kernelConfig->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
+    getKernelConfig()->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
 
-    _kernelConfig->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
+    getKernelConfig()->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
 
-    _kernelConfig->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+    getKernelConfig()->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
 
-    _kernelConfig->IP_CPU = config_get_string_value(_configFile, "IP_CPU");
+    getKernelConfig()->IP_CPU = config_get_string_value(_configFile, "IP_CPU");
 
-    _kernelConfig->PUERTO_CPU_DISPATCH = config_get_int_value(_configFile, "PUERTO_CPU_DISPATCH");
+    getKernelConfig()->PUERTO_CPU_DISPATCH = config_get_int_value(_configFile, "PUERTO_CPU_DISPATCH");
 
-    _kernelConfig->PUERTO_CPU_INTERRUPT = config_get_int_value(_configFile, "PUERTO_CPU_INTERRUPT");
+    getKernelConfig()->PUERTO_CPU_INTERRUPT = config_get_int_value(_configFile, "PUERTO_CPU_INTERRUPT");
 
-    _kernelConfig->ALGORITMO_PLANIFICACION = config_get_string_value(_configFile, "ALGORITMO_PLANIFICACION");
+    getKernelConfig()->ALGORITMO_PLANIFICACION = config_get_string_value(_configFile, "ALGORITMO_PLANIFICACION");
 
-    _kernelConfig->QUANTUM = config_get_int_value(_configFile, "QUANTUM");
+    getKernelConfig()->QUANTUM = config_get_int_value(_configFile, "QUANTUM");
 
-    _kernelConfig->RECURSOS = getListOfStringsFromConfig(_configFile, "RECURSOS", kernelLogger, "No se pudieron obtener los recursos del archivo de configuracion");
+    getKernelConfig()->RECURSOS = getListOfStringsFromConfig(_configFile, "RECURSOS", kernelLogger, "No se pudieron obtener los recursos del archivo de configuracion");
 
-    _kernelConfig->INSTANCIAS_RECURSOS = getListOfIntsFromConfig(_configFile, "INSTANCIAS_RECURSOS", kernelLogger, "No se pudo obtener la cantidad de instancias de los recursos del archivo de configuracion");
+    getKernelConfig()->INSTANCIAS_RECURSOS = getListOfIntsFromConfig(_configFile, "INSTANCIAS_RECURSOS", kernelLogger, "No se pudo obtener la cantidad de instancias de los recursos del archivo de configuracion");
 
-    _kernelConfig->GRADO_MULTIPROGRAMACION = config_get_int_value(_configFile, "GRADO_MULTIPROGRAMACION");
+    getKernelConfig()->GRADO_MULTIPROGRAMACION = config_get_int_value(_configFile, "GRADO_MULTIPROGRAMACION");
 }
 
 
@@ -68,10 +68,10 @@ void freeKernelConfig()
 {
     log_info(kernelLogger, "Liberando la memoria usada para el archivo de configuracion");
 
-    list_destroy_and_destroy_elements(_kernelConfig->RECURSOS, free);
-    list_destroy(_kernelConfig->INSTANCIAS_RECURSOS);
+    list_destroy_and_destroy_elements(getKernelConfig()->RECURSOS, free);
+    list_destroy(getKernelConfig()->INSTANCIAS_RECURSOS);
     config_destroy(_configFile);
-    free(_kernelConfig);
+    free(getKernelConfig());
 
     log_info(kernelLogger, "Memoria liberada con exito");
 }
