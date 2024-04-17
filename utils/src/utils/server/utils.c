@@ -3,6 +3,8 @@
 
 int initServer(t_log* logger, char* port)
 {
+	log_info(logger, "Iniciando el servidor");
+
 	struct addrinfo hints,*servinfo;
 
 
@@ -15,7 +17,7 @@ int initServer(t_log* logger, char* port)
 	getaddrinfo(NULL, port, &hints, &servinfo);
 
 	// creamos el socket
-	int socketServer = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+	int socketServer = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol); // Retorna -1 si hubo un error.
 	if (socketServer == -1) 
 	{
         log_error(logger, "Error al crear el socket del servidor");
@@ -24,7 +26,8 @@ int initServer(t_log* logger, char* port)
     }
 
 	// Asociamos el socket a un puerto
-	if (bind(socketServer, servinfo->ai_addr, servinfo->ai_addrlen) == -1) 
+	int bindSuccess = bind(socketServer, servinfo->ai_addr, servinfo->ai_addrlen); // Retorna 0 si "bindeo" con exito, retorna -1 si hubo un error.
+	if (bindSuccess == -1) 
 	{
         log_error(logger, "Error al enlazar el socket del servidor");
         close(socketServer);
@@ -33,7 +36,8 @@ int initServer(t_log* logger, char* port)
     }
 
 	// Escuchamos las conexiones entrantes
-	if(listen(socketServer, SOMAXCONN)==-1)
+	int listenSuccess = listen(socketServer, SOMAXCONN); // Retorna 0 si "escucha" con exito, retorna -1 si hubo un error.
+	if(listen(socketServer, SOMAXCONN) == -1)
 	{
 		log_error(logger, "Error al escuchar las conexiones entrantes");
         close(socketServer);
@@ -43,7 +47,7 @@ int initServer(t_log* logger, char* port)
 
 	freeaddrinfo(servinfo);
 
-	log_info(logger, "Listo para escuchar a mi cliente");
+	log_info(logger, "Servidor iniciado con exito");
 
 	return socketServer;
 }
@@ -51,13 +55,14 @@ int initServer(t_log* logger, char* port)
 int waitClient(t_log* logger, int socketServer)
 {
 	// Aceptamos un nuevo cliente
-    int socketClient = accept(socketServer, NULL, NULL);
-    if (socketClient == -1) {
-        log_error(logger, "Error al aceptar la conexión del cliente");
+    int socketClient = accept(socketServer, NULL, NULL); // Retorna -1 si hubo un error.
+    if (socketClient == -1)
+	{
+        log_error(logger, "Error al aceptar la conexion del cliente");
         return -1;
     }
 
-    log_info(logger, "Se conectó un cliente!");
+    log_info(logger, "Se conecto un cliente!");
     return socketClient;
 }
 
@@ -74,7 +79,7 @@ operationCode getOperation(int socketClient)
 
 }
 
-void* getBuffer(int* size, int socketClient)
+void* _getBuffer(int* size, int socketClient)
 {
 	void * buffer;
 
@@ -88,7 +93,7 @@ void* getBuffer(int* size, int socketClient)
 void getMessage(t_log* logger, int socketClient)
 {
 	int size;
-	char* buffer = getBuffer(&size, socketClient);
+	char* buffer = _getBuffer(&size, socketClient);
 	log_info(logger, "Me llego el mensaje %s", buffer);
 	free(buffer);
 }
@@ -101,7 +106,7 @@ t_list* getPackage(int socketClient)
 	t_list* values = list_create();
 	int eachSize;
 
-	buffer = getBuffer(&totalSize, socketClient);
+	buffer = _getBuffer(&totalSize, socketClient);
 	while(offset < totalSize)
 	{
 		memcpy(&eachSize, buffer + offset, sizeof(int));

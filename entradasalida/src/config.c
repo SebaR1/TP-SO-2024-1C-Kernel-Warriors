@@ -40,7 +40,7 @@ void _getIOData()
 
 void initIOConfig(char* path)
 {
-    log_info(ioLogger, "Obteniendo los datos del archivo de configuracion");
+    log_info(_ioLogger, "Obteniendo los datos del archivo de configuracion");
 
     _configFile = config_create(path);
 
@@ -48,18 +48,18 @@ void initIOConfig(char* path)
 
     _getIOData();
 
-    log_info(ioLogger, "Datos obtenidos con exito");
+    log_info(_ioLogger, "Datos obtenidos con exito");
 }
 
 // Posible riesgo de memory leak o de Segmentation Fault en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak o un Segmentation Fault en los testeos
 void freeIOConfig()
 {
-    log_info(ioLogger, "Liberando la memoria usada para el archivo de configuracion");
+    log_info(_ioLogger, "Liberando la memoria usada para el archivo de configuracion");
 
     config_destroy(_configFile);
     free(getIOConfig());
 
-    log_info(ioLogger, "Memoria liberada con exito");
+    log_info(_ioLogger, "Memoria liberada con exito");
 }
 
 

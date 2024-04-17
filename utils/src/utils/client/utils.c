@@ -1,7 +1,7 @@
 #include "utils.h"
 
 
-void* serializePackage(t_package* package, int bytes)
+void* _serializePackage(t_package* package, int bytes)
 {
 	void * magic = malloc(bytes);
 	int offset = 0;
@@ -16,7 +16,7 @@ void* serializePackage(t_package* package, int bytes)
 	return magic;
 }
 
-int createConection(char *ip, char* port)
+int createConection(t_log* logger, char *ip, char* port)
 {
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
@@ -24,19 +24,27 @@ int createConection(char *ip, char* port)
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
-	//hints.ai_flags = AI_PASSIVE;
+	hints.ai_flags = AI_PASSIVE;
 
 	getaddrinfo(ip, port, &hints, &servinfo);
 
-	// Ahora vamos a crear el socket.
 
-	int socketClient = socket(servinfo->ai_family,
-                         		servinfo->ai_socktype,
-                         		servinfo->ai_protocol);
+	// Ahora vamos a crear el socket.
+	int socketClient = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol); // Retorna -1 si hubo un error.
+	if (socketClient == -1)
+	{
+		log_error(logger, "Hubo un error al crear el socket");
+		return -1;
+	}
 
 	// Ahora que tenemos el socket, vamos a conectarlo
 
-	connect(socketClient, servinfo->ai_addr, servinfo->ai_addrlen);
+	int connectSuccess = connect(socketClient, servinfo->ai_addr, servinfo->ai_addrlen); // Retorna 0 si se conecto con exito, retorna -1 si hubo un error.
+	if (connectSuccess == -1)
+	{
+		log_error(logger, "Hubo un error al conectarse con el servidor");
+		return -1;
+	}
 
 
 	freeaddrinfo(servinfo);
@@ -56,7 +64,7 @@ void enviar_mensaje(char* message, int socketClient)
 
 	int bytes = package->buffer->size + 2*sizeof(int);
 
-	void* toSend = serializePackage(package, bytes);
+	void* toSend = _serializePackage(package, bytes);
 
 	send(socketClient, toSend, bytes, 0);
 
@@ -65,7 +73,7 @@ void enviar_mensaje(char* message, int socketClient)
 }
 
 
-void createBuffer(t_package* package)
+void _createBuffer(t_package* package)
 {
 	package->buffer = malloc(sizeof(t_buffer));
 	package->buffer->size = 0;
@@ -93,7 +101,7 @@ void addAPackage(t_package* package, void* value, int size)
 void sendPackage(t_package* package, int socketClient)
 {
 	int bytes = package->buffer->size + 2*sizeof(int);
-	void* toSend = serializePackage(package, bytes);
+	void* toSend = _serializePackage(package, bytes);
 
 	send(socketClient, toSend, bytes, 0);
 

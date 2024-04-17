@@ -1,6 +1,7 @@
 #include "utils/client/utils.h"
 #include "config.h"
 #include "logger.h"
+#include <pthread.h>
 
 
 
@@ -11,10 +12,6 @@ int main ()
 
     // Obtengo la configuracion general del kernel.
     initKernelConfig("kernel.config");
-
-
-
-
 
 
     /*

@@ -15,14 +15,14 @@ int main()
     t_list* list;
 
     // Iniciar el servidor
-    int socketServer = initServer(cpuLogger, port);
+    int socketServer = initServer(_cpuLogger, port);
     if (socketServer == -1) {
         //log_error(logger,"Error: no se pudo iniciar el servidor.\n" );
         return 1;
     }
 
     // Esperar la conexión de un cliente
-    int socketClient = waitClient(cpuLogger, socketServer);
+    int socketClient = waitClient(_cpuLogger, socketServer);
     if (socketClient == -1) {
         //log_error(logger, "Error al esperar cliente.\n");
         return 1;
@@ -34,7 +34,7 @@ int main()
     {
         case MESSAGE:
             printf("caso 0");
-            getMessage(cpuLogger, socketClient);
+            getMessage(_cpuLogger, socketClient);
             break;
         case PACKAGE:
             list= getPackage(socketClient);
