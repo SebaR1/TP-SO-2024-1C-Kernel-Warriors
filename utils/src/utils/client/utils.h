@@ -7,6 +7,7 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<readline/readline.h>
+#include "utils/utilsGeneral.h"
 
 #include<signal.h>
 #include<unistd.h>
@@ -15,12 +16,9 @@
 #include<string.h>
 
 
+
 // Estructura usada para saber de que tipo es el paquete que envia un cliente.
-typedef enum
-{
-	MESSAGE,
-	PACKAGE
-} operationCode;
+typedef enum operationCode;
 
 
 // Estructura usada para contener info importante para un buffer.

@@ -11,5 +11,5 @@
 void serverKernelForIO(void* args)
 {
     // Inicio el servidor
-    initServer(getKernelLogger() getKernelConfig()->PUERTO_ESCUCHA);
+    initServer(getKernelLogger(), getKernelConfig()->PUERTO_ESCUCHA);
 }

@@ -10,15 +10,11 @@
 #include<string.h>
 #include<assert.h>
 #include<netdb.h>
+#include "utils/utilsGeneral.h"
 
 
 // Estructura usada para saber de que tipo es el paquete que envia un cliente.
-typedef enum
-{
-	ERROR=-1,
-	MESSAGE,
-	PACKAGE
-} operationCode;
+typedef enum operationCode;
 
 
 // Funcion auxiliar que recibe el buffer del socket del cliente especificado.
