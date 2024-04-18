@@ -40,7 +40,7 @@ typedef struct
 
 
 // Se conecta al servidor que esta escuchando en la ip y el puerto especificado.
-// Retorna el socket del cliente, o -1 si hubo un error.
+// Retorna el socket del cliente, o -1 si hubo un error, y loggea usando log_error.
 int createConection(t_log* logger, char *ip, char* port);
 
 

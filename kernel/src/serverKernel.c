@@ -8,8 +8,8 @@
 
 
 
-void serverIO(void* args)
+void serverKernelForIO(void* args)
 {
     // Inicio el servidor
-    initServer(_kernelLogger, getKernelConfig()->PUERTO_ESCUCHA);
+    initServer(getKernelLogger() getKernelConfig()->PUERTO_ESCUCHA);
 }
