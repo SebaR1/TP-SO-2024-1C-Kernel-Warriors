@@ -21,11 +21,11 @@ void _getCPUData()
 {
     getCPUConfig()->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
 
-    getCPUConfig()->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+    getCPUConfig()->PUERTO_MEMORIA = config_get_string_value(_configFile, "PUERTO_MEMORIA");
 
-    getCPUConfig()->PUERTO_ESCUCHA_DISPATCH = config_get_int_value(_configFile, "PUERTO_ESCUCHA_DISPATCH");
+    getCPUConfig()->PUERTO_ESCUCHA_DISPATCH = config_get_string_value(_configFile, "PUERTO_ESCUCHA_DISPATCH");
 
-    getCPUConfig()->PUERTO_ESCUCHA_INTERRUPT = config_get_int_value(_configFile, "PUERTO_ESCUCHA_INTERRUPT");
+    getCPUConfig()->PUERTO_ESCUCHA_INTERRUPT = config_get_string_value(_configFile, "PUERTO_ESCUCHA_INTERRUPT");
 
     getCPUConfig()->CANTIDAD_ENTRADAS_TLB = config_get_int_value(_configFile, "CANTIDAD_ENTRADAS_TLB");
 

@@ -7,12 +7,12 @@
 // Configuracion del archivo de configuracion del kernel
 typedef struct
 {
-    int PUERTO_ESCUCHA;
+    char* PUERTO_ESCUCHA; // de int a char
     char* IP_MEMORIA;
-    int PUERTO_MEMORIA;
+    char* PUERTO_MEMORIA;
     char* IP_CPU;
-    int PUERTO_CPU_DISPATCH;
-    int PUERTO_CPU_INTERRUPT;
+    char* PUERTO_CPU_DISPATCH;
+    char* PUERTO_CPU_INTERRUPT;
     char* ALGORITMO_PLANIFICACION;
     int QUANTUM;
     t_list* RECURSOS; // Lista que almacena el tipo de dato "int"

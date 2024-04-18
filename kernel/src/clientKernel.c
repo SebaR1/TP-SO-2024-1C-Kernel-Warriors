@@ -1,18 +1,19 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <utils/client/utils.h>
+#include "serverKernel.h"
+#include "utils/server/utils.h"
 #include "logger.h"
 #include "config.h"
 
-int main(int argc, char* argv[])
+// Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
+void clientKernelForIO()
 {
-    // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
-    initLogger("IO.log", "entrada salida", true, LOG_LEVEL_INFO);
+    // Creo Logger
+    initLogger("kernel.config", "entrada salida", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
-    initIOConfig("IO.config");
+    initIOConfig("kernel.config");
 
-    int socketClientKernel = createConection(_ioLogger, getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
+    // Creo la conexión 
+    int socketClientKernel = createConection(getKernelLogger(), getKernelconfig()->IP_CPU, getIOConfig()->PUERTO_CPU_DISPATCH);
 
     if (socketClientKernel == -1) 
     {
@@ -32,17 +33,4 @@ int main(int argc, char* argv[])
     addAPackage(packageToTest, message3, strlen(message3)+1);
 
     sendPackage(packageToTest, socketClientKernel);
-
-    //free(message1);
-    //free(message2);
-    //free(message3);
-
-    //sendMessage(messageToTest, socket)
-
-    // Liberando todos los recursos
-    freeIOConfig();
-    destroyLogger();
-    releaseConnection(socketClientKernel);
-
-    return 0;
 }

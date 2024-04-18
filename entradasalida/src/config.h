@@ -10,9 +10,9 @@ typedef struct
     char* TIPO_INTERFAZ;
     int TIEMPO_UNIDAD_TRABAJO;
     char* IP_KERNEL;
-    int PUERTO_KERNEL;
+    char* PUERTO_KERNEL; //cambie de int a char
     char* IP_MEMORIA;
-    int PUERTO_MEMORIA;
+    char* PUERTO_MEMORIA; //cambie de int a char
     char* PATH_BASE_DIALFS;
     int BLOCK_SIZE;
     int BLOCK_COUNT;

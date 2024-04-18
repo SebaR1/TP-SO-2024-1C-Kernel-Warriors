@@ -7,7 +7,7 @@
 // Configuracion del archivo de configuracion de la memoria
 typedef struct
 {
-    int PUERTO_ESCUCHA;
+    char* PUERTO_ESCUCHA;
     int TAM_MEMORIA;
     int TAM_PAGINA;
     char* PATH_INSTRUCCIONES;

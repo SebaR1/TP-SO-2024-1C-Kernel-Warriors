@@ -19,17 +19,17 @@ kernelConfig* getKernelConfig()
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getKernelData()
 {
-    getKernelConfig()->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
+    getKernelConfig()->PUERTO_ESCUCHA = config_get_string_value(_configFile, "PUERTO_ESCUCHA");
 
     getKernelConfig()->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
 
-    getKernelConfig()->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+    getKernelConfig()->PUERTO_MEMORIA = config_get_string_value(_configFile, "PUERTO_MEMORIA");
 
     getKernelConfig()->IP_CPU = config_get_string_value(_configFile, "IP_CPU");
 
-    getKernelConfig()->PUERTO_CPU_DISPATCH = config_get_int_value(_configFile, "PUERTO_CPU_DISPATCH");
+    getKernelConfig()->PUERTO_CPU_DISPATCH = config_get_string_value(_configFile, "PUERTO_CPU_DISPATCH");
 
-    getKernelConfig()->PUERTO_CPU_INTERRUPT = config_get_int_value(_configFile, "PUERTO_CPU_INTERRUPT");
+    getKernelConfig()->PUERTO_CPU_INTERRUPT = config_get_string_value(_configFile, "PUERTO_CPU_INTERRUPT");
 
     getKernelConfig()->ALGORITMO_PLANIFICACION = config_get_string_value(_configFile, "ALGORITMO_PLANIFICACION");
 
@@ -75,4 +75,3 @@ void freeKernelConfig()
 
     log_info(_kernelLogger, "Memoria liberada con exito");
 }
-

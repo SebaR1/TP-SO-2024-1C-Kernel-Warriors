@@ -19,7 +19,7 @@ memoryConfig* getMemoryConfig()
 // FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getMemoryData()
 {
-    getMemoryConfig()->PUERTO_ESCUCHA = config_get_int_value(_configFile, "PUERTO_ESCUCHA");
+    getMemoryConfig()->PUERTO_ESCUCHA = config_get_string_value(_configFile, "PUERTO_ESCUCHA");
 
     getMemoryConfig()->TAM_MEMORIA = config_get_int_value(_configFile, "TAM_MEMORIA");
 

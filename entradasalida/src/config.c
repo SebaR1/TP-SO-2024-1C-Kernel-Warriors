@@ -25,11 +25,11 @@ void _getIOData()
 
     getIOConfig()->IP_KERNEL = config_get_string_value(_configFile, "IP_KERNEL");
 
-    getIOConfig()->PUERTO_KERNEL = config_get_int_value(_configFile, "PUERTO_KERNEL");
+    getIOConfig()->PUERTO_KERNEL = config_get_string_value(_configFile, "PUERTO_KERNEL");
 
     getIOConfig()->IP_MEMORIA = config_get_string_value(_configFile, "IP_MEMORIA");
 
-    getIOConfig()->PUERTO_MEMORIA = config_get_int_value(_configFile, "PUERTO_MEMORIA");
+    getIOConfig()->PUERTO_MEMORIA = config_get_string_value(_configFile, "PUERTO_MEMORIA");
 
     getIOConfig()->PATH_BASE_DIALFS = config_get_string_value(_configFile, "PATH_BASE_DIALFS");
 
@@ -43,6 +43,11 @@ void initIOConfig(char* path)
     log_info(_ioLogger, "Obteniendo los datos del archivo de configuracion");
 
     _configFile = config_create(path);
+
+    if (_configFile == NULL){
+        log_info(_ioLogger, "FAllo en la creación del config");
+        exit(1);
+    }
 
     _ioConfig = (ioConfig*) malloc(sizeof(ioConfig));
 

@@ -2,8 +2,9 @@
 #include "config.h"
 #include "logger.h"
 #include <pthread.h>
-
-
+#include "utils/utilsGeneral.h"
+#include "serverKernel.h"
+#include "serverClient.h"
 
 int main ()
 {
@@ -13,6 +14,7 @@ int main ()
     // Obtengo la configuracion general del kernel.
     initKernelConfig("kernel.config");
 
+    serverKernelForIO();
 
     /*
 

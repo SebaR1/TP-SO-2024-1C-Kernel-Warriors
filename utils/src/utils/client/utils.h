@@ -18,7 +18,7 @@
 
 
 // Estructura usada para saber de que tipo es el paquete que envia un cliente.
-typedef enum operationCode;
+//typedef enum operationCode;
 
 
 // Estructura usada para contener info importante para un buffer.

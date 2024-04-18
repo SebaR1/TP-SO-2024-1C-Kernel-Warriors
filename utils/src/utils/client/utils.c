@@ -52,7 +52,7 @@ int createConection(t_log* logger, char *ip, char* port)
 	return socketClient;
 }
 
-void enviar_mensaje(char* message, int socketClient)
+void sendMessage(char* message, int socketClient)
 {
 	t_package* package = malloc(sizeof(t_package));
 
@@ -73,7 +73,7 @@ void enviar_mensaje(char* message, int socketClient)
 }
 
 
-void _createBuffer(t_package* package)
+void createBuffer(t_package* package)
 {
 	package->buffer = malloc(sizeof(t_buffer));
 	package->buffer->size = 0;
