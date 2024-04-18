@@ -6,6 +6,8 @@
 // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
 void clientKernelForIO()
 {
+
+/*
     // Creo Logger
     initLogger("kernel.config", "entrada salida", true, LOG_LEVEL_INFO);
 
@@ -34,3 +36,4 @@ void clientKernelForIO()
 
     sendPackage(packageToTest, socketClientKernel);
 }
+*/
