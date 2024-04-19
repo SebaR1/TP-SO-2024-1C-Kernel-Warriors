@@ -52,6 +52,8 @@ int createConection(t_log* logger, char *ip, char* port)
 	return socketClient;
 }
 
+
+/*
 void sendMessage(char* message, int socketClient)
 {
 	t_package* package = malloc(sizeof(t_package));
@@ -69,26 +71,26 @@ void sendMessage(char* message, int socketClient)
 	send(socketClient, toSend, bytes, 0);
 
 	free(toSend);
-	removePackage(package);
+	destroyPackage(package);
 }
+*/
 
-
-void createBuffer(t_package* package)
+void _createBuffer(t_package* package)
 {
 	package->buffer = malloc(sizeof(t_buffer));
 	package->buffer->size = 0;
 	package->buffer->stream = NULL;
 }
 
-t_package* createPackage(void)
+t_package* createPackage(operationCode opCode)
 {
 	t_package* package = malloc(sizeof(t_package));
-	package->opCode = PACKAGE;
-	createBuffer(package);
+	package->opCode = opCode;
+	_createBuffer(package);
 	return package;
 }
 
-void addAPackage(t_package* package, void* value, int size)
+void addToPackage(t_package* package, void* value, int size)
 {
 	package->buffer->stream = realloc(package->buffer->stream, package->buffer->size + size + sizeof(int));
 
@@ -108,7 +110,7 @@ void sendPackage(t_package* package, int socketClient)
 	free(toSend);
 }
 
-void removePackage(t_package* package)
+void destroyPackage(t_package* package)
 {
 	free(package->buffer->stream);
 	free(package->buffer);
@@ -119,3 +121,31 @@ void releaseConnection(int socketClient)
 {
 	close(socketClient);
 }
+
+
+
+/*
+void readConsoleAndSendPackage(int socketClient)
+{
+ 	// Ahora toca lo divertido!
+	char* read;
+	t_package* package = createPackage();
+
+	// Leemos y esta vez agregamos las lineas al paquete
+	read = readline("> ");
+
+	while (!is_empty_string(read))
+	{
+		addToPackage(package, read, strlen(read) + 1); // (+ 1) para tener en cuenta el caracter nulo '\0'
+		free(read);
+		read = readline("> ");
+	}
+	
+	sendPackage(package, socketClient);
+
+	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
+	free(read);
+	destroyPackage(package);
+}
+
+*/

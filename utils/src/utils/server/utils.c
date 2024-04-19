@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <semaphore.h>
 
 
 int initServer(t_log* logger, char* port)
@@ -118,4 +119,24 @@ t_list* getPackage(int socketClient)
 	}
 	free(buffer);
 	return values;
+}
+
+
+
+void waitClientsLoop(waitClientsLoopParams* params)
+{
+    // Inicio el servidor
+    int socketServer = initServer(params->logger, params->portToListen);
+
+    if (socketServer == -1)
+    {
+        log_error(params->logger, "Error: no se pudo iniciar el servidor.\n");
+        exit(EXIT_FAILURE);
+    }
+
+
+    while (!(*(params->finishLoopSignal)))
+    {
+        (params->eachIterationFunc)(socketServer);
+    }
 }

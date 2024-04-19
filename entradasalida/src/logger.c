@@ -1,19 +1,19 @@
 #include "logger.h"
 
-t_log* _ioLogger;
+t_log* _logger;
 
 
 void initLogger(char* file, char* processName, bool isActiveConsole, t_log_level level)
 {
-    _ioLogger = log_create(file, processName, isActiveConsole, level);
+    _logger = log_create(file, processName, isActiveConsole, level);
 }
 
-t_log* getIOLogger()
+t_log* getLogger()
 {
-    return _ioLogger;
+    return _logger;
 }
 
 void destroyLogger()
 {
-    log_destroy(_ioLogger);
+    log_destroy(_logger);
 }

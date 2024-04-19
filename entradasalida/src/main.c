@@ -12,37 +12,43 @@ int main(int argc, char* argv[])
     // Obtengo la configuracion general.
     initIOConfig("IO.config");
 
-    int socketClientKernel = createConection(_ioLogger, getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
 
-    if (socketClientKernel == -1) 
-    {
-        log_error(_ioLogger, "Error al crear la conexión.\n");
-        exit(1);
-    } else {
-        log_info(_ioLogger, "Conexión IO/Kernel exitosa");
-    }
 
-    t_package *packageToTest = createPackage();
-    char *message1 = "Hola1"; 
-    char *message2 = "Hola2";
-    char *message3 = "Hola3";
+    t_package* initialPackage = createPackage(IO_MODULE);
 
-    addAPackage(packageToTest, message1, strlen(message1)+1);
-    addAPackage(packageToTest, message2, strlen(message2)+1);
-    addAPackage(packageToTest, message3, strlen(message3)+1);
+    t_package* testPackageToKernel = createPackage(PACKAGE_FROM_IO);
+    char* msg1 = "Holaaaa, soy un mensaje de prueba desde IO.";
+    addToPackage(testPackageToKernel, msg1, string_length(msg1) + 1); // (+1) para tener en cuenta el caracter nulo
 
-    sendPackage(packageToTest, socketClientKernel);
+    t_package* testPackageToMemory = createPackage(PACKAGE_FROM_IO);
+    char* msg2 = "Holaaaa, soy un mensaje de prueba desde IO.";
+    addToPackage(testPackageToMemory, msg2, string_length(msg2) + 1); // (+1) para tener en cuenta el caracter nulo
 
-    //free(message1);
-    //free(message2);
-    //free(message3);
+    log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel");
+    int socketClientKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
+    sendPackage(initialPackage, socketClientKernel);
+    sendPackage(testPackageToKernel, socketClientKernel);
+    releaseConnection(socketClientKernel);
+    log_info(getLogger(), "Paquete enviado con exito.");
 
-    //sendMessage(messageToTest, socket)
+
+    log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
+    int socketClientMemory = createConection(getLogger(), getIOConfig()->IP_MEMORIA, getIOConfig()->PUERTO_MEMORIA);
+    sendPackage(initialPackage, socketClientMemory);
+    sendPackage(testPackageToMemory, socketClientMemory);
+    releaseConnection(socketClientMemory);
+    log_info(getLogger(), "Paquete enviado con exito.");
+
+
+    destroyPackage(initialPackage);
+    destroyPackage(testPackageToKernel);
+    destroyPackage(testPackageToMemory);
+
+
 
     // Liberando todos los recursos
     freeIOConfig();
     destroyLogger();
-    releaseConnection(socketClientKernel);
 
     return 0;
 }

@@ -1,19 +1,19 @@
 #include "logger.h"
 
-t_log* _kernelLogger;
+t_log* _logger;
 
 
 void initLogger(char* file, char* processName, bool isActiveConsole, t_log_level level)
 {
-    _kernelLogger = log_create(file, processName, isActiveConsole, level);
+    _logger = log_create(file, processName, isActiveConsole, level);
 }
 
-t_log* getKernelLogger()
+t_log* getLogger()
 {
-    return _kernelLogger;
+    return _logger;
 }
 
 void destroyLogger()
 {
-    log_destroy(_kernelLogger);
+    log_destroy(_logger);
 }

@@ -1,66 +1,104 @@
 #include "utils/client/utils.h"
+#include "utils/server/utils.h"
 #include "config.h"
 #include "logger.h"
 #include <pthread.h>
-#include "utils/utilsGeneral.h"
 #include "serverKernel.h"
-#include "serverClient.h"
+#include <commons/string.h>
+#include <semaphore.h>
+#include <commons/string.h>
 
-int main ()
+
+
+
+int main()
 {
     // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
     initLogger("kernel.log", "kernel", true, LOG_LEVEL_INFO);
 
+
     // Obtengo la configuracion general del kernel.
     initKernelConfig("kernel.config");
 
-    serverKernelForIO();
+    // Reservo memoria para mi sepaforo y lo inicializo
+    semaphore = (sem_t*) malloc(sizeof(sem_t));
+    sem_init(semaphore, 0, 1);
 
-    /*
-
-
-
-
-
-
-
-    int socketClient = createConection(IP, Port);
-    if (socketClient == -1) 
-    {
-        //log_error(logger, "Error al crear la conexión.\n");
-        return 1;
-    }
-
-    // Crear un paquete con la información de conexión
-    t_package *connectionPackage = createPackage();
-    addAPackage(connectionPackage, IP, strlen(IP) + 1);
-    addAPackage(connectionPackage, Port, strlen(Port) + 1);
-
-    // Serializar el paquete de conexión
-    int connectionPackageSize = connectionPackage->buffer->size + 2 * sizeof(int);
-    void *serializedConnectionPackage = serializePackage(connectionPackage, connectionPackageSize);
-
-    // Enviar el paquete serializado al servidor
-    send(socketClient, serializedConnectionPackage, connectionPackageSize, 0);
-
-    // Liberar recursos
-    free(serializedConnectionPackage);
-    removePackage(connectionPackage);
-
-     // Cerrar la conexión
-    releaseConnection(socketClient);
+    // Creo y pongo a correr el/los threads de el/los servidores de este modulo
+    waitClientsLoopParams params;
+    params.logger = getLogger();
+    params.portToListen = getKernelConfig()->PUERTO_ESCUCHA;
+    params.eachIterationFunc = receiveClientIteration;
+    params.finishLoopSignal = &_finishAllServersSignal;
+    pthread_t* waitClientsLoopThread;
+    pthread_create(&waitClientsLoopThread, NULL, waitClientsLoop, &params);
 
 
+    // Espero hasta que se creen los demas servidores de los otros modulos.
+    // Esta linea es unicamente para testeo del primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
+    sleep(30);
+
+    t_package* initialPackageToMemory = createPackage(KERNEL_MODULE);
+    t_package* initialPackageToCPUDispatch = createPackage(KERNEL_MODULE_TO_CPU_DISPATCH);
+    t_package* initialPackageToCPUInterrupt = createPackage(KERNEL_MODULE_TO_CPU_INTERRUPT);
+
+    t_package* testPackageToMemory = createPackage(PACKAGE_FROM_KERNEL);
+    char* msg1 = "Holaaaa, soy un mensaje de prueba desde el kernel.";
+    addToPackage(testPackageToMemory, msg1, string_length(msg1) + 1); // (+1) para tener en cuenta el caracter nulo
+    
+    t_package* testPackageToCPUDispatch = createPackage(PACKAGE_FROM_KERNEL);
+    char* msg2 = "Holaaaa, soy un mensaje de prueba desde el Kernel hacia Dispatch";
+    addToPackage(testPackageToCPUDispatch, msg2, string_length(msg2) + 1); // (+1) para tener en cuenta el caracter nulo
+
+    t_package* testPackageToCPUInterrupt = createPackage(PACKAGE_FROM_KERNEL);
+    char* msg3 = "Holaaaa, soy un mensaje de prueba desde el Kernel hacia Interrupt";
+    addToPackage(testPackageToCPUInterrupt, msg3, string_length(msg3) + 1); // (+1) para tener en cuenta el caracter nulo
+
+    
+    log_info(getLogger(), "Creando conexion con la CPU Dispatch. Se enviara un mensaje a la CPU Dispatch");
+    int socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
+    sendPackage(initialPackageToCPUDispatch, socketClientCPUDispatch);
+    sendPackage(testPackageToCPUDispatch, socketClientCPUDispatch);
+    releaseConnection(socketClientCPUDispatch);
+    log_info(getLogger(), "Paquete enviado con exito.");
+    
+
+    log_info(getLogger(), "Creando conexion con la CPU Interrupt. Se enviara un mensaje a la CPU Interrupt");
+    int socketClientCPUInterrupt = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_INTERRUPT);
+    sendPackage(initialPackageToCPUInterrupt, socketClientCPUInterrupt);
+    sendPackage(testPackageToCPUInterrupt, socketClientCPUInterrupt);
+    releaseConnection(socketClientCPUInterrupt);
+    log_info(getLogger(), "Paquete enviado con exito.");
+
+
+    log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
+    int socketClientMemory = createConection(getLogger(), getKernelConfig()->IP_MEMORIA, getKernelConfig()->PUERTO_MEMORIA);
+    sendPackage(initialPackageToMemory, socketClientMemory);
+    sendPackage(testPackageToMemory, socketClientMemory);
+    releaseConnection(socketClientMemory);
+    log_info(getLogger(), "Paquete enviado con exito.");
+
+    destroyPackage(initialPackageToCPUDispatch);
+    destroyPackage(initialPackageToCPUInterrupt);
+    destroyPackage(initialPackageToMemory);
+    destroyPackage(testPackageToMemory);
+    destroyPackage(testPackageToCPUDispatch);
+    destroyPackage(testPackageToCPUInterrupt);
+    
+
+    // Espero para ver si me llegan mensajes.
+    // Esta linea es unicamente para testeo del primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
+    sleep(60);
 
 
 
-    */
-
-
+    // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion
+    finishAllServersSignal();
 
     // Liberando todos los recursos
     freeKernelConfig();
     destroyLogger();
+    sem_destroy(semaphore);
 
     return 0;
 }

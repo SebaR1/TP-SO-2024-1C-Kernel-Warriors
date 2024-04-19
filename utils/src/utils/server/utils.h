@@ -14,13 +14,27 @@
 
 
 // Estructura usada para saber de que tipo es el paquete que envia un cliente.
-//typedef enum operationCode;
+typedef enum operationCode;
+
+
+// Structu para llenar con los valores correspondientes y enviarlo como parametro a la funcion waitClientsLoop
+typedef struct
+{
+    t_log* logger;
+    char* portToListen;
+    void (*eachIterationFunc)(int);
+    bool* finishLoopSignal;
+} waitClientsLoopParams;
+
 
 
 // Funcion auxiliar que recibe el buffer del socket del cliente especificado.
 // No deberia ser uasda por fuera su scope de utilidad.
 void* _getBuffer(int* size, int socketClient);
 
+// Inicia el servidor. Crea la conexion para que el socket sea capaz de escuchar en el puerto determinado.
+// Use la funcion waitClient para esperar a que un cliente se conecte al puerto. Use la funcion getOperation o getPackage para quedarse esperando la llegada de un paquete.
+// Loggea lo que va ocurriendo.
 // Retorna el socket de servidor, o -1 si hubo algun error.
 int initServer(t_log* logger, char* port);
 
@@ -30,6 +44,7 @@ int waitClient(t_log* logger, int socketServer);
 
 
 // Cuando el socket del cliente especificado envia un paquete, el servidor lo recibe.
+// Esta funcion se queda esperando a recibir un paquete por parte de un cliente
 // Retorna un lista con todos los mensajes que envio el socket del cliente
 t_list* getPackage(int socketClient);
 
@@ -44,6 +59,9 @@ void getMessage(t_log* logger, int socketClient);
 operationCode getOperation(int socketClient);
 
 
+// Inicializa el servidor y el semaforo pasado como parametro. 
+// Espera en un loop a los clientes y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)
+void waitClientsLoop(waitClientsLoopParams* params);
 
 
 

@@ -32,7 +32,7 @@ void _getMemoryData()
 
 void initMemoryConfig(char* path)
 {
-    log_info(_memoryLogger, "Obteniendo los datos del archivo de configuracion");
+    log_info(getLogger(), "Obteniendo los datos del archivo de configuracion");
 
     _configFile = config_create(path);
 
@@ -40,18 +40,18 @@ void initMemoryConfig(char* path)
 
     _getMemoryData();
 
-    log_info(_memoryLogger, "Datos obtenidos con exito");
+    log_info(getLogger(), "Datos obtenidos con exito");
 }
 
 // Posible riesgo de memory leak o de Segmentation Fault en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak o un Segmentation Fault en los testeos
 void freeMemoryConfig()
 {
-    log_info(_memoryLogger, "Liberando la memoria usada para el archivo de configuracion");
+    log_info(getLogger(), "Liberando la memoria usada para el archivo de configuracion");
 
     config_destroy(_configFile);
     free(getMemoryConfig());
 
-    log_info(_memoryLogger, "Memoria liberada con exito");
+    log_info(getLogger(), "Memoria liberada con exito");
 }
 
 

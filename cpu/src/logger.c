@@ -1,19 +1,19 @@
 #include "logger.h"
 
-t_log* _cpuLogger;
+t_log* _logger;
 
 
 void initLogger(char* file, char* processName, bool isActiveConsole, t_log_level level)
 {
-    _cpuLogger = log_create(file, processName, isActiveConsole, level);
+    _logger = log_create(file, processName, isActiveConsole, level);
 }
 
-t_log* getCPULogger()
+t_log* getLogger()
 {
-    return _cpuLogger;
+    return _logger;
 }
 
 void destroyLogger()
 {
-    log_destroy(_cpuLogger);
+    log_destroy(_logger);
 }

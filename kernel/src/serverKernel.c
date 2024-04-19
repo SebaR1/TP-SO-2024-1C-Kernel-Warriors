@@ -2,52 +2,131 @@
 #include "utils/server/utils.h"
 #include "logger.h"
 #include "config.h"
+#include <pthread.h>
+#include <semaphore.h>
 
+int numberOfIOClients = 0;
 
+sem_t* semaphore;
 
-t_list * list;
+bool _finishAllServersSignal = false;
 
-void iterator(char* value) 
+// Funcion auxiliar que se ejecuta en cada iteracion de una lista para loggear su valor. Usada para el primer checkpoint.
+void listIterator(char *element)
 {
-	log_info(getKernelLogger(),"%s", value);
+    log_info(getLogger(), "%s", element);
 }
 
-void serverKernelForIO()
+void receiveClientIteration(int socketServer)
 {
-    // Inicio el servidor
-    int socketServerKernelForIO = initServer(getKernelLogger(), getKernelConfig()->PUERTO_ESCUCHA);
-
-    int socketClientIO = waitClient(getKernelLogger(), socketServerKernelForIO);
-    if (socketClientIO == -1) {
-        log_error(getKernelLogger(), "Error al esperar el cliente IO.\n");
-        exit(1);
-    }   else {
-        log_info(getKernelLogger(), "Se conecto el cliente IO");
+    if (_finishAllServersSignal)
+    {
+        return;
     }
 
-    while(1) {
-        operationCode codOP = getOperation(socketClientIO);
+    // Esperar la conexión de un cliente
+    int socketClient = waitClient(getLogger(), socketServer);
+    if (socketClient == -1)
+    {
+        log_error(getLogger(), "Error al esperar cliente.\n");
+        exit(EXIT_FAILURE);
+    }
 
-        switch(codOP)
+    // Recibir el codigo de operacion para saber de que tipo es el cliente que se quiere conectar
+    operationCode opCode = getOperation(socketClient);
+    if (_finishAllServersSignal)
+    {
+        return;
+    }
+
+    switch (opCode)
+    {
+    case IO_MODULE:
+
+        if (numberOfIOClients >= MAX_IO_CLIENTS)
         {
-            case MESSAGE:
-                printf("caso 0");
-                getMessage(getKernelLogger(), socketClientIO);
-                break;
-            case PACKAGE:
-                list= getPackage(socketClientIO);
-                log_info(getKernelLogger(), "Me llegaron los siguientes valores:\n");
-                list_iterate(list, (void*) iterator);
-                break;
-            case ERROR:
-                log_error(getKernelLogger(), "el cliente se desconectó. Termina server\n");
-                exit(EXIT_FAILURE);
-                break;
-            default:
-                log_error(getKernelLogger(), "operación no reconocida.\n");
-                break;
-                exit(EXIT_FAILURE);
+            log_info(getLogger(), "Un cliente IO se intento conectar. Fue rechazado debido a que se alcanzo la cantidad maxima de clientes.");
+            break;
         }
-        exit(EXIT_SUCCESS);
+
+        log_info(getLogger(), "Se conecto un modulo IO");
+        pthread_t threadIO;
+        int *socketClientIO = (int *)malloc(sizeof(int));
+        *socketClientIO = socketClient;
+        pthread_create(&threadIO, NULL, serverKernelForIO, socketClientIO);
+        pthread_detach(&threadIO);
+
+        sem_wait(&semaphore);
+        numberOfIOClients++;
+        sem_post(&semaphore);
+
+        break;
+
+    case DO_NOTHING:
+        break;
+
+    case ERROR:
+        log_error(getLogger(), ERROR_CASE_MESSAGE);
+        break;
+
+    default:
+        log_error(getLogger(), DEFAULT_CASE_MESSAGE);
+        break;
     }
+}
+
+void serverKernelForIO(int *socketClient)
+{
+    bool exitLoop = false;
+    while (!exitLoop || _finishAllServersSignal)
+    {
+        // Recibir el codigo de operacion y hacer la operacion recibida.
+        operationCode opCode = getOperation(*socketClient);
+        if (_finishAllServersSignal)
+        {
+            break;
+        }
+
+        switch (opCode)
+        {
+        case PACKAGE_FROM_IO:
+            log_info(getLogger(), "Obteniendo paquete por parte del modulo IO");
+            t_list *listPackage = getPackage(*socketClient);
+            log_info(getLogger(), "Paquete obtenido con exito del modulo IO");
+            operationPackageFromIO(listPackage);
+            break;
+
+        case DO_NOTHING:
+            break;
+
+
+        case ERROR:
+            log_error(getLogger(), ERROR_CASE_MESSAGE);
+            exitLoop = true;
+            break;
+
+        default:
+            log_error(getLogger(), DEFAULT_CASE_MESSAGE);
+            break;
+        }
+    }
+
+    free(socketClient);
+
+    sem_wait(&semaphore);
+    numberOfIOClients--;
+    sem_post(&semaphore);
+}
+
+void operationPackageFromIO(t_list *package)
+{
+    list_iterate(package, listIterator);
+}
+
+
+
+
+void finishAllServersSignal()
+{
+    _finishAllServersSignal = true;
 }
