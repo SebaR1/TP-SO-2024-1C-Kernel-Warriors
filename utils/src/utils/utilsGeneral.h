@@ -13,7 +13,7 @@
 typedef enum
 {
     ERROR = -1,
-	DO_NOTHING, // Segun testeos, cuando un cliente se conecta, en su primer o segundo mensaje, envia un mensaje vacio (es decir, con codigo operacion 0). No es un error, simplemente es algo a tener en cuenta y no hacer nada al respecto.
+	DO_NOTHING = 0, // Segun testeos, cuando un cliente se conecta, en su primer o segundo mensaje, envia un mensaje vacio (es decir, con codigo operacion 0). No es un error, simplemente es algo a tener en cuenta y no hacer nada al respecto.
 	EXIT_CPU,
 	EXIT_MEMORY,
 	KERNEL_MODULE,
