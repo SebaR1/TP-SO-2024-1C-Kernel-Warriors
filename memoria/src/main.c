@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
 
     // Espero para ver si me llegan mensajes.
-    // Esta linea es unicamente para testeo del primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
+    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
     sleep(60);
 
 

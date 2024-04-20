@@ -28,6 +28,9 @@ int main(int argc, char* argv[])
     int socketClientKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
     sendPackage(initialPackage, socketClientKernel);
     sendPackage(testPackageToKernel, socketClientKernel);
+    // Espero para desconectarme del cliente
+    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
+    sleep(15);
     releaseConnection(socketClientKernel);
     log_info(getLogger(), "Paquete enviado con exito.");
 
@@ -36,6 +39,9 @@ int main(int argc, char* argv[])
     int socketClientMemory = createConection(getLogger(), getIOConfig()->IP_MEMORIA, getIOConfig()->PUERTO_MEMORIA);
     sendPackage(initialPackage, socketClientMemory);
     sendPackage(testPackageToMemory, socketClientMemory);
+    // Espero para desconectarme del cliente
+    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
+    sleep(15);
     releaseConnection(socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito.");
 
@@ -43,7 +49,6 @@ int main(int argc, char* argv[])
     destroyPackage(initialPackage);
     destroyPackage(testPackageToKernel);
     destroyPackage(testPackageToMemory);
-
 
 
     // Liberando todos los recursos

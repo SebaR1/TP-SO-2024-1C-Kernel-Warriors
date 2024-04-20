@@ -37,7 +37,7 @@ int main()
 
 
     // Espero hasta que se creen los demas servidores de los otros modulos.
-    // Esta linea es unicamente para testeo del primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
+    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
     sleep(30);
 
 
@@ -60,7 +60,7 @@ int main()
 
 
     // Espero para ver si me llegan mensajes.
-    // Esta linea es unicamente para testeo del primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
+    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
     sleep(60);
 
 
