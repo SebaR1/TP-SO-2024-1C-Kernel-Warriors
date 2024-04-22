@@ -14,8 +14,8 @@ int main()
     initCPUConfig("CPU.config");
 
     // Reservo memoria para mi sepaforo y lo inicializo
-    semaphore = (sem_t*) malloc(sizeof(sem_t));
-    sem_init(semaphore, 0, 1);
+    sem_init(&semaphoreForKernelDispatch, 0, 1);
+    sem_init(&semaphoreForKernelInterrupt, 0, 1);
 
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
@@ -71,7 +71,8 @@ int main()
     // Liberando todos los recursos
     freeCPUConfig();
     destroyLogger();
-    sem_destroy(semaphore);    
+    sem_destroy(&semaphoreForKernelDispatch); 
+    sem_destroy(&semaphoreForKernelInterrupt); 
 
     return 0;
 }

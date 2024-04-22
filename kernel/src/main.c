@@ -21,8 +21,7 @@ int main()
     initKernelConfig("kernel.config");
 
     // Reservo memoria para mi sepaforo y lo inicializo
-    semaphore = (sem_t*) malloc(sizeof(sem_t));
-    sem_init(semaphore, 0, 1);
+    sem_init(&semaphoreForIO, 0, 1);
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
     waitClientsLoopParams params;
@@ -98,7 +97,7 @@ int main()
     // Liberando todos los recursos
     freeKernelConfig();
     destroyLogger();
-    sem_destroy(semaphore);
+    sem_destroy(&semaphoreForIO);
 
     return 0;
 }

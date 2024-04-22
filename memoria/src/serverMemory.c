@@ -3,13 +3,16 @@
 #include "logger.h"
 #include "config.h"
 #include "utils/utilsGeneral.h"
+#include <pthread.h>
 
 
 int numberOfKernelClients = 0;
 int numberOfCPUClients = 0;
 int numberOfIOClients = 0;
 
-sem_t* semaphore;
+sem_t semaphoreForKernel;
+sem_t semaphoreForCPU;
+sem_t semaphoreForIO;
 
 bool _finishAllServersSignal = false;
 
@@ -60,9 +63,9 @@ void receiveClientIteration(int socketServer)
         pthread_create(&threadKernel, NULL, serverMemoryForKernel, socketClientKernel);
         pthread_detach(&threadKernel);
 
-        sem_wait(&semaphore);
-        numberOfIOClients++;
-        sem_post(&semaphore);
+        sem_wait(&semaphoreForKernel);
+        numberOfKernelClients++;
+        sem_post(&semaphoreForKernel);
 
         break;
 
@@ -81,9 +84,9 @@ void receiveClientIteration(int socketServer)
         pthread_create(&threadCPU, NULL, serverMemoryForCPU, socketClientCPU);
         pthread_detach(&threadCPU);
 
-        sem_wait(&semaphore);
-        numberOfIOClients++;
-        sem_post(&semaphore);
+        sem_wait(&semaphoreForCPU);
+        numberOfCPUClients++;
+        sem_post(&semaphoreForCPU);
 
         break;
 
@@ -102,9 +105,9 @@ void receiveClientIteration(int socketServer)
         pthread_create(&threadIO, NULL, serverMemoryForIO, socketClientIO);
         pthread_detach(&threadIO);
 
-        sem_wait(&semaphore);
+        sem_wait(&semaphoreForIO);
         numberOfIOClients++;
-        sem_post(&semaphore);
+        sem_post(&semaphoreForIO);
 
         break;
 
@@ -161,9 +164,9 @@ void serverMemoryForKernel(int* socketClient)
 
     free(socketClient);
 
-    sem_wait(&semaphore);
-    numberOfIOClients--;
-    sem_post(&semaphore);
+    sem_wait(&semaphoreForKernel);
+    numberOfKernelClients--;
+    sem_post(&semaphoreForKernel);
 }
 
 
@@ -204,9 +207,9 @@ void serverMemoryForCPU(int* socketClient)
 
     free(socketClient);
 
-    sem_wait(&semaphore);
-    numberOfIOClients--;
-    sem_post(&semaphore);
+    sem_wait(&semaphoreForCPU);
+    numberOfCPUClients--;
+    sem_post(&semaphoreForCPU);
 }
 
 void serverMemoryForIO(int* socketClient)
@@ -246,9 +249,9 @@ void serverMemoryForIO(int* socketClient)
 
     free(socketClient);
 
-    sem_wait(&semaphore);
+    sem_wait(&semaphoreForIO);
     numberOfIOClients--;
-    sem_post(&semaphore);
+    sem_post(&semaphoreForIO);
 }
 
 

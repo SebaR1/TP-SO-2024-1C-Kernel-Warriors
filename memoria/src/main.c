@@ -15,9 +15,10 @@ int main(int argc, char *argv[])
     initMemoryConfig("memoria.config");
 
 
-    // Reservo memoria para mi sepaforo y lo inicializo
-    semaphore = (sem_t*) malloc(sizeof(sem_t));
-    sem_init(semaphore, 0, 1);
+    // Reservo memoria para los semaforos y lo inicializo
+    sem_init(&semaphoreForKernel, 0, 1);
+    sem_init(&semaphoreForCPU, 0, 1);
+    sem_init(&semaphoreForIO, 0, 1);
 
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
@@ -42,6 +43,10 @@ int main(int argc, char *argv[])
     // Liberando todos los recursos
     freeMemoryConfig();
     destroyLogger();
+
+    sem_destroy(&semaphoreForKernel);
+    sem_destroy(&semaphoreForCPU);
+    sem_destroy(&semaphoreForIO);
 
     return 0;
 }

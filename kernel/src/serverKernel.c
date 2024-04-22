@@ -7,7 +7,7 @@
 
 int numberOfIOClients = 0;
 
-sem_t* semaphore;
+sem_t semaphoreForIO;
 
 bool _finishAllServersSignal = false;
 
@@ -56,9 +56,9 @@ void receiveClientIteration(int socketServer)
         pthread_create(&threadIO, NULL, serverKernelForIO, socketClientIO);
         pthread_detach(&threadIO);
 
-        sem_wait(&semaphore);
+        sem_wait(&semaphoreForIO);
         numberOfIOClients++;
-        sem_post(&semaphore);
+        sem_post(&semaphoreForIO);
 
         break;
 
@@ -113,9 +113,9 @@ void serverKernelForIO(int *socketClient)
 
     free(socketClient);
 
-    sem_wait(&semaphore);
+    sem_wait(&semaphoreForIO);
     numberOfIOClients--;
-    sem_post(&semaphore);
+    sem_post(&semaphoreForIO);
 }
 
 void operationPackageFromIO(t_list *package)

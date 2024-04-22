@@ -6,7 +6,8 @@
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
 
-sem_t *semaphore;
+sem_t semaphoreForKernelDispatch;
+sem_t semaphoreForKernelInterrupt;
 
 bool _finishAllServersSignal = false;
 
@@ -55,9 +56,9 @@ void receiveClientIteration(int socketServer)
         pthread_create(&threadDispatch, NULL, serverCPUDispatchForKernel, socketClientDispatch);
         pthread_detach(&threadDispatch);
 
-        sem_wait(&semaphore);
+        sem_wait(&semaphoreForKernelDispatch);
         numberOfKernelClientsForDispatch++;
-        sem_post(&semaphore);
+        sem_post(&semaphoreForKernelDispatch);
 
         break;
 
@@ -76,9 +77,9 @@ void receiveClientIteration(int socketServer)
         pthread_create(&threadInterrupt, NULL, serverCPUInterruptForKernel, socketClientInterrupt);
         pthread_detach(&threadInterrupt);
 
-        sem_wait(&semaphore);
+        sem_wait(&semaphoreForKernelInterrupt);
         numberOfKernelClientsForInterrupt++;
-        sem_post(&semaphore);
+        sem_post(&semaphoreForKernelInterrupt);
 
         break;
 
@@ -134,9 +135,9 @@ void serverCPUDispatchForKernel(int *socketClient)
 
     free(socketClient);
 
-    sem_wait(&semaphore);
+    sem_wait(&semaphoreForKernelDispatch);
     numberOfKernelClientsForDispatch--;
-    sem_post(&semaphore);
+    sem_post(&semaphoreForKernelDispatch);
 }
 
 void serverCPUInterruptForKernel(int *socketClient)
@@ -177,9 +178,9 @@ void serverCPUInterruptForKernel(int *socketClient)
 
     free(socketClient);
 
-    sem_wait(&semaphore);
+    sem_wait(&semaphoreForKernelInterrupt);
     numberOfKernelClientsForInterrupt--;
-    sem_post(&semaphore);
+    sem_post(&semaphoreForKernelInterrupt);
 }
 
 void operationPackageFromKernel(t_list *package)

@@ -9,7 +9,8 @@
 #define MAX_KERNEL_CLIENTS_FOR_INTERRUPT 1
 
 
-extern sem_t* semaphore;
+extern sem_t semaphoreForKernelDispatch;
+extern sem_t semaphoreForKernelInterrupt;
 
 extern bool _finishAllServersSignal;
 

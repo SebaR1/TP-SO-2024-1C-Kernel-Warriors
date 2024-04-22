@@ -9,7 +9,7 @@
 #define MAX_IO_CLIENTS 4096
 
 
-extern sem_t* semaphore;
+extern sem_t semaphoreForIO;
 
 extern bool _finishAllServersSignal;
 
