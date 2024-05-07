@@ -12,8 +12,6 @@ int main(int argc, char* argv[])
     // Obtengo la configuracion general.
     initIOConfig("IO.config");
 
-
-
     t_package* initialPackage = createPackage(IO_MODULE);
 
     t_package* testPackageToKernel = createPackage(PACKAGE_FROM_IO);

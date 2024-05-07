@@ -53,8 +53,8 @@ void receiveClientIteration(int socketServer)
         pthread_t threadIO;
         int *socketClientIO = (int *)malloc(sizeof(int));
         *socketClientIO = socketClient;
-        pthread_create(&threadIO, NULL, serverKernelForIO, socketClientIO);
-        pthread_detach(&threadIO);
+        pthread_create(&threadIO, NULL, (void*)serverKernelForIO, socketClientIO);
+        pthread_detach(threadIO);
 
         sem_wait(&semaphoreForIO);
         numberOfIOClients++;
@@ -120,7 +120,7 @@ void serverKernelForIO(int *socketClient)
 
 void operationPackageFromIO(t_list *package)
 {
-    list_iterate(package, listIterator);
+    list_iterate(package, (void*)listIterator);
 }
 
 

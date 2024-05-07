@@ -53,8 +53,8 @@ void receiveClientIteration(int socketServer)
         pthread_t threadDispatch;
         int *socketClientDispatch = (int *)malloc(sizeof(int));
         *socketClientDispatch = socketClient;
-        pthread_create(&threadDispatch, NULL, serverCPUDispatchForKernel, socketClientDispatch);
-        pthread_detach(&threadDispatch);
+        pthread_create(&threadDispatch, NULL, (void*)serverCPUDispatchForKernel, socketClientDispatch);
+        pthread_detach(threadDispatch);
 
         sem_wait(&semaphoreForKernelDispatch);
         numberOfKernelClientsForDispatch++;
@@ -74,8 +74,8 @@ void receiveClientIteration(int socketServer)
         pthread_t threadInterrupt;
         int *socketClientInterrupt = (int *)malloc(sizeof(int));
         *socketClientInterrupt = socketClient;
-        pthread_create(&threadInterrupt, NULL, serverCPUInterruptForKernel, socketClientInterrupt);
-        pthread_detach(&threadInterrupt);
+        pthread_create(&threadInterrupt, NULL, (void*)serverCPUInterruptForKernel, socketClientInterrupt);
+        pthread_detach(threadInterrupt);
 
         sem_wait(&semaphoreForKernelInterrupt);
         numberOfKernelClientsForInterrupt++;
@@ -185,7 +185,7 @@ void serverCPUInterruptForKernel(int *socketClient)
 
 void operationPackageFromKernel(t_list *package)
 {
-    list_iterate(package, listIterator);
+    list_iterate(package, (void*)listIterator);
 }
 
 void finishAllServersSignal()

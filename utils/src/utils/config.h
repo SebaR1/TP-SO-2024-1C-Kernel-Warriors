@@ -4,7 +4,7 @@
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
-
+#include <stdlib.h>
 
 t_list* getListOfStringsFromConfig(t_config* config, char* key, t_log* logger, const char* errorMessage);
 t_list* _fromConfigToListOfStrings(char** listChars);

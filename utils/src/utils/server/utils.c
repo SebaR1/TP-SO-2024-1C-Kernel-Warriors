@@ -37,7 +37,7 @@ int initServer(t_log* logger, char* port)
     }
 
 	// Escuchamos las conexiones entrantes
-	int listenSuccess = listen(socketServer, SOMAXCONN); // Retorna 0 si "escucha" con exito, retorna -1 si hubo un error.
+	//int listenSuccess = listen(socketServer, SOMAXCONN); Retorna 0 si "escucha" con exito, retorna -1 si hubo un error. Por ahora sin usar.
 	if(listen(socketServer, SOMAXCONN) == -1)
 	{
 		log_error(logger, "Error al escuchar las conexiones entrantes");

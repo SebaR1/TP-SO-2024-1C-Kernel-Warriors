@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
     params.portToListen = getMemoryConfig()->PUERTO_ESCUCHA;
     params.eachIterationFunc = receiveClientIteration;
     params.finishLoopSignal = &_finishAllServersSignal;
-    pthread_t* waitClientsLoopThread;
-    pthread_create(&waitClientsLoopThread, NULL, waitClientsLoop, &params);
+    pthread_t waitClientsLoopThread;
+    pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
 
 
 

@@ -1,7 +1,8 @@
 #ifndef CPU_SERVER_H_
 #define CPU_SERVER_H_
 
-#include <semaphore.h>
+#include "pthread.h"
+#include "semaphore.h"
 #include <stdbool.h>
 #include <commons/collections/list.h>
 

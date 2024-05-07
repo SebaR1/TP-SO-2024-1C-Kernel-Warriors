@@ -12,7 +12,7 @@ t_list* getListOfStringsFromConfig(t_config* config, char* key, t_log* logger, c
 
     if (listChars == NULL)
     {
-        log_error(logger, errorMessage);
+        log_error(logger, "%s",errorMessage);
         return NULL;
     }
 
@@ -44,7 +44,7 @@ t_list* getListOfIntsFromConfig(t_config* config, char* key, t_log* logger, cons
 
     if (listChars == NULL)
     {
-        log_error(logger, errorMessage);
+        log_error(logger, "%s" ,errorMessage);
         return NULL;
     }
 
@@ -59,7 +59,8 @@ t_list* _fromConfigToListOfInts(char** listChars)
     int i = 0;
     while (listChars[i] != NULL)
     {
-        list_add(list, atoi(listChars[i]));
+        int temp = atoi(listChars[i]); //Para evitar el warning, agrego un temporal
+        list_add(list, &temp);
         i++;
     }
 

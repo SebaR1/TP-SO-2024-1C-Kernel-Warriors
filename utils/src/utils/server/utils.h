@@ -13,10 +13,6 @@
 #include "utils/utilsGeneral.h"
 
 
-// Estructura usada para saber de que tipo es el paquete que envia un cliente.
-typedef enum operationCode;
-
-
 // Structu para llenar con los valores correspondientes y enviarlo como parametro a la funcion waitClientsLoop
 typedef struct
 {

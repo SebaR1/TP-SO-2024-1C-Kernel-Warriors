@@ -5,6 +5,7 @@
 #include "utils/client/utils.h"
 
 
+
 int main() 
 {
     // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
@@ -24,16 +25,16 @@ int main()
     paramsDispatch.portToListen = getCPUConfig()->PUERTO_ESCUCHA_DISPATCH;
     paramsDispatch.eachIterationFunc = receiveClientIteration;
     paramsDispatch.finishLoopSignal = &_finishAllServersSignal;
-    pthread_t* dispatchWaitClientsLoopThread;
-    pthread_create(&dispatchWaitClientsLoopThread, NULL, waitClientsLoop, &paramsDispatch);
+    pthread_t dispatchWaitClientsLoopThread;
+    pthread_create(&dispatchWaitClientsLoopThread, NULL, (void*)waitClientsLoop, &paramsDispatch);
 
     waitClientsLoopParams paramsInterrupt;
     paramsInterrupt.logger = getLogger();
     paramsInterrupt.portToListen = getCPUConfig()->PUERTO_ESCUCHA_INTERRUPT;
     paramsInterrupt.eachIterationFunc = receiveClientIteration;
     paramsInterrupt.finishLoopSignal = &_finishAllServersSignal;
-    pthread_t* interruptWaitClientsLoopThread;
-    pthread_create(&interruptWaitClientsLoopThread, NULL, waitClientsLoop, &paramsInterrupt);
+    pthread_t interruptWaitClientsLoopThread;
+    pthread_create(&interruptWaitClientsLoopThread, NULL, (void*)waitClientsLoop, &paramsInterrupt);
 
 
     // Espero hasta que se creen los demas servidores de los otros modulos.

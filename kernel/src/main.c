@@ -29,8 +29,8 @@ int main()
     params.portToListen = getKernelConfig()->PUERTO_ESCUCHA;
     params.eachIterationFunc = receiveClientIteration;
     params.finishLoopSignal = &_finishAllServersSignal;
-    pthread_t* waitClientsLoopThread;
-    pthread_create(&waitClientsLoopThread, NULL, waitClientsLoop, &params);
+    pthread_t waitClientsLoopThread;
+    pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
 
 
     // Espero hasta que se creen los demas servidores de los otros modulos.
