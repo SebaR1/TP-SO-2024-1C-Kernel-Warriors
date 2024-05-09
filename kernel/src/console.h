@@ -1,3 +1,6 @@
+#ifndef KERNEL_CONSOLE_H_
+#define KERNEL_CONSOLE_H_
+
 #include <readline/readline.h>
 #include <commons/string.h>
 #include "logger.h"
@@ -11,3 +14,10 @@ bool _isAnInstruction(char* instruction);
 
 //Atiende la instruccion validada
 //void attendInstruction(char* instruction);
+
+
+
+
+
+
+#endif
