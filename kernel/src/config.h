@@ -38,5 +38,4 @@ void initKernelConfig(char* path);
 void freeKernelConfig();
 
 
-
 #endif

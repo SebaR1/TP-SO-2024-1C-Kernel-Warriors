@@ -1,14 +1,4 @@
-#include "utils/client/utils.h"
-#include "utils/server/utils.h"
-#include "config.h"
-#include "logger.h"
-#include <pthread.h>
-#include "serverKernel.h"
-#include <commons/string.h>
-#include <semaphore.h>
-#include <commons/string.h>
-
-
+#include "kernel.h"
 
 
 int main()
@@ -31,11 +21,13 @@ int main()
     params.finishLoopSignal = &_finishAllServersSignal;
     pthread_t waitClientsLoopThread;
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
+    //pthread_detach(waitClientsLoopThread);
 
+    pthread_t kernelConsole;
+    pthread_create(&kernelConsole, NULL, (void*)readKernelConsole, NULL);
+    pthread_join(kernelConsole,NULL);
 
-    // Espero hasta que se creen los demas servidores de los otros modulos.
-    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
-    sleep(30);
+/*
 
     t_package* initialPackageToMemory = createPackage(KERNEL_MODULE);
     t_package* initialPackageToCPUDispatch = createPackage(KERNEL_MODULE_TO_CPU_DISPATCH);
@@ -83,13 +75,13 @@ int main()
     destroyPackage(testPackageToMemory);
     destroyPackage(testPackageToCPUDispatch);
     destroyPackage(testPackageToCPUInterrupt);
-    
+
 
     // Espero para ver si me llegan mensajes.
     // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
-    sleep(60);
+    //sleep(60);
 
-
+*/
 
     // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion
     finishAllServersSignal();

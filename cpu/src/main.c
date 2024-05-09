@@ -27,6 +27,7 @@ int main()
     paramsDispatch.finishLoopSignal = &_finishAllServersSignal;
     pthread_t dispatchWaitClientsLoopThread;
     pthread_create(&dispatchWaitClientsLoopThread, NULL, (void*)waitClientsLoop, &paramsDispatch);
+    pthread_detach(dispatchWaitClientsLoopThread);
 
     waitClientsLoopParams paramsInterrupt;
     paramsInterrupt.logger = getLogger();
@@ -35,13 +36,9 @@ int main()
     paramsInterrupt.finishLoopSignal = &_finishAllServersSignal;
     pthread_t interruptWaitClientsLoopThread;
     pthread_create(&interruptWaitClientsLoopThread, NULL, (void*)waitClientsLoop, &paramsInterrupt);
+    pthread_join(interruptWaitClientsLoopThread, NULL);
 
-
-    // Espero hasta que se creen los demas servidores de los otros modulos.
-    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
-    sleep(30);
-
-
+/*
     t_package* initialPackage = createPackage(CPU_MODULE);
 
     t_package* testPackageToMemory = createPackage(PACKAGE_FROM_CPU);
@@ -58,11 +55,11 @@ int main()
 
     destroyPackage(initialPackage);
     destroyPackage(testPackageToMemory);
-
+*/
 
     // Espero para ver si me llegan mensajes.
     // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
-    sleep(60);
+    //sleep(60);
 
 
     // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion

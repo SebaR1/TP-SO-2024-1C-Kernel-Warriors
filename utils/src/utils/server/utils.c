@@ -55,6 +55,7 @@ int initServer(t_log* logger, char* port)
 
 int waitClient(t_log* logger, int socketServer)
 {
+	log_info(logger, "Esperando a cliente");
 	// Aceptamos un nuevo cliente
     int socketClient = accept(socketServer, NULL, NULL); // Retorna -1 si hubo un error.
     if (socketClient == -1)

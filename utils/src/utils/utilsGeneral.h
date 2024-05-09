@@ -4,6 +4,7 @@
 
 #include <commons/log.h>
 #include <commons/collections/list.h>
+#include <pthread.h>
 
 
 #define DEFAULT_CASE_MESSAGE "Un cliente me envio una operacion no valida o desconocida."
@@ -27,10 +28,6 @@ typedef enum
 	PACKAGE_FROM_MEMORY,
 	PACKAGE_FROM_IO,
 } operationCode;
-
-
-
-
 
 
 

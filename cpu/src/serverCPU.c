@@ -93,7 +93,7 @@ void receiveClientIteration(int socketServer)
 
     default:
         log_error(getLogger(), DEFAULT_CASE_MESSAGE);
-        break;
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -129,7 +129,7 @@ void serverCPUDispatchForKernel(int *socketClient)
 
         default:
             log_error(getLogger(), DEFAULT_CASE_MESSAGE);
-            break;
+            exit(EXIT_FAILURE);
         }
     }
 

@@ -23,7 +23,6 @@ typedef struct
 } waitClientsLoopParams;
 
 
-
 // Funcion auxiliar que recibe el buffer del socket del cliente especificado.
 // No deberia ser uasda por fuera su scope de utilidad.
 void* _getBuffer(int* size, int socketClient);

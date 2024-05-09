@@ -29,12 +29,7 @@ int main(int argc, char *argv[])
     params.finishLoopSignal = &_finishAllServersSignal;
     pthread_t waitClientsLoopThread;
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
-
-
-
-    // Espero para ver si me llegan mensajes.
-    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
-    sleep(60);
+    pthread_join(waitClientsLoopThread, NULL);
 
 
     // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion
