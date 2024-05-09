@@ -15,26 +15,226 @@ uint32_t DI = 0; // Contiene la dirección lógica de memoria de destino a donde
 
 
 
+
+
+///////////////////////// INSTRUCCION SET /////////////////////////
+
 void SET(registerType registerType, uint32_t value)
 {
-    uint8_t* register1byte;
-    uint32_t* register4bytes;
+    uint8_t* reg1bytes;
+    uint32_t* reg4bytes;
 
 
-    switch (_TypeToRegister(registerType, register1byte, register4bytes))
+    switch (_TypeToRegister(registerType, reg1bytes, reg4bytes))
     {
     case REGISTER_1_BYTE:
-        *register1byte = value;
+        _SET1(reg1bytes, value);
         break;
 
     case REGISTER_4_BYTES:
-        *register4bytes = value;
+        _SET4(reg4bytes, value);
         break;
     }
+
+    PC++;
+}
+
+void _SET1(uint8_t* reg, uint32_t value)
+{
+    *reg = value;
+}
+
+void _SET4(uint32_t* reg, uint32_t value)
+{
+    *reg = value;
 }
 
 
 
+
+///////////////////////// INSTRUCCION SUM /////////////////////////
+
+
+void SUM(registerType destination, registerType origin)
+{
+    uint8_t* destination1bytes;
+    uint8_t* origin1bytes;
+    uint32_t* destination4bytes;
+    uint32_t* origin4bytes;
+
+
+    switch (_TypeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // Destination 1 bytes
+        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
+            _SUM11(destination1bytes, origin1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
+            _SUM14(destination1bytes, origin4bytes);
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // Destination 4 bytes
+        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
+            _SUM41(destination4bytes, origin1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
+            _SUM44(destination4bytes, origin4bytes);
+            break;
+        }
+
+        break;
+    }
+
+    PC++;
+}
+
+void _SUM11(uint8_t* destination, uint8_t* origin)
+{
+    *destination = *destination + *origin;
+}
+
+void _SUM14(uint8_t* destination, uint32_t* origin)
+{
+    *destination = *destination + *origin;
+}
+
+void _SUM41(uint32_t* destination, uint8_t* origin)
+{
+    *destination = *destination + *origin;
+}
+
+void _SUM44(uint32_t* destination, uint32_t* origin)
+{
+    *destination = *destination + *origin;
+}
+
+
+
+
+///////////////////////// INSTRUCCION SUB /////////////////////////
+
+void SUB(registerType destination, registerType origin)
+{
+    uint8_t* destination1bytes;
+    uint8_t* origin1bytes;
+    uint32_t* destination4bytes;
+    uint32_t* origin4bytes;
+
+
+    switch (_TypeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // Destination 1 bytes
+        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
+            _SUB11(destination1bytes, origin1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
+            _SUB14(destination1bytes, origin4bytes);
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // Destination 4 bytes
+        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
+            _SUB41(destination4bytes, origin1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
+            _SUB44(destination4bytes, origin4bytes);
+            break;
+        }
+
+        break;
+    }
+
+    PC++;
+}
+
+void _SUB11(uint8_t* destination, uint8_t* origin)
+{
+    *destination = *destination - *origin;
+}
+
+void _SUB14(uint8_t* destination, uint32_t* origin)
+{
+    *destination = *destination - *origin;
+}
+
+void _SUB41(uint32_t* destination, uint8_t* origin)
+{
+    *destination = *destination - *origin;
+}
+
+void _SUB44(uint32_t* destination, uint32_t* origin)
+{
+    *destination = *destination - *origin;
+}
+
+
+
+
+
+///////////////////////// INSTRUCCION JNZ /////////////////////////
+
+void JNZ(registerType reg, uint32_t instruction)
+{
+    uint8_t* reg1bytes;
+    uint32_t* reg4bytes;
+
+
+    switch (_TypeToRegister(reg, reg1bytes, reg4bytes))
+    {
+    case REGISTER_1_BYTE:
+        _JNZ1(reg1bytes, instruction);
+        break;
+
+    case REGISTER_4_BYTES:
+        _JNZ4(reg4bytes, instruction);
+        break;
+    }
+}
+
+void _JNZ1(uint8_t* reg, uint32_t instruction)
+{
+    if (*reg != 0)
+    {
+        PC = instruction;
+        return;
+    }
+
+    PC++;
+}
+
+void _JNZ4(uint32_t* reg, uint32_t instruction)
+{
+    if (*reg != 0)
+    {
+        PC = instruction;
+        return;
+    }
+
+    PC++;
+}
+
+
+
+
+
+///////////////////////// FUNCIONES AUXILIARES GENERALES /////////////////////////
 
 registerTypeByBytes _TypeToRegister(registerType type, uint8_t* outRegister1byte, uint32_t* outRegister4bytes)
 {

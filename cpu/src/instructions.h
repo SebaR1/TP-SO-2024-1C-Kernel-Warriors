@@ -30,8 +30,14 @@ typedef enum
 
 
 
+
+
+////////////////// FUNCIONES QUE REPRESENTAN LAS INSTRUCCIONES //////////////////
+
+
+
 // (Registro, Valor): Asigna al registro el valor pasado como parámetro.
-void SET(registerType register, uint32_t value);
+void SET(registerType reg, uint32_t value);
 
 
 // (Registro Datos, Registro Dirección): Lee el valor de memoria correspondiente a la Dirección Lógica
@@ -53,7 +59,7 @@ void SUB(registerType destination, registerType origin);
 
 
 // (Registro, Instrucción): Si el valor del registro es distinto de cero, actualiza el program counter al número de instrucción pasada por parámetro.
-void JNZ(registerType register, uint32_t instruction);
+void JNZ(registerType reg, uint32_t instruction);
 
 
 // (Tamaño): Solicitará a la Memoria ajustar el tamaño del proceso al tamaño pasado por parámetro.
@@ -122,6 +128,42 @@ void IO_FS_READ(char* resource, char* fileName, registerType direction, register
 // Esta instrucción representa la syscall de finalización del proceso. Se deberá devolver el Contexto de Ejecución actualizado al Kernel para su finalización.
 void EXIT();
 
+
+
+
+
+
+
+////////////////// FUNCIONES AUXILIARES PARTICULARES DE CADA INSTRUCCION //////////////////
+
+
+void _SET1(uint8_t* reg, uint32_t value);
+void _SET4(uint32_t* reg, uint32_t value);
+
+
+void _SUM11(uint8_t* destination, uint8_t* origin);
+void _SUM14(uint8_t* destination, uint32_t* origin);
+void _SUM41(uint32_t* destination, uint8_t* origin);
+void _SUM44(uint32_t* destination, uint32_t* origin);
+
+
+void _SUB11(uint8_t* destination, uint8_t* origin);
+void _SUB14(uint8_t* destination, uint32_t* origin);
+void _SUB41(uint32_t* destination, uint8_t* origin);
+void _SUB44(uint32_t* destination, uint32_t* origin);
+
+
+void _JNZ1(uint8_t* reg, uint32_t instruction);
+void _JNZ4(uint32_t* reg, uint32_t instruction);
+
+
+
+
+
+
+
+
+////////////////// FUNCIONES AUXILIARES GENERALES //////////////////
 
 
 
