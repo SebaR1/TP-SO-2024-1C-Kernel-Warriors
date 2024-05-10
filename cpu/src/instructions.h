@@ -3,22 +3,8 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "essentials.h"
 
-// Enum que determina el tipo de registro
-typedef enum
-{
-    PC_TYPE,
-    AX_TYPE,
-    BX_TYPE,
-    CX_TYPE,
-    DX_TYPE,
-    EAX_TYPE,
-    EBX_TYPE,
-    ECX_TYPE,
-    EDX_TYPE,
-    SI_TYPE,
-    DI_TYPE,
-} registerType;
 
 
 // Enum que determina si el registro a usar es de 1 o 4 bytes
@@ -34,6 +20,7 @@ typedef enum
 
 ////////////////// FUNCIONES QUE REPRESENTAN LAS INSTRUCCIONES //////////////////
 
+////////////////// WARNING! TODOS LOS STRINGS (char*) PASADOS POR PARAMETRO DEBEN LIBERAR LA MEMORIA USANDO LA FUNCION FREE CUANDO LO TERMINEN DE USAR //////////////////
 
 
 // (Registro, Valor): Asigna al registro el valor pasado como parámetro.
