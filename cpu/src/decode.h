@@ -13,8 +13,8 @@
 
 /// @brief Decodifica la instruccion instruction en forma de string, para saber qué tipo de instruccion es y cuáles son sus parametros
 /// @param instruction La instruccion en forma de string
-/// @param outParams Debe ser un puntero a NULL o a basura (es decir, no se debe haber reservado memoria al pasar por parametro este puntero). Se crea la estructura correspondiente usando malloc y se almacenan sus parametros segun lo que viene en la instruccion instruction. Se retorna esa estructura (ES NECESARIO LIBERAR LA MEMORIA CON FREE SI SE USA ESTA FUNCIÓN)
-/// @warning ES NECESARIO LIBERAR LA MEMORIA DEL outParams CON FREE SI SE USA ESTA FUNCIÓN
+/// @param outParams Debe ser un puntero a NULL o a basura (es decir, no se debe haber reservado memoria al pasar por parametro este puntero). Se crea la estructura correspondiente usando malloc y se almacenan sus parametros segun lo que viene en la instruccion instruction. Se retorna esa estructura (ES NECESARIO LIBERAR MEMORIA)
+/// @warning ES NECESARIO LIBERAR LA MEMORIA DEL outParams CON FREE SI SE USA ESTA FUNCIÓN, ASI COMO TAMBIEN LAS VARIABLES INTERNAS DE LA ESTRUCTURA QUE HAYAN RESERVADO MEMORIA CON MALLOC (como los strings (char*) por ejemplo)
 /// @return Retorna el tipo de instruccion
 instructionType DecodeInstruction(char* instruction, void* outParams);
 
