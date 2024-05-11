@@ -1,6 +1,7 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
+
 #include <readline/readline.h>
 #include <commons/string.h>
 #include "utilsKernel/logger.h"
@@ -16,5 +17,6 @@ bool _isAnInstruction(char* instruction);
 
 //Atiende la instruccion validada
 void attendInstruction(char* instruction);
+
 
 #endif
