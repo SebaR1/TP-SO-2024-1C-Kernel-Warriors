@@ -1,7 +1,12 @@
+#ifndef CONSOLE_H
+#define CONSOLE_H
+
 #include <readline/readline.h>
 #include <commons/string.h>
-#include "logger.h"
+#include "utilsKernel/logger.h"
 #include <stdlib.h>
+#include "longTermPlanning.h"
+
 
 //Inicia la consola interactiva de kernel
 void readKernelConsole(void);
@@ -10,4 +15,6 @@ void readKernelConsole(void);
 bool _isAnInstruction(char* instruction);
 
 //Atiende la instruccion validada
-//void attendInstruction(char* instruction);
+void attendInstruction(char* instruction);
+
+#endif

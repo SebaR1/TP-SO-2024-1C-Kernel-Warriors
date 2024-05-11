@@ -1,10 +1,14 @@
 #ifndef UTILS_GENERAL_H_
 #define UTILS_GENERAL_H_
 
-
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <pthread.h>
+#include <commons/string.h>
+#include <semaphore.h>
+#include <readline/readline.h>
+#include <stdlib.h>
+#include <netdb.h>
 
 
 #define DEFAULT_CASE_MESSAGE "Un cliente me envio una operacion no valida o desconocida."
@@ -29,6 +33,34 @@ typedef enum
 	PACKAGE_FROM_IO,
 } operationCode;
 
+typedef struct 
+{
+	t_list *list;
+	pthread_mutex_t mutex;
+} listMutex_t;
 
+typedef struct
+{
+	char* AX;
+	//etc
+} registers_t;
+
+typedef enum
+{
+	PCB_NEW,
+	PCB_READY,
+	PCB_EXEC,
+	PCB_BLOCK,
+	PCB_EXIT
+} pcbState_t;
+
+typedef struct 
+{
+	uint32_t pid;
+	uint32_t pc;
+	uint32_t quantum;
+	registers_t *registersCpu;
+	pcbState_t state;
+} pcb_t;
 
 #endif

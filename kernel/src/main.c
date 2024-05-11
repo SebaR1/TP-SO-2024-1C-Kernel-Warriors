@@ -6,12 +6,30 @@ int main()
     // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
     initLogger("kernel.log", "kernel", true, LOG_LEVEL_INFO);
 
-
     // Obtengo la configuracion general del kernel.
     initKernelConfig("kernel.config");
 
-    // Reservo memoria para mi sepaforo y lo inicializo
-    sem_init(&semaphoreForIO, 0, 1);
+    //Inicializo todo
+    pid = 0;
+
+    sem_init(&semNew, 0, 0);
+    sem_init(&semReady, 0, 0);
+    sem_init(&semExec, 0, 0);
+    sem_init(&semBlock, 0, 0);
+    sem_init(&semExit, 0, 0);
+    sem_init(&semAddPid, 0, 1);
+    sem_init(&semMulti, 0 , getKernelConfig()->GRADO_MULTIPROGRAMACION);
+    sem_init(&semaphoreForIO, 0, 1); // Reservo memoria para mi sepaforo y lo inicializo
+
+    pcbNewList = initListMutex();
+    pcbReadyList = initListMutex();
+    pcbExecList = initListMutex();
+    pcbBLockList = initListMutex();
+    pcbExitList = initListMutex();
+
+    initLongTermPlanning();
+
+    //
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
     waitClientsLoopParams params;
@@ -26,6 +44,8 @@ int main()
     pthread_t kernelConsole;
     pthread_create(&kernelConsole, NULL, (void*)readKernelConsole, NULL);
     pthread_join(kernelConsole,NULL);
+
+
 
 /*
 
@@ -89,7 +109,20 @@ int main()
     // Liberando todos los recursos
     freeKernelConfig();
     destroyLogger();
+
     sem_destroy(&semaphoreForIO);
+    sem_destroy(&semNew);
+    sem_destroy(&semReady);
+    sem_destroy(&semExec);
+    sem_destroy(&semBlock);
+    sem_destroy(&semExit);
+    sem_destroy(&semMulti);
+
+    destroyListMutex(pcbNewList);
+    destroyListMutex(pcbReadyList);
+    destroyListMutex(pcbExecList);
+    destroyListMutex(pcbBLockList);
+    destroyListMutex(pcbExitList);
 
     return 0;
 }

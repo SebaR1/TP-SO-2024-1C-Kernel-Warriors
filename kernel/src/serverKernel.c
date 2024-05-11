@@ -1,9 +1,4 @@
 #include "serverKernel.h"
-#include "utils/server/utils.h"
-#include "logger.h"
-#include "config.h"
-#include <pthread.h>
-#include <semaphore.h>
 
 int numberOfIOClients = 0;
 
