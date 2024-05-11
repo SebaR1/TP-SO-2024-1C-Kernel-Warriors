@@ -3,7 +3,7 @@
 
 
 
-instructionType DecodeInstruction(char* instruction, void* outParams)
+instructionType decodeInstruction(char* instruction, void* outParams)
 {
     instructionType type;
 
@@ -41,7 +41,7 @@ instructionType DecodeInstruction(char* instruction, void* outParams)
 
 
 
-registerType _StringRegisterToType(char* regString)
+registerType _stringRegisterToType(char* regString)
 {
     if (regString == PC_STRING) return PC_TYPE;
     else if (regString == AX_STRING) return AX_TYPE;
@@ -63,7 +63,7 @@ registerType _StringRegisterToType(char* regString)
 instructionType SET_GET_INFO(char** instructionSplitted, void* outParams)
 {
     SET_STRUCT* params = malloc(sizeof(SET_STRUCT));
-    params->reg = _StringRegisterToType(instructionSplitted[1]);
+    params->reg = _stringRegisterToType(instructionSplitted[1]);
     params->value = atoi(instructionSplitted[2]);
 
     outParams = params;
@@ -73,8 +73,8 @@ instructionType SET_GET_INFO(char** instructionSplitted, void* outParams)
 instructionType MOV_IN_GET_INFO(char** instructionSplitted, void* outParams)
 {
     MOV_IN_STRUCT* params = malloc(sizeof(MOV_IN_STRUCT));
-    params->data = _StringRegisterToType(instructionSplitted[1]);
-    params->direction = _StringRegisterToType(instructionSplitted[2]);
+    params->data = _stringRegisterToType(instructionSplitted[1]);
+    params->direction = _stringRegisterToType(instructionSplitted[2]);
 
     outParams = params;
     return MOV_IN_TYPE;
@@ -83,8 +83,8 @@ instructionType MOV_IN_GET_INFO(char** instructionSplitted, void* outParams)
 instructionType MOV_OUT_GET_INFO(char** instructionSplitted, void* outParams)
 {
     MOV_OUT_STRUCT* params = malloc(sizeof(MOV_OUT_STRUCT));
-    params->direction = _StringRegisterToType(instructionSplitted[1]);
-    params->data = _StringRegisterToType(instructionSplitted[2]);
+    params->direction = _stringRegisterToType(instructionSplitted[1]);
+    params->data = _stringRegisterToType(instructionSplitted[2]);
 
     outParams = params;
     return MOV_OUT_TYPE;
@@ -93,8 +93,8 @@ instructionType MOV_OUT_GET_INFO(char** instructionSplitted, void* outParams)
 instructionType SUM_GET_INFO(char** instructionSplitted, void* outParams)
 {
     SUM_STRUCT* params = malloc(sizeof(SUM_STRUCT));
-    params->destination = _StringRegisterToType(instructionSplitted[1]);
-    params->origin = _StringRegisterToType(instructionSplitted[2]);
+    params->destination = _stringRegisterToType(instructionSplitted[1]);
+    params->origin = _stringRegisterToType(instructionSplitted[2]);
 
     outParams = params;
     return SUM_TYPE;
@@ -103,8 +103,8 @@ instructionType SUM_GET_INFO(char** instructionSplitted, void* outParams)
 instructionType SUB_GET_INFO(char** instructionSplitted, void* outParams)
 {
     SUB_STRUCT* params = malloc(sizeof(SUB_STRUCT));
-    params->destination = _StringRegisterToType(instructionSplitted[1]);
-    params->origin = _StringRegisterToType(instructionSplitted[2]);
+    params->destination = _stringRegisterToType(instructionSplitted[1]);
+    params->origin = _stringRegisterToType(instructionSplitted[2]);
 
     outParams = params;
     return SUB_TYPE;
@@ -113,7 +113,7 @@ instructionType SUB_GET_INFO(char** instructionSplitted, void* outParams)
 instructionType JNZ_GET_INFO(char** instructionSplitted, void* outParams)
 {
     JNZ_STRUCT* params = malloc(sizeof(JNZ_STRUCT));
-    params->reg = _StringRegisterToType(instructionSplitted[1]);
+    params->reg = _stringRegisterToType(instructionSplitted[1]);
     params->instruction = atoi(instructionSplitted[2]);
 
     outParams = params;
@@ -170,8 +170,8 @@ instructionType IO_STDIN_READ_GET_INFO(char** instructionSplitted, void* outPara
 {
     IO_STDIN_READ_STRUCT* params = malloc(sizeof(IO_STDIN_READ_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
-    params->direction = _StringRegisterToType(instructionSplitted[2]);
-    params->size = _StringRegisterToType(instructionSplitted[3]);
+    params->direction = _stringRegisterToType(instructionSplitted[2]);
+    params->size = _stringRegisterToType(instructionSplitted[3]);
 
     outParams = params;
     return IO_STDIN_READ_TYPE;
@@ -181,8 +181,8 @@ instructionType IO_STDOUT_WRITE_GET_INFO(char** instructionSplitted, void* outPa
 {
     IO_STDOUT_WRITE_STRUCT* params = malloc(sizeof(IO_STDOUT_WRITE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
-    params->direction = _StringRegisterToType(instructionSplitted[2]);
-    params->size = _StringRegisterToType(instructionSplitted[3]);
+    params->direction = _stringRegisterToType(instructionSplitted[2]);
+    params->size = _stringRegisterToType(instructionSplitted[3]);
 
     outParams = params;
     return IO_STDOUT_WRITE_TYPE;
@@ -213,7 +213,7 @@ instructionType IO_FS_TRUNCATE_GET_INFO(char** instructionSplitted, void* outPar
     IO_FS_TRUNCATE_STRUCT* params = malloc(sizeof(IO_FS_TRUNCATE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
-    params->size = _StringRegisterToType(instructionSplitted[3]);
+    params->size = _stringRegisterToType(instructionSplitted[3]);
 
     outParams = params;
     return IO_FS_TRUNCATE_TYPE;
@@ -224,9 +224,9 @@ instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void* outParams
     IO_FS_WRITE_STRUCT* params = malloc(sizeof(IO_FS_WRITE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
-    params->direction = _StringRegisterToType(instructionSplitted[3]);
-    params->size = _StringRegisterToType(instructionSplitted[4]);
-    params->pointer = _StringRegisterToType(instructionSplitted[5]);
+    params->direction = _stringRegisterToType(instructionSplitted[3]);
+    params->size = _stringRegisterToType(instructionSplitted[4]);
+    params->pointer = _stringRegisterToType(instructionSplitted[5]);
 
     outParams = params;
     return IO_FS_WRITE_TYPE;
@@ -237,9 +237,9 @@ instructionType IO_FS_READ_GET_INFO(char** instructionSplitted, void* outParams)
     IO_FS_READ_STRUCT* params = malloc(sizeof(IO_FS_READ_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
-    params->direction = _StringRegisterToType(instructionSplitted[3]);
-    params->size = _StringRegisterToType(instructionSplitted[4]);
-    params->pointer = _StringRegisterToType(instructionSplitted[5]);
+    params->direction = _stringRegisterToType(instructionSplitted[3]);
+    params->size = _stringRegisterToType(instructionSplitted[4]);
+    params->pointer = _stringRegisterToType(instructionSplitted[5]);
 
     outParams = params;
     return IO_FS_READ_TYPE;

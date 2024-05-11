@@ -2,6 +2,8 @@
 #include "utils/server/utils.h"
 #include "logger.h"
 #include "config.h"
+#include "utils/utilsGeneral.h"
+#include "fetch.h"
 
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
@@ -183,9 +185,61 @@ void serverCPUInterruptForKernel(int *socketClient)
     sem_post(&semaphoreForKernelInterrupt);
 }
 
+void serverCPUForMemory(int *socketClient)
+{
+    bool exitLoop = false;
+    while (!exitLoop || _finishAllServersSignal)
+    {
+        // Recibir el codigo de operacion y hacer la operacion recibida.
+        operationCode opCode = getOperation(*socketClient);
+        if (_finishAllServersSignal)
+        {
+            break;
+        }
+
+        switch (opCode)
+        {
+        case MEMORY_NEXT_INSTRUCTION:
+            log_info(getLogger(), "Obteniendo paquete por parte del modulo kernel en Interrput");
+            t_list *listPackage = getPackage(*socketClient);
+            log_info(getLogger(), "Paquete obtenido con exito del modulo kernel en Interrupt");
+            operationPackageFromKernel(listPackage);
+            break;
+
+        case DO_NOTHING:
+            break;
+
+
+        case ERROR:
+            log_error(getLogger(), ERROR_CASE_MESSAGE);
+            exitLoop = true;
+            break;
+
+        default:
+            log_error(getLogger(), DEFAULT_CASE_MESSAGE);
+            break;
+        }
+    }
+
+    free(socketClient);
+
+    sem_wait(&semaphoreForKernelInterrupt);
+    numberOfKernelClientsForInterrupt--;
+    sem_post(&semaphoreForKernelInterrupt);
+}
+
 void operationPackageFromKernel(t_list *package)
 {
     list_iterate(package, (void*)listIterator);
+}
+
+void memoryNextInstruction(int* socketClient)
+{
+    t_list *listPackage = getPackage(*socketClient);
+    instructionString = list_get(listPackage, 0);
+    list_destroy(listPackage);
+
+
 }
 
 void finishAllServersSignal()

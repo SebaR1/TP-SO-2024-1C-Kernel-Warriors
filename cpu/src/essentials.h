@@ -2,6 +2,7 @@
 #define CPU_ESSENTIALS_H_
 
 #include <stdint.h>
+#include <semaphore.h>
 
 
 
@@ -203,6 +204,24 @@ typedef struct
     registerType size;
     registerType pointer;
 } IO_FS_READ_STRUCT;
+
+
+
+
+////////////////////// FUNCIONES UTILES GENERALES //////////////////////
+
+
+/// @brief Retorna el valor del Program Counter, el cual indica la proxima instruccion a ejecutar una vez completado un ciclo de ejecucion
+/// @return Retorna el valor del Program Counter
+uint32_t getPC();
+
+
+
+
+
+////////////////////// SEMAFOROS //////////////////////
+
+extern sem_t semaphoreWaitInstruction;
 
 
 

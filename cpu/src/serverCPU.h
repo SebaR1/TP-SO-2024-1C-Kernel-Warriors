@@ -34,6 +34,9 @@ void receiveClientIteration(int socketServer);
 void operationPackageFromKernel(t_list* package);
 
 
+/// @brief Cuando recibo la siguiente instruccion a ejecutar por parte de la memoria, esta funcion es llamada
+/// @param socketClient El socket del cliente de quién recibió la instruccion
+void memoryNextInstruction(int* socketClient);
 
 
 

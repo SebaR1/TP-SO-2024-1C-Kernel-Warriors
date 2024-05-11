@@ -3,6 +3,7 @@
 #include "serverCPU.h"
 #include "utils/server/utils.h"
 #include "utils/client/utils.h"
+#include "essentials.h"
 
 
 
@@ -17,6 +18,7 @@ int main()
     // Reservo memoria para mi sepaforo y lo inicializo
     sem_init(&semaphoreForKernelDispatch, 0, 1);
     sem_init(&semaphoreForKernelInterrupt, 0, 1);
+    sem_init(&semaphoreWaitInstruction, 0, 1);
 
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo

@@ -1,6 +1,6 @@
 #include "instructions.h"
 
-uint32_t PC = 0; // Program Counter, indica la próxima instrucción a ejecutar
+uint32_t PC = 0; // Program Counter, indica la próxima instrucción a ejecutar una vez completado un ciclo de ejecucion
 uint8_t AX = 0; // Registro Numérico de propósito general
 uint8_t BX = 0; // Registro Numérico de propósito general
 uint8_t CX = 0; // Registro Numérico de propósito general
@@ -25,7 +25,7 @@ void SET(registerType registerType, uint32_t value)
     uint32_t* reg4bytes;
 
 
-    switch (_TypeToRegister(registerType, reg1bytes, reg4bytes))
+    switch (_typeToRegister(registerType, reg1bytes, reg4bytes))
     {
     case REGISTER_1_BYTE:
         _SET1(reg1bytes, value);
@@ -63,10 +63,10 @@ void SUM(registerType destination, registerType origin)
     uint32_t* origin4bytes;
 
 
-    switch (_TypeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    switch (_typeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
     {
     case REGISTER_1_BYTE: // Destination 1 bytes
-        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
             _SUM11(destination1bytes, origin1bytes);
@@ -80,7 +80,7 @@ void SUM(registerType destination, registerType origin)
         break;
 
     case REGISTER_4_BYTES: // Destination 4 bytes
-        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
             _SUM41(destination4bytes, origin1bytes);
@@ -130,10 +130,10 @@ void SUB(registerType destination, registerType origin)
     uint32_t* origin4bytes;
 
 
-    switch (_TypeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    switch (_typeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
     {
     case REGISTER_1_BYTE: // Destination 1 bytes
-        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
             _SUB11(destination1bytes, origin1bytes);
@@ -147,7 +147,7 @@ void SUB(registerType destination, registerType origin)
         break;
 
     case REGISTER_4_BYTES: // Destination 4 bytes
-        switch (_TypeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
             _SUB41(destination4bytes, origin1bytes);
@@ -196,7 +196,7 @@ void JNZ(registerType reg, uint32_t instruction)
     uint32_t* reg4bytes;
 
 
-    switch (_TypeToRegister(reg, reg1bytes, reg4bytes))
+    switch (_typeToRegister(reg, reg1bytes, reg4bytes))
     {
     case REGISTER_1_BYTE:
         _JNZ1(reg1bytes, instruction);
@@ -236,7 +236,7 @@ void _JNZ4(uint32_t* reg, uint32_t instruction)
 
 ///////////////////////// FUNCIONES AUXILIARES GENERALES /////////////////////////
 
-registerTypeByBytes _TypeToRegister(registerType type, uint8_t* outRegister1byte, uint32_t* outRegister4bytes)
+registerTypeByBytes _typeToRegister(registerType type, uint8_t* outRegister1byte, uint32_t* outRegister4bytes)
 {
     registerTypeByBytes typeByBytes;
     outRegister1byte = NULL;
@@ -305,4 +305,7 @@ registerTypeByBytes _TypeToRegister(registerType type, uint8_t* outRegister1byte
 
 
 
-
+uint32_t getPC()
+{
+    return PC;
+}

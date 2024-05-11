@@ -27,6 +27,11 @@ typedef enum
 	CPU_MODULE,
 	MEMORY_MODULE,
 	IO_MODULE,
+	CPU_GIVE_ME_NEXT_INSTRUCTION,
+	MEMORY_NEXT_INSTRUCTION,
+
+
+	// TODOS LOS SIGUIENTES VALORES SON UNICAMENTE PARA TESTEOS
 	PACKAGE_FROM_KERNEL,
 	PACKAGE_FROM_CPU,
 	PACKAGE_FROM_MEMORY,
@@ -62,5 +67,19 @@ typedef struct
 	registers_t *registersCpu;
 	pcbState_t state;
 } pcb_t;
+
+
+// Estructura que se le manda a la memoria para decirle que debe enviarle a la CPU la proxima instruccion.
+typedef struct
+{
+	uint32_t PC; // Program Counter
+} cpuGiveMeNextInstruction;
+
+
+// Estructura que se le manda a la CPU con el string de la instruccion que debe ejecutar
+typedef struct
+{
+	char* instructionString;
+} memoryInstructionString;
 
 #endif
