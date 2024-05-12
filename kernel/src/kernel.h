@@ -9,6 +9,7 @@
 #include "console.h"
 #include "utils/utilsGeneral.h"
 #include "longTermPlanning.h"
+#include "shortTermPlanning.h"
 
 #include <pthread.h>
 #include <commons/string.h>

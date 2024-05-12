@@ -28,8 +28,7 @@ int main()
     pcbExitList = initListMutex();
 
     initLongTermPlanning();
-
-    //
+    initShortTermPlanning();
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
     waitClientsLoopParams params;
@@ -41,9 +40,9 @@ int main()
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
     //pthread_detach(waitClientsLoopThread);
 
-    pthread_t kernelConsole;
-    pthread_create(&kernelConsole, NULL, (void*)readKernelConsole, NULL);
-    pthread_join(kernelConsole,NULL);
+    pthread_t kernelConsoleThread;
+    pthread_create(&kernelConsoleThread, NULL, (void*)readKernelConsole, NULL);
+    pthread_join(kernelConsoleThread, NULL);
 
 
 
@@ -117,6 +116,7 @@ int main()
     sem_destroy(&semBlock);
     sem_destroy(&semExit);
     sem_destroy(&semMulti);
+    sem_destroy(&semAddPid);
 
     destroyListMutex(pcbNewList);
     destroyListMutex(pcbReadyList);

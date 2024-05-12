@@ -6,13 +6,14 @@ void newState()
 {
     while(1)
     {
+        sem_wait(&semMulti);
         sem_wait(&semNew);
         pcb_t* pcbToReady = list_pop(pcbNewList);
         list_push(pcbReadyList, pcbToReady);
         pcbToReady->state = PCB_READY;
+        //Log obligatorio
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_READY", pcbToReady->pid);
         sem_post(&semReady);
-        
     }
 }
 
@@ -21,7 +22,10 @@ void exitState()
 {
     while(1){
         sem_wait(&semExit);
+        pcb_t *process = list_pop(pcbExitList);
+        process->state = PCB_EXIT;
         //Pido a memoria que libere todo lo asociado al proceso
+        //destruir proceso
         sem_post(&semMulti); //Manda un aviso que libera una parte del grado de multiprogramacion
     }
 }
@@ -53,6 +57,7 @@ void addPcbToNew()
 {
     pcb_t *process = createProcess();
     list_push(pcbNewList, process); 
+    //Log obligatorio
     log_info(getLogger(), "Se crea el proceso %d en NEW", process->pid);
     sem_post(&semNew);
 }
