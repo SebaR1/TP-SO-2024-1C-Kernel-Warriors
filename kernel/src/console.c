@@ -4,18 +4,18 @@
 void readKernelConsole(){
     log_info(getLogger(), "Consola iniciada\n");
     char* read;
-    read = readline("> \n");
+    read = readline("");
 
     while(!string_is_empty(read)){
         if(!_isAnInstruction(read)){
             log_error(getLogger(), "Comando de consola no recognized");
             free(read);
-            read = readline("> ");
+            read = readline("");
             continue;
         }
 
         attendInstruction(read);
-        read = readline("> ");
+        read = readline("");
     } //Para terminar la consola se pone algo vacio
     free(read);
 }
