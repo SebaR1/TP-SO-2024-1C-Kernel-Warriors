@@ -15,6 +15,12 @@ extern sem_t semaphoreForKernelInterrupt;
 
 extern bool _finishAllServersSignal;
 
+extern int socketMemory;
+extern int socketKernelDispatch;
+extern int socketKernelInterrupt;
+
+
+// Manda el aviso a todos los servidores de que deben dejar de recibir peticiones y terminar su ejecucion cuando puedan
 void finishAllServersSignal();
 
 
@@ -28,6 +34,11 @@ void serverCPUInterruptForKernel(int *socketClient);
 
 // Espera en un loop a los clientes y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)
 void receiveClientIteration(int socketServer);
+
+
+
+
+/////////////////// FUNCIONES AUXILIARES ///////////////////
 
 
 // Funcion que se ejecuta cuando un cliente solicita realizar esta operacion.

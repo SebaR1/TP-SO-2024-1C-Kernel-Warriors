@@ -123,6 +123,16 @@ void releaseConnection(int socketClient)
 }
 
 
+void sendOperation(int socketClient, operationCode opCode)
+{
+	if(send(socketClient, &opCode, sizeof(operationCode), 0) < 0)
+	{
+		close(socketClient);
+		return ERROR;
+	}
+}
+
+
 
 /*
 void readConsoleAndSendPackage(int socketClient)

@@ -1,4 +1,4 @@
-#include "instructions.h"
+#include "execute.h"
 
 uint32_t PC = 0; // Program Counter, indica la próxima instrucción a ejecutar una vez completado un ciclo de ejecucion
 uint8_t AX = 0; // Registro Numérico de propósito general
@@ -14,6 +14,152 @@ uint32_t DI = 0; // Contiene la dirección lógica de memoria de destino a donde
 
 
 
+
+void executeInstruction(instructionType type, void* paramsGeneric)
+{
+    switch (type)
+    {
+    case INVALID_TYPE:
+        break;
+
+    case SET_TYPE:
+    {
+        SET_STRUCT* params = paramsGeneric;
+        SET(params->reg, params->value);
+        break;
+    }
+
+    case MOV_IN_TYPE:
+    {
+        MOV_IN_STRUCT* params = paramsGeneric;
+        MOV_IN(params->data, params->direction);
+        break;
+    }
+
+    case MOV_OUT_TYPE:
+    {
+        MOV_OUT_STRUCT* params = paramsGeneric;
+        MOV_OUT(params->direction, params->data);
+        break;
+    }
+
+    case SUM_TYPE:
+    {
+        SUM_STRUCT* params = paramsGeneric;
+        SUM(params->destination, params->origin);
+        break;
+    }
+
+    case SUB_TYPE:
+    {
+        SUB_STRUCT* params = paramsGeneric;
+        SUB(params->destination, params->origin);
+        break;
+    }
+
+    case JNZ_TYPE:
+    {
+        JNZ_STRUCT* params = paramsGeneric;
+        JNZ(params->reg, params->instruction);
+        break;
+    }
+
+    case RESIZE_TYPE:
+    {
+        RESIZE_STRUCT* params = paramsGeneric;
+        RESIZE(params->size);
+        break;
+    }
+
+    case COPY_STRING_TYPE:
+    {
+        COPY_STRING_STRUCT* params = paramsGeneric;
+        COPY_STRING(params->size);
+        break;
+    }
+
+    case WAIT_TYPE:
+    {
+        WAIT_STRUCT* params = paramsGeneric;
+        WAIT(params->resource);
+        break;
+    }
+
+    case SIGNAL_TYPE:
+    {
+        SIGNAL_STRUCT* params = paramsGeneric;
+        SIGNAL(params->resource);
+        break;
+    }
+
+    case IO_GEN_SLEEP_TYPE:
+    {
+        IO_GEN_SLEEP_STRUCT* params = paramsGeneric;
+        IO_GEN_SLEEP(params->interface, params->workUnits);
+        break;
+    }
+
+    case IO_STDIN_READ_TYPE:
+    {
+        IO_STDIN_READ_STRUCT* params = paramsGeneric;
+        IO_STDIN_READ(params->resource, params->direction, params->size);
+        break;
+    }
+
+    case IO_STDOUT_WRITE_TYPE:
+    {
+        IO_STDOUT_WRITE_STRUCT* params = paramsGeneric;
+        IO_STDOUT_WRITE(params->resource, params->direction, params->size);
+        break;
+    }
+
+    case IO_FS_CREATE_TYPE:
+    {
+        IO_FS_CREATE_STRUCT* params = paramsGeneric;
+        IO_FS_CREATE(params->resource, params->fileName);
+        break;
+    }
+
+    case IO_FS_DELETE_TYPE:
+    {
+        IO_FS_DELETE_STRUCT* params = paramsGeneric;
+        IO_FS_DELETE(params->resource, params->fileName);
+        break;
+    }
+
+    case IO_FS_TRUNCATE_TYPE:
+    {
+        IO_FS_TRUNCATE_STRUCT* params = paramsGeneric;
+        IO_FS_TRUNCATE(params->resource, params->fileName, params->size);
+        break;
+    }
+
+    case IO_FS_WRITE_TYPE:
+    {
+        IO_FS_WRITE_STRUCT* params = paramsGeneric;
+        IO_FS_WRITE(params->resource, params->fileName, params->direction, params->size, params->pointer);
+        break;
+    }
+
+    case IO_FS_READ_TYPE:
+    {
+        IO_FS_READ_STRUCT* params = paramsGeneric;
+        IO_FS_READ(params->resource, params->fileName, params->direction, params->size, params->pointer);
+        break;
+    }
+
+    case EXIT_TYPE:
+    {
+        EXIT();
+        break;
+    }
+
+    default:
+        break;
+
+    }
+
+}
 
 
 
@@ -49,6 +195,25 @@ void _SET4(uint32_t* reg, uint32_t value)
     *reg = value;
 }
 
+
+
+///////////////////////// INSTRUCCION MOV_IN /////////////////////////
+
+
+void MOV_IN(registerType data, registerType direction)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION MOV_OUT /////////////////////////
+
+
+void MOV_OUT(registerType direction, registerType data)
+{
+
+}
 
 
 
@@ -232,6 +397,140 @@ void _JNZ4(uint32_t* reg, uint32_t instruction)
 
 
 
+///////////////////////// INSTRUCCION RESIZE /////////////////////////
+
+
+void RESIZE(uint32_t size)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION COPY_STRING /////////////////////////
+
+
+void COPY_STRING(uint32_t size)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION WAIT /////////////////////////
+
+
+void WAIT(char* resource)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION SIGNAL /////////////////////////
+
+
+void SIGNAL(char* resource)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_GEN_SLEEP /////////////////////////
+
+
+void IO_GEN_SLEEP(char* interface, uint32_t workUnits)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_STDIN_READ /////////////////////////
+
+
+void IO_STDIN_READ(char* resource, registerType direction, registerType size)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_STDOUT_WRITE /////////////////////////
+
+
+void IO_STDOUT_WRITE(char* resource, registerType direction, registerType size)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_FS_CREATE /////////////////////////
+
+
+void IO_FS_CREATE(char* resource, char* fileName)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_FS_DELETE /////////////////////////
+
+
+void IO_FS_DELETE(char* resource, char* fileName)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_FS_TRUNCATE /////////////////////////
+
+
+void IO_FS_TRUNCATE(char* resource, char* fileName, registerType size)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_FS_WRITE /////////////////////////
+
+
+void IO_FS_WRITE(char* resource, char* fileName, registerType direction, registerType size, registerType pointer)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION IO_FS_READ /////////////////////////
+
+
+void IO_FS_READ(char* resource, char* fileName, registerType direction, registerType size, registerType pointer)
+{
+
+}
+
+
+
+///////////////////////// INSTRUCCION EXIT /////////////////////////
+
+
+void EXIT()
+{
+
+}
+
+
+
+
+
+
+
 
 
 ///////////////////////// FUNCIONES AUXILIARES GENERALES /////////////////////////
@@ -301,7 +600,6 @@ registerTypeByBytes _typeToRegister(registerType type, uint8_t* outRegister1byte
 
     return typeByBytes;
 }
-
 
 
 

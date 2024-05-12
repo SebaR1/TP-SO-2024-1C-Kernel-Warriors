@@ -75,5 +75,11 @@ void* _serializePackage(t_package* package, int bytes);
 // void readConsoleAndSendPackage(int socketClient);
 
 
+/// @brief Envia al socket socketClient el codigo de operacion opCode. Esta funcion es util si se necesita enviar solamente un codigo de operacion y ningun paquete extra
+/// @param socketClient El socket del cliente que va a enviar la informacion
+/// @param opCode El codigo de operacion que se enviará
+void sendOperation(int socketClient, operationCode opCode);
+
+
 
 #endif 

@@ -3,7 +3,7 @@
 #include "utilsCPU/logger.h"
 #include "utilsCPU/config.h"
 #include "utils/utilsGeneral.h"
-#include "fetch.h"
+#include "instructionCycle/fetch.h"
 
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
@@ -12,6 +12,13 @@ sem_t semaphoreForKernelDispatch;
 sem_t semaphoreForKernelInterrupt;
 
 bool _finishAllServersSignal = false;
+
+
+int socketMemory;
+int socketKernelDispatch;
+int socketKernelInterrupt;
+
+
 
 // Funcion auxiliar que se ejecuta en cada iteracion de una lista para loggear su valor. Usada para el primer checkpoint.
 void listIterator(char *element)
@@ -101,6 +108,8 @@ void receiveClientIteration(int socketServer)
 
 void serverCPUDispatchForKernel(int *socketClient)
 {
+    socketKernelDispatch = *socketClient;
+
     bool exitLoop = false;
     while (!exitLoop || _finishAllServersSignal)
     {
@@ -144,6 +153,8 @@ void serverCPUDispatchForKernel(int *socketClient)
 
 void serverCPUInterruptForKernel(int *socketClient)
 {
+    socketKernelInterrupt = *socketClient;
+
     bool exitLoop = false;
     while (!exitLoop || _finishAllServersSignal)
     {
@@ -187,6 +198,8 @@ void serverCPUInterruptForKernel(int *socketClient)
 
 void serverCPUForMemory(int *socketClient)
 {
+    socketMemory = *socketClient;
+
     bool exitLoop = false;
     while (!exitLoop || _finishAllServersSignal)
     {
@@ -200,10 +213,7 @@ void serverCPUForMemory(int *socketClient)
         switch (opCode)
         {
         case MEMORY_NEXT_INSTRUCTION:
-            log_info(getLogger(), "Obteniendo paquete por parte del modulo kernel en Interrput");
-            t_list *listPackage = getPackage(*socketClient);
-            log_info(getLogger(), "Paquete obtenido con exito del modulo kernel en Interrupt");
-            operationPackageFromKernel(listPackage);
+            memoryNextInstruction(socketClient);
             break;
 
         case DO_NOTHING:
@@ -235,11 +245,15 @@ void operationPackageFromKernel(t_list *package)
 
 void memoryNextInstruction(int* socketClient)
 {
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista (aun hay que liberar la memoria del string, pero eso es responsabilidad de quien lo use)
     t_list *listPackage = getPackage(*socketClient);
-    instructionString = list_get(listPackage, 0);
+
+    instructionString = malloc(sizeof(memoryInstructionString));
+    instructionString->instructionString = (char*)list_get(listPackage, 0); // Obtengo la instruccion en forma de string
+
+    sem_post(&semaphoreWaitInstruction); // Le aviso a la fase fetch del ciclo de instruccion que ya se obtuvo la instruccion en forma de string
+
     list_destroy(listPackage);
-
-
 }
 
 void finishAllServersSignal()

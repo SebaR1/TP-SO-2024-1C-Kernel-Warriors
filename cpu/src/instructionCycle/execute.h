@@ -17,6 +17,9 @@ typedef enum
 
 
 
+void executeInstruction(instructionType type, void* paramsGeneric);
+
+
 
 ////////////////// FUNCIONES QUE REPRESENTAN LAS INSTRUCCIONES //////////////////
 
@@ -159,6 +162,7 @@ void _JNZ4(uint32_t* reg, uint32_t instruction);
 // Si el registro de type es de 8 bytes (Como EAX por ejemplo), almacena en outREgister4bytes la direccion de memoria del registro pedido en type.
 // Retorna REGISTER_1_BYTE si el registro es de 1 byte, o REGISTER_4_BYTES si el registro es de 4 bytes
 registerTypeByBytes _typeToRegister(registerType type, uint8_t* outRegister1byte, uint32_t* outRegister4bytes);
+
 
 
 

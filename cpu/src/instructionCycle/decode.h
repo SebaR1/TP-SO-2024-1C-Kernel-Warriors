@@ -70,4 +70,5 @@ instructionType EXIT_GET_INFO(char** instructionSplitted, void* outParams);
 
 
 
+
 #endif
