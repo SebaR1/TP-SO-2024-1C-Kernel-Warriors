@@ -1,5 +1,5 @@
-#include "logger.h"
-#include "config.h"
+#include "utilsCPU/logger.h"
+#include "utilsCPU/config.h"
 #include "serverCPU.h"
 #include "utils/server/utils.h"
 #include "utils/client/utils.h"

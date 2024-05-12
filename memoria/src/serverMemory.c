@@ -1,7 +1,7 @@
 #include "serverMemory.h"
 #include "utils/server/utils.h"
-#include "logger.h"
-#include "config.h"
+#include "utilsMemory/logger.h"
+#include "utilsMemory/config.h"
 #include "utils/utilsGeneral.h"
 #include <pthread.h>
 

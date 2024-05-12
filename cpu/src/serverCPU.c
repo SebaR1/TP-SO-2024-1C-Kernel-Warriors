@@ -1,7 +1,7 @@
 #include "serverCPU.h"
 #include "utils/server/utils.h"
-#include "logger.h"
-#include "config.h"
+#include "utilsCPU/logger.h"
+#include "utilsCPU/config.h"
 #include "utils/utilsGeneral.h"
 #include "fetch.h"
 

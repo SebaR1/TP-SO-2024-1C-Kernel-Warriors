@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "logger.h"
-#include "config.h"
+#include "utilsMemory/logger.h"
+#include "utilsMemory/config.h"
 #include "serverMemory.h"
 #include "utils/server/utils.h"
 #include <pthread.h>
