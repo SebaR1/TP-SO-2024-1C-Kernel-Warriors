@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <utils/client/utils.h>
-#include "logger.h"
-#include "config.h"
+#include "utilsIO/logger.h"
+#include "utilsIO/config.h"
 
 int main(int argc, char* argv[])
 {
