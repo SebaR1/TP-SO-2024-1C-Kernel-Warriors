@@ -38,6 +38,7 @@ bool _isAnInstruction(char* instruction){
     }
     //Falta agregar los que quedan
     
+    string_array_destroy(consoleCommand);
     return false;
 }
 

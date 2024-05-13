@@ -1,5 +1,6 @@
 #include "decode.h"
 #include <commons/string.h>
+#include <string.h>
 
 
 
@@ -11,25 +12,25 @@ instructionType decodeInstruction(char* instruction, void* outParams)
     char** instructionSplitted = string_split(instruction, INSTRUCTION_SEPARATOR);
 
     // Me fijo qué tipo de instruccion es en base a la primera palabra de la instruccion
-    if (instructionSplitted[0] == SET_STRING) type = SET_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = MOV_IN_STRING) type = MOV_IN_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = MOV_OUT_STRING) type = MOV_OUT_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = SUM_STRING) type = SUM_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = SUB_STRING) type = SUB_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = JNZ_STRING) type = JNZ_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = RESIZE_STRING) type = RESIZE_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = COPY_STRING_STRING) type = COPY_STRING_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = WAIT_STRING) type = WAIT_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = SIGNAL_STRING) type = SIGNAL_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_GEN_SLEEP_STRING) type = IO_GEN_SLEEP_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_STDIN_READ_STRING) type = IO_STDIN_READ_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_STDOUT_WRITE_STRING) type = IO_STDOUT_WRITE_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_FS_CREATE_STRING) type = IO_FS_CREATE_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_FS_DELETE_STRING) type = IO_FS_DELETE_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_FS_TRUNCATE_STRING) type = IO_FS_TRUNCATE_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_FS_WRITE_STRING) type = IO_FS_WRITE_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = IO_FS_READ_STRING) type = IO_FS_READ_GET_INFO(instructionSplitted, outParams);
-    else if (instructionSplitted[0] = EXIT_STRING) type = EXIT_GET_INFO(instructionSplitted, outParams);
+    if (strcmp(instructionSplitted[0], SET_STRING) == 0) type = SET_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], MOV_IN_STRING) == 0) type = MOV_IN_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], MOV_OUT_STRING) == 0) type = MOV_OUT_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], SUM_STRING) == 0) type = SUM_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], SUB_STRING) == 0) type = SUB_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], JNZ_STRING) == 0) type = JNZ_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], RESIZE_STRING) == 0) type = RESIZE_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], COPY_STRING_STRING) == 0) type = COPY_STRING_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], WAIT_STRING) == 0) type = WAIT_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], SIGNAL_STRING) == 0) type = SIGNAL_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_GEN_SLEEP_STRING) == 0) type = IO_GEN_SLEEP_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_STDIN_READ_STRING) == 0) type = IO_STDIN_READ_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_STDOUT_WRITE_STRING) == 0) type = IO_STDOUT_WRITE_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_FS_CREATE_STRING) == 0) type = IO_FS_CREATE_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_FS_DELETE_STRING) == 0) type = IO_FS_DELETE_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_FS_TRUNCATE_STRING) == 0) type = IO_FS_TRUNCATE_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_FS_WRITE_STRING) == 0) type = IO_FS_WRITE_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], IO_FS_READ_STRING) == 0) type = IO_FS_READ_GET_INFO(instructionSplitted, outParams);
+    else if (strcmp(instructionSplitted[0], EXIT_STRING) == 0) type = EXIT_GET_INFO(instructionSplitted, outParams);
 
 
 

@@ -40,24 +40,17 @@ int main()
     pthread_create(&interruptWaitClientsLoopThread, NULL, (void*)waitClientsLoop, &paramsInterrupt);
     pthread_join(interruptWaitClientsLoopThread, NULL);
 
-/*
+
     t_package* initialPackage = createPackage(CPU_MODULE);
-
-    t_package* testPackageToMemory = createPackage(PACKAGE_FROM_CPU);
-    char* msg1 = "Holaaaa, soy un mensaje de prueba desde CPU.";
-    addToPackage(testPackageToMemory, msg1, string_length(msg1) + 1); // (+1) para tener en cuenta el caracter nulo
-
     log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
     int socketClientMemory = createConection(getLogger(), getCPUConfig()->IP_MEMORIA, getCPUConfig()->PUERTO_MEMORIA);
     sendPackage(initialPackage, socketClientMemory);
-    sendPackage(testPackageToMemory, socketClientMemory);
     releaseConnection(socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito.");
 
 
     destroyPackage(initialPackage);
-    destroyPackage(testPackageToMemory);
-*/
+
 
     // Espero para ver si me llegan mensajes.
     // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego

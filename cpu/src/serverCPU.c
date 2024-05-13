@@ -7,6 +7,7 @@
 
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
+int numberOfKernelClientsForInterrupt = 0;
 
 sem_t semaphoreForKernelDispatch;
 sem_t semaphoreForKernelInterrupt;
@@ -232,10 +233,6 @@ void serverCPUForMemory(int *socketClient)
     }
 
     free(socketClient);
-
-    sem_wait(&semaphoreForKernelInterrupt);
-    numberOfKernelClientsForInterrupt--;
-    sem_post(&semaphoreForKernelInterrupt);
 }
 
 void operationPackageFromKernel(t_list *package)
