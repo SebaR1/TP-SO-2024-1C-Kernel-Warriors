@@ -10,10 +10,9 @@ extern memoryInstructionString* instructionString;
 
 /// @brief Pertenece a la fase fetch del ciclo de la CPU, Le pide a la memoria la siguiente instruccion, y espera a que llegue. La instruccion será almacenada en la variable global instructionString.
 /// @param PC El Program Counter necesario para decirle a la memoria cuál instruccion debe enviarme
-/// @param socketClient El socket del cliente que va a enviar la informacion.
 /// @return Retorna la estructura que contiene lo que envió la memoria sobre la instruccion que debe ejecutar la CPU (es decir, la instruccion en forma de string).
 /// @warning Es necesario que quien use esta funcion libere la memoria de la estructura que retorna la funcion, asi como tambien la de todos sus campos que usen memoria dinamica
-memoryInstructionString* getNextInstruction(uint32_t PC, int socketClient);
+memoryInstructionString* getNextInstruction(uint32_t PC);
 
 
 

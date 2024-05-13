@@ -45,11 +45,8 @@ void receiveClientIteration(int socketServer)
         }
 
         log_info(getLogger(), "Se conecto un modulo IO");
-        pthread_t threadIO;
-        int *socketClientIO = (int *)malloc(sizeof(int));
-        *socketClientIO = socketClient;
-        pthread_create(&threadIO, NULL, (void*)serverKernelForIO, socketClientIO);
-        pthread_detach(threadIO);
+
+        initServerForASocket(socketClient, serverKernelForIO);
 
         sem_wait(&semaphoreForIO);
         numberOfIOClients++;

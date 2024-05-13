@@ -2,7 +2,7 @@
 #define CPU_SERVER_H_
 
 #include "pthread.h"
-#include "semaphore.h"
+#include <semaphore.h>
 #include <stdbool.h>
 #include <commons/collections/list.h>
 
@@ -30,6 +30,10 @@ void serverCPUDispatchForKernel(int *socketClient);
 
 // Hilo que funciona como servidor para recibir paquetes de los clientes y realizar determinadas operaciones
 void serverCPUInterruptForKernel(int *socketClient);
+
+
+// Hilo que funciona como servidor para recibir paquetes de los clientes y realizar determinadas operaciones
+void serverCPUForMemory(int *socketClient);
 
 
 // Espera en un loop a los clientes y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)

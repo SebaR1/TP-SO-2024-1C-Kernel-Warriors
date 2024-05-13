@@ -141,3 +141,14 @@ void waitClientsLoop(waitClientsLoopParams* params)
         (params->eachIterationFunc)(socketServer);
     }
 }
+
+
+
+void initServerForASocket(int socketClient, void(*serverFunction)(int*))
+{
+	pthread_t thread;
+    int *socketClientParam = (int *)malloc(sizeof(int));
+    *socketClientParam = socketClient;
+    pthread_create(&thread, NULL, (void*)serverFunction, socketClientParam);
+    pthread_detach(thread);
+}

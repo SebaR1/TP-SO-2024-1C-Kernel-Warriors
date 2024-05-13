@@ -60,4 +60,15 @@ void waitClientsLoop(waitClientsLoopParams* params);
 
 
 
+/// @brief Inicia un servidor en un nuevo thread que escuchará solamente al socket especificado
+/// @param socketClient El socket del cliente al que escuchará el servidor
+/// @param serverFunction La funcion que se ejecutará en el thread (es decir, el servidor). El servidor debe retornar void y recibir un puntero a int, que será el socket del cliente al que escuchará
+void initServerForASocket(int socketClient, void(*serverFunction)(int*));
+
+
+
+void initMainServer();
+
+
+
 #endif

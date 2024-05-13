@@ -57,11 +57,8 @@ void receiveClientIteration(int socketServer)
         }
 
         log_info(getLogger(), "Se conecto un modulo Kernel");
-        pthread_t threadKernel;
-        int *socketClientKernel = (int *)malloc(sizeof(int));
-        *socketClientKernel = socketClient;
-        pthread_create(&threadKernel, NULL, (void*)serverMemoryForKernel, socketClientKernel);
-        pthread_detach(threadKernel);
+
+        initServerForASocket(socketClient, serverMemoryForKernel);
 
         sem_wait(&semaphoreForKernel);
         numberOfKernelClients++;
@@ -78,11 +75,8 @@ void receiveClientIteration(int socketServer)
         }
 
         log_info(getLogger(), "Se conecto un modulo CPU");
-        pthread_t threadCPU;
-        int *socketClientCPU = (int *)malloc(sizeof(int));
-        *socketClientCPU = socketClient;
-        pthread_create(&threadCPU, NULL, (void*)serverMemoryForCPU, socketClientCPU);
-        pthread_detach(threadCPU);
+
+        initServerForASocket(socketClient, serverMemoryForCPU);
 
         sem_wait(&semaphoreForCPU);
         numberOfCPUClients++;
@@ -99,11 +93,8 @@ void receiveClientIteration(int socketServer)
         }
 
         log_info(getLogger(), "Se conecto un modulo IO");
-        pthread_t threadIO;
-        int *socketClientIO = (int *)malloc(sizeof(int));
-        *socketClientIO = socketClient;
-        pthread_create(&threadIO, NULL, (void*)serverMemoryForIO, socketClientIO);
-        pthread_detach(threadIO);
+
+        initServerForASocket(socketClient, serverMemoryForIO);
 
         sem_wait(&semaphoreForIO);
         numberOfIOClients++;

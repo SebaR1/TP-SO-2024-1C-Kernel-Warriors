@@ -7,7 +7,6 @@
 
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
-int numberOfKernelClientsForInterrupt = 0;
 
 sem_t semaphoreForKernelDispatch;
 sem_t semaphoreForKernelInterrupt;
@@ -60,11 +59,8 @@ void receiveClientIteration(int socketServer)
         }
 
         log_info(getLogger(), "Se conecto un modulo Kernel en el dispatch");
-        pthread_t threadDispatch;
-        int *socketClientDispatch = (int *)malloc(sizeof(int));
-        *socketClientDispatch = socketClient;
-        pthread_create(&threadDispatch, NULL, (void*)serverCPUDispatchForKernel, socketClientDispatch);
-        pthread_detach(threadDispatch);
+
+        initServerForASocket(socketClient, serverCPUDispatchForKernel);
 
         sem_wait(&semaphoreForKernelDispatch);
         numberOfKernelClientsForDispatch++;
@@ -81,11 +77,8 @@ void receiveClientIteration(int socketServer)
         }
 
         log_info(getLogger(), "Se conecto un modulo Kernel en el Interrupt");
-        pthread_t threadInterrupt;
-        int *socketClientInterrupt = (int *)malloc(sizeof(int));
-        *socketClientInterrupt = socketClient;
-        pthread_create(&threadInterrupt, NULL, (void*)serverCPUInterruptForKernel, socketClientInterrupt);
-        pthread_detach(threadInterrupt);
+
+        initServerForASocket(socketClient, serverCPUInterruptForKernel);
 
         sem_wait(&semaphoreForKernelInterrupt);
         numberOfKernelClientsForInterrupt++;

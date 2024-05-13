@@ -5,7 +5,7 @@
 #include "utils/server/utils.h"
 #include "utilsKernel/config.h"
 #include "utilsKernel/logger.h"
-#include "serverKernel.h"
+#include "connections/serverKernel.h"
 #include "console.h"
 #include "utils/utilsGeneral.h"
 #include "longTermPlanning.h"

@@ -4,7 +4,7 @@
 void runInstructionCycle()
 {
     // Fase fetch, busco la siguiente instruccion
-    memoryInstructionString* instructionString = getNextInstruction(getPC(), socketMemory);
+    memoryInstructionString* instructionString = getNextInstruction(getPC());
 
     // Fase decode, descifro qué me pide la instrucción (la cual llegó en forma de string)
     void* instructionParams;

@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include "utilsMemory/logger.h"
 #include "utilsMemory/config.h"
-#include "serverMemory.h"
+#include "connections/serverMemory.h"
 #include "utils/server/utils.h"
 #include <pthread.h>
+#include "finish.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
     sem_init(&semaphoreForKernel, 0, 1);
     sem_init(&semaphoreForCPU, 0, 1);
     sem_init(&semaphoreForIO, 0, 1);
+    sem_init(&semaphoreFinishModule, 0, 0);
 
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
@@ -29,8 +31,10 @@ int main(int argc, char *argv[])
     params.finishLoopSignal = &_finishAllServersSignal;
     pthread_t waitClientsLoopThread;
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
-    pthread_join(waitClientsLoopThread, NULL);
+    pthread_detach(waitClientsLoopThread);
 
+    // Espero a que me manden la señal de que tengo que terminar finalizar este modulo
+    sem_wait(&semaphoreFinishModule);
 
     // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion
     finishAllServersSignal();
@@ -42,6 +46,7 @@ int main(int argc, char *argv[])
     sem_destroy(&semaphoreForKernel);
     sem_destroy(&semaphoreForCPU);
     sem_destroy(&semaphoreForIO);
+    sem_destroy(&semaphoreFinishModule);
 
     return 0;
 }

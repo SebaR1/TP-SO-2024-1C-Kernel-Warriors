@@ -5,7 +5,6 @@
 #include "fetch.h"
 #include "decode.h"
 #include "execute.h"
-#include "serverCPU.h"
 
 
 /// @brief Ejecuta un ciclo de instruccion completo (fetch, decode y execute)
