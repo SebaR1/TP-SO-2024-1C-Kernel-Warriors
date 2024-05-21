@@ -65,7 +65,7 @@ typedef struct
 {
 	uint32_t pid;
 	uint32_t pc;
-	uint32_t quantum;
+	uint32_t timer;
 	registers_t *registersCpu;
 	pcbState_t state;
 } pcb_t;

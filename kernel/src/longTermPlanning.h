@@ -22,5 +22,7 @@ void addPcbToNew();
 //Inicia el planificador a largo plazo
 void initLongTermPlanning();
 
+//Destruye el proceso y libera la memoria
+void destroyProcess(pcb_t *process);
 
 #endif

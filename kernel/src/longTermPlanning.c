@@ -25,7 +25,7 @@ void exitState()
         pcb_t *process = list_pop(pcbExitList);
         process->state = PCB_EXIT;
         //Pido a memoria que libere todo lo asociado al proceso
-        //destruir proceso
+        destroyProcess(process);
         sem_post(&semMultiProgramming); //Manda un aviso que libera una parte del grado de multiprogramacion
     }
 }
@@ -60,4 +60,10 @@ void addPcbToNew()
     //Log obligatorio
     log_info(getLogger(), "Se crea el proceso %d en NEW", process->pid);
     sem_post(&semNew);
+}
+
+void destroyProcess(pcb_t *process)
+{
+    free(process->registersCpu);
+    free(process);
 }
