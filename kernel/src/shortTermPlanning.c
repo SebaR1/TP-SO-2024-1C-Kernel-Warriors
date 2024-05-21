@@ -2,6 +2,7 @@
 
 void readyState()
 {
+    
     while (1)
     {
         sem_wait(&semReady);
@@ -18,23 +19,40 @@ void readyState()
             //Ordenar pcbReadyList segun VRR 
         }
         
-        pcb_t *pcbToExec = list_pop(pcbReadyList);
-        list_push(pcbExecList, pcbToExec);
-        pcbToExec->state = PCB_EXEC;
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_READY", pcbToExec->pid);
 
+        
         sem_post(&semExec);
     }
 }
 
+void execState()
+{
+    while(1)
+    {
+        sem_wait(&semMultiProcessing);
+        sem_wait(&semExec);
+        // Espero que se desocupe la CPU
+        pcb_t *pcbToExec = list_pop(pcbReadyList);
+        list_push(pcbExecList, pcbToExec);
+        pcbToExec->state = PCB_EXEC;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
+
+        pcbToExec = list_pop(pcbExecList);
+        sendContextToCPU(pcbToExec);
+    }
+  
+    
+}
+
 void initShortTermPlanning(){
     pthread_t readyStateThread;
-    //pthread_t execStateThread;
+    pthread_t execStateThread;
     //pthread_t blockStateThread;
     pthread_create(&readyStateThread, NULL, (void*)readyState, NULL);
-    //pthread_create(&readyStateThread, NULL, (void*), NULL);
+    pthread_create(&execStateThread, NULL, (void*)execState, NULL);
     //pthread_create(&readyStateThread, NULL, (void*), NULL);
     pthread_detach(readyStateThread);
+    pthread_detach(execStateThread);
 }
 
 char* _listPids(t_list *list)

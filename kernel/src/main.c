@@ -18,7 +18,8 @@ int main()
     sem_init(&semBlock, 0, 0);
     sem_init(&semExit, 0, 0);
     sem_init(&semAddPid, 0, 1);
-    sem_init(&semMulti, 0 , getKernelConfig()->GRADO_MULTIPROGRAMACION);
+    sem_init(&semMultiProgramming, 0 , getKernelConfig()->GRADO_MULTIPROGRAMACION);
+    sem_init(&semMultiProcessing, 0 , 1);
     sem_init(&semaphoreForIO, 0, 1); // Reservo memoria para mi sepaforo y lo inicializo
 
     pcbNewList = initListMutex();
@@ -66,7 +67,12 @@ int main()
 
     
     log_info(getLogger(), "Creando conexion con la CPU Dispatch. Se enviara un mensaje a la CPU Dispatch");
+    
+
+
     int socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
+
+
     sendPackage(initialPackageToCPUDispatch, socketClientCPUDispatch);
     sendPackage(testPackageToCPUDispatch, socketClientCPUDispatch);
     releaseConnection(socketClientCPUDispatch);
@@ -115,7 +121,8 @@ int main()
     sem_destroy(&semExec);
     sem_destroy(&semBlock);
     sem_destroy(&semExit);
-    sem_destroy(&semMulti);
+    sem_destroy(&semMultiProcessing);
+    sem_destroy(&semMultiProgramming);
     sem_destroy(&semAddPid);
 
     destroyListMutex(pcbNewList);

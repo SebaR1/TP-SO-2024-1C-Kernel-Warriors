@@ -6,6 +6,7 @@
 #include "generalPlanning.h"
 #include "utilsKernel/logger.h"
 #include "utilsKernel/config.h"
+#include "connections/clientKernel.h"
 
 //Hilo para el estado de ready
 void readyState();

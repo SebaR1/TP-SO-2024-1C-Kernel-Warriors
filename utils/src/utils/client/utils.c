@@ -128,7 +128,8 @@ void sendOperation(int socketClient, operationCode opCode)
 	if(send(socketClient, &opCode, sizeof(operationCode), 0) < 0)
 	{
 		close(socketClient);
-		return ERROR;
+		exit(EXIT_FAILURE);
+		//return ERROR;
 	}
 }
 

@@ -30,6 +30,8 @@ typedef enum
 	CPU_GIVE_ME_NEXT_INSTRUCTION,
 	MEMORY_NEXT_INSTRUCTION,
 
+	// KERNEL
+	KERNEL_SEND_CONTEXT,
 
 	// TODOS LOS SIGUIENTES VALORES SON UNICAMENTE PARA TESTEOS
 	PACKAGE_FROM_KERNEL,
@@ -67,6 +69,15 @@ typedef struct
 	registers_t *registersCpu;
 	pcbState_t state;
 } pcb_t;
+
+typedef struct
+{
+	registers_t *registersCpu;
+	//instrucciones
+	uint32_t pc;
+
+} contextProcess;
+
 
 
 // Estructura que se le manda a la memoria para decirle que debe enviarle a la CPU la proxima instruccion.

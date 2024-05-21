@@ -6,7 +6,7 @@ void newState()
 {
     while(1)
     {
-        sem_wait(&semMulti);
+        sem_wait(&semMultiProgramming);
         sem_wait(&semNew);
         pcb_t* pcbToReady = list_pop(pcbNewList);
         list_push(pcbReadyList, pcbToReady);
@@ -26,7 +26,7 @@ void exitState()
         process->state = PCB_EXIT;
         //Pido a memoria que libere todo lo asociado al proceso
         //destruir proceso
-        sem_post(&semMulti); //Manda un aviso que libera una parte del grado de multiprogramacion
+        sem_post(&semMultiProgramming); //Manda un aviso que libera una parte del grado de multiprogramacion
     }
 }
 

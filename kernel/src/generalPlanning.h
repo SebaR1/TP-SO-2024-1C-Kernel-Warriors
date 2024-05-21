@@ -20,8 +20,9 @@ extern sem_t semExit;
 extern sem_t semReady;
 extern sem_t semBlock;
 extern sem_t semExec;
-extern sem_t semMulti;
 
+extern sem_t semMultiProgramming;
+extern sem_t semMultiProcessing;
 extern sem_t semAddPid;
 
 extern int pid;
