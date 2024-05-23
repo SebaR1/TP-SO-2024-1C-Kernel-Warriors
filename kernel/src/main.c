@@ -40,18 +40,35 @@ int main()
     pthread_t waitClientsLoopThread;
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
     //pthread_detach(waitClientsLoopThread);
+    
+
+
+
+    t_package* initialPackageM = createPackage(KERNEL_MODULE);
+    log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
+    socketClientMemory = createConection(getLogger(), getKernelConfig()->IP_MEMORIA, getKernelConfig()->PUERTO_MEMORIA);
+    sendPackage(initialPackageM, socketClientMemory);
+    log_info(getLogger(), "Paquete enviado con exito a memoria.");
+
+    t_package* initialPackageCD = createPackage(KERNEL_MODULE);
+    log_info(getLogger(), "Creando conexion con CpuDispatch. Se enviara un mensaje a CpuDispatch");
+    socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
+    sendPackage(initialPackageCD, socketClientCPUDispatch);
+    log_info(getLogger(), "Paquete enviado con exito dispatch.");
 
     pthread_t kernelConsoleThread;
     pthread_create(&kernelConsoleThread, NULL, (void*)readKernelConsole, NULL);
     pthread_join(kernelConsoleThread, NULL);
 
 
+///////////////////////////////////////////////////////////
 
 /*
 
     t_package* initialPackageToMemory = createPackage(KERNEL_MODULE);
     t_package* initialPackageToCPUDispatch = createPackage(KERNEL_MODULE_TO_CPU_DISPATCH);
     t_package* initialPackageToCPUInterrupt = createPackage(KERNEL_MODULE_TO_CPU_INTERRUPT);
+    int socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
 
     t_package* testPackageToMemory = createPackage(PACKAGE_FROM_KERNEL);
     char* msg1 = "Holaaaa, soy un mensaje de prueba desde el kernel.";
@@ -130,6 +147,10 @@ int main()
     destroyListMutex(pcbExecList);
     destroyListMutex(pcbBLockList);
     destroyListMutex(pcbExitList);
+
+    releaseConnection(socketClientMemory);
+    releaseConnection(socketClientCPUDispatch);
+
 
     return 0;
 }

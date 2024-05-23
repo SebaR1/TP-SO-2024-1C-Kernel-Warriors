@@ -17,3 +17,7 @@ sem_t semMultiProcessing;
 sem_t semAddPid;
 
 int pid;
+
+int socketClientMemory;
+int socketClientCPUDispatch;
+int socketClientCPUInterrupt;

@@ -63,10 +63,10 @@ void attendInstruction(char* instruction)
     char** consoleCommand = string_split(instruction, " ");
 
     if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PROCESO")){
-        addPcbToNew(); //Falta agregar un parametro que pide a memoria el proceso especifico a iniciar
+        addPcbToNew(consoleCommand[1]);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "FINALIZAR_PROCESO")){
-        //Implementacion para FINALIZAR_PROCESO
+        finalizar_proceso(atoi(consoleCommand[1]));
     }
     else if(string_equals_ignore_case(consoleCommand[0], "DETENER_PLANIFICACION")){
         //Implementacion para DETENER_PLANIFICACION

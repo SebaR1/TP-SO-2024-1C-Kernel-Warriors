@@ -32,6 +32,7 @@ typedef enum
 
 	// KERNEL
 	KERNEL_SEND_CONTEXT,
+	KERNEL_SEND_PROCESS_PATH,
 
 	// TODOS LOS SIGUIENTES VALORES SON UNICAMENTE PARA TESTEOS
 	PACKAGE_FROM_KERNEL,
@@ -61,6 +62,7 @@ typedef enum
 	PCB_EXIT
 } pcbState_t;
 
+//Estructra del pcb del proceso
 typedef struct 
 {
 	uint32_t pid;
@@ -70,6 +72,7 @@ typedef struct
 	pcbState_t state;
 } pcb_t;
 
+//Estructura del contexto de ejecucion de los procesos
 typedef struct
 {
 	registers_t *registersCpu;
@@ -78,7 +81,12 @@ typedef struct
 
 } contextProcess;
 
-
+//Estructura que se le manda a la memoria del path y el pid del proceso a ejecutar.
+typedef struct
+{
+	uint32_t pid;
+	char* path;
+} kernelPathProcess;
 
 // Estructura que se le manda a la memoria para decirle que debe enviarle a la CPU la proxima instruccion.
 typedef struct

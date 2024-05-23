@@ -27,5 +27,8 @@ extern sem_t semAddPid;
 
 extern int pid;
 
+extern int socketClientMemory;
+extern int socketClientCPUDispatch;
+extern int socketClientCPUInterrupt;
 
 #endif

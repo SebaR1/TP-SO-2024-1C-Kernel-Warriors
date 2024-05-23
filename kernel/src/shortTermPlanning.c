@@ -36,12 +36,11 @@ void execState()
         list_push(pcbExecList, pcbToExec);
         pcbToExec->state = PCB_EXEC;
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
-
         pcbToExec = list_pop(pcbExecList);
+        
         sendContextToCPU(pcbToExec);
     }
   
-    
 }
 
 void initShortTermPlanning(){
