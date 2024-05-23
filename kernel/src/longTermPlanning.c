@@ -93,19 +93,14 @@ void finalizar_proceso(uint32_t pid)
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXIT", processFound->pid);
         list_push(pcbExitList, processFound);
         sem_post(&semExit);
-    } 
-
-    pcb_t* processFound2 = (pcb_t *)list_find(pcbNewList->list, compare_pid);
-
-    if (processFound2 != NULL){
-        log_info(getLogger(), "LO ENCONTRE EN NEW");
-        if(list_remove_element(pcbNewList->list, processFound2)){
-        log_info(getLogger(), "SE BORROOO EN NEW");
+    } else if ((processFound = (pcb_t *)list_find(pcbNewList->list, compare_pid)) != NULL){
+        log_info(getLogger(), "LO ENCONTRE ");
+        if(list_remove_element(pcbNewList->list, processFound)){
+        log_info(getLogger(), "SE BORROOO");
         }
-        processFound2->state = PCB_EXIT;
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_EXIT", processFound2->pid);
-        list_push(pcbExitList, processFound2);
-        log_info(getLogger(), "LLEGA A PUSHEAR");
+        processFound->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_EXIT", processFound->pid);
+        list_push(pcbExitList, processFound);
         sem_post(&semExit);
     }
 	
