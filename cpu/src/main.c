@@ -27,7 +27,7 @@ int main()
     waitClientsLoopParams paramsDispatch;
     paramsDispatch.logger = getLogger();
     paramsDispatch.portToListen = getCPUConfig()->PUERTO_ESCUCHA_DISPATCH;
-    paramsDispatch.eachIterationFunc = receiveClientIteration;
+    paramsDispatch.eachIterationFunc = receiveClientIterationDispatch;
     paramsDispatch.finishLoopSignal = &_finishAllServersSignal;
     pthread_t dispatchWaitClientsLoopThread;
     pthread_create(&dispatchWaitClientsLoopThread, NULL, (void*)waitClientsLoop, &paramsDispatch);
@@ -36,7 +36,7 @@ int main()
     waitClientsLoopParams paramsInterrupt;
     paramsInterrupt.logger = getLogger();
     paramsInterrupt.portToListen = getCPUConfig()->PUERTO_ESCUCHA_INTERRUPT;
-    paramsInterrupt.eachIterationFunc = receiveClientIteration;
+    paramsInterrupt.eachIterationFunc = receiveClientIterationInterrupt;
     paramsInterrupt.finishLoopSignal = &_finishAllServersSignal;
     pthread_t interruptWaitClientsLoopThread;
     pthread_create(&interruptWaitClientsLoopThread, NULL, (void*)waitClientsLoop, &paramsInterrupt);

@@ -26,7 +26,7 @@ void listIterator(char *element)
     log_info(getLogger(), "%s", element);
 }
 
-void receiveClientIteration(int socketServer)
+void receiveClientIterationDispatch(int socketServer)
 {
     if (_finishAllServersSignal)
     {
@@ -68,6 +68,44 @@ void receiveClientIteration(int socketServer)
 
         break;
 
+    case DO_NOTHING:
+        break;
+
+
+    case ERROR:
+        log_error(getLogger(), ERROR_CASE_MESSAGE);
+        break;
+
+    default:
+        log_error(getLogger(), DEFAULT_CASE_MESSAGE);
+        exit(EXIT_FAILURE);
+    }
+}
+
+void receiveClientIterationInterrupt(int socketServer)
+{
+    if (_finishAllServersSignal)
+    {
+        return;
+    }
+
+    // Esperar la conexión de un cliente
+    int socketClient = waitClient(getLogger(), socketServer);
+    if (socketClient == -1)
+    {
+        log_error(getLogger(), "Error al esperar cliente.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Recibir el codigo de operacion para saber de que tipo es el cliente que se quiere conectar
+    operationCode opCode = getOperation(socketClient);
+    if (_finishAllServersSignal)
+    {
+        return;
+    }
+
+    switch (opCode)
+    {
     case KERNEL_MODULE_TO_CPU_INTERRUPT:
 
         if (numberOfKernelClientsForInterrupt >= MAX_KERNEL_CLIENTS_FOR_INTERRUPT)

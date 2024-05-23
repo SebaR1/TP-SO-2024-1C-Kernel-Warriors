@@ -36,8 +36,11 @@ void serverCPUInterruptForKernel(int *socketClient);
 void serverCPUForMemory(int *socketClient);
 
 
-// Espera en un loop a los clientes y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)
-void receiveClientIteration(int socketServer);
+// Espera en un loop a los clientes para Dispatch y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)
+void receiveClientIterationDispatch(int socketServer);
+
+// Espera en un loop a los clientes para Interrupt y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)
+void receiveClientIterationInterrupt(int socketServer);
 
 
 
