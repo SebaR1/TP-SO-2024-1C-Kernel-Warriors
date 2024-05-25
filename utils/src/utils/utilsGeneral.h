@@ -44,11 +44,11 @@ typedef enum
 	PACKAGE_FROM_IO,
 } operationCode;
 
-typedef struct 
-{
-	t_list *list;
-	pthread_mutex_t mutex;
-} listMutex_t;
+// typedef struct 
+// {
+// 	t_list *list;
+// 	pthread_mutex_t mutex;
+// } listMutex_t;
 
 typedef struct
 {
@@ -94,6 +94,7 @@ typedef struct
 // Estructura que se le manda a la memoria para decirle que debe enviarle a la CPU la proxima instruccion.
 typedef struct
 {
+	int PID;
 	uint32_t PC; // Program Counter
 } cpuGiveMeNextInstruction;
 
@@ -101,7 +102,7 @@ typedef struct
 // Estructura que se le manda a la CPU con el string de la instruccion que debe ejecutar
 typedef struct
 {
-	char* instructionString;
-} memoryInstructionString;
+	char* string;
+} instructionString;
 
 #endif

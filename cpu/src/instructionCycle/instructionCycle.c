@@ -4,11 +4,11 @@
 void runInstructionCycle()
 {
     // Fase fetch, busco la siguiente instruccion
-    memoryInstructionString* instructionString = getNextInstruction(getPC());
+    instructionString* newInstructionString = getNextInstruction(getCurrentPID(), getPC());
 
     // Fase decode, descifro qué me pide la instrucción (la cual llegó en forma de string)
     void* instructionParams;
-    instructionType type = decodeInstruction(instructionString->instructionString, instructionParams);
+    instructionType type = decodeInstruction(newInstructionString->string, instructionParams);
 
     // Ejecuto la instruccion
     executeInstruction(type, instructionParams);
@@ -16,6 +16,6 @@ void runInstructionCycle()
 
     // Libero la memoria que usé
     free(instructionParams);
-    free(instructionString->instructionString);
-    free(instructionString);
+    free(newInstructionString->string);
+    free(newInstructionString);
 }

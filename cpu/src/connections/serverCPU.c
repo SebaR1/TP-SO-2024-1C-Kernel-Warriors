@@ -276,8 +276,8 @@ void memoryNextInstruction(int* socketClient)
     // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista (aun hay que liberar la memoria del string, pero eso es responsabilidad de quien lo use)
     t_list *listPackage = getPackage(*socketClient);
 
-    instructionString = malloc(sizeof(memoryInstructionString));
-    instructionString->instructionString = (char*)list_get(listPackage, 0); // Obtengo la instruccion en forma de string
+    currentInstructionString = malloc(sizeof(instructionString));
+    currentInstructionString->string = (char*)list_get(listPackage, 0); // Obtengo la instruccion en forma de string
 
     sem_post(&semaphoreWaitInstruction); // Le aviso a la fase fetch del ciclo de instruccion que ya se obtuvo la instruccion en forma de string
 

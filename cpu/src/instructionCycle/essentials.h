@@ -208,12 +208,33 @@ typedef struct
 
 
 
+
+
+////////////////////// VARIABLES GLOBALES GENERALES //////////////////////
+
+
+extern int PID;
+
+
+
+
+
 ////////////////////// FUNCIONES UTILES GENERALES //////////////////////
 
 
 /// @brief Retorna el valor del Program Counter, el cual indica la proxima instruccion a ejecutar una vez completado un ciclo de ejecucion
 /// @return Retorna el valor del Program Counter
 uint32_t getPC();
+
+
+/// @brief Settea al PID del proceso actual el valor especificado
+/// @param PID El nuevo valor
+void setCurrentPID(int value);
+
+
+/// @brief Obtiene el valor de PID actual
+/// @return El PID
+int getCurrentPID();
 
 
 

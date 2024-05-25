@@ -1,4 +1,12 @@
-#include "mutexUtils.h"
+#include "listMutex.h"
+
+
+void* list_find_mutex(listMutex_t* list, bool(*closure)(void*))
+{
+    pthread_mutex_lock(&(list->mutex));
+    void* info = list_find(list->list, closure);
+	pthread_mutex_unlock(&(list->mutex));
+}
 
 void list_push(listMutex_t *list, void *info)
 {
@@ -15,7 +23,8 @@ void* list_pop(listMutex_t *list)
 	return info;
 }
 
-listMutex_t* initListMutex(){
+listMutex_t* initListMutex()
+{
     listMutex_t *list;
     list = malloc(sizeof(listMutex_t));
     list->list = list_create();
@@ -23,8 +32,11 @@ listMutex_t* initListMutex(){
     return list;
 }
 
-void destroyListMutex(listMutex_t* list){
+void destroyListMutex(listMutex_t* list)
+{
+   	pthread_mutex_lock(&(list->mutex)); 
     list_destroy(list->list);
+    pthread_mutex_unlock(&(list->mutex));
     pthread_mutex_destroy(&(list->mutex));
     free(list);
 }

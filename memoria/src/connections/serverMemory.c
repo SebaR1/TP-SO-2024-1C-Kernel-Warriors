@@ -3,6 +3,8 @@
 #include "utilsMemory/logger.h"
 #include "utilsMemory/config.h"
 #include "utils/utilsGeneral.h"
+#include "clientMemory.h"
+#include "pseudocodeManagment/codeLoader.h"
 #include <pthread.h>
 
 
@@ -138,6 +140,11 @@ void serverMemoryForKernel(int* socketClient)
             operationPackageFromKernel(listPackage);
             break;
 
+
+        case KERNEL_SEND_PROCESS_PATH:
+            receiveNewProcessFromKernel(socketClient);
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -180,6 +187,10 @@ void serverMemoryForCPU(int* socketClient)
             t_list *listPackage = getPackage(*socketClient);
             log_info(getLogger(), "Paquete obtenido con exito del modulo CPU");
             operationPackageFromCPU(listPackage);
+            break;
+
+        case CPU_GIVE_ME_NEXT_INSTRUCTION:
+            cpuWantsNextInstruction(socketClient);
             break;
 
         case DO_NOTHING:
@@ -263,6 +274,42 @@ void operationPackageFromIO(t_list* package)
 {
     list_iterate(package, (void*)listIterator);
 }
+
+
+void cpuWantsNextInstruction(int* socketClient)
+{
+    // Recibo el mensaje por parte de la CPU, lo almaceno en el lugar correspondiente y destruyo la lista con sus elementos
+    t_list *listPackage = getPackage(*socketClient);
+
+
+    cpuGiveMeNextInstruction nextInstructionRequest;
+    nextInstructionRequest.PID = *((int*)list_get(listPackage, 0)); // Obtengo el PID
+    nextInstructionRequest.PC = *((int*)list_get(listPackage, 1)); // Obtengo el PC
+
+    sendInstructionToCpu(socketClient, &nextInstructionRequest);
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
+void receiveNewProcessFromKernel(int* socketClient)
+{
+    // Recibo el mensaje por parte del Kernel, lo almaceno en el lugar correspondiente y destruyo la lista con sus elementos.
+    t_list *listPackage = getPackage(*socketClient);
+
+    kernelPathProcess* processPath = malloc(sizeof(kernelPathProcess)); // Es responsabilidad del hilo que se creó y está ejecutando el liberar la memoria cuando ya no la usé.
+    int* pidPointer = (int*)list_get(listPackage, 0);
+    processPath->pid = *pidPointer;
+    processPath->path = (char*)list_get(listPackage, 1);
+
+    pthread_t loadProcessThread;
+    pthread_create(&loadProcessThread, NULL, loadProcessByPathWithParams, processPath);
+    pthread_detach(&loadProcessThread);
+
+    free(pidPointer);
+    list_destroy(listPackage);
+}
+
+
 
 
 void finishAllServersSignal()

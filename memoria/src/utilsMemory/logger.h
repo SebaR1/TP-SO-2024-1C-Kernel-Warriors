@@ -1,5 +1,5 @@
-#ifndef MEMORIA_LOGGER_H_
-#define MEMORIA_LOGGER_H_
+#ifndef MEMORY_LOGGER_H_
+#define MEMORY_LOGGER_H_
 
 
 #include <commons/log.h>

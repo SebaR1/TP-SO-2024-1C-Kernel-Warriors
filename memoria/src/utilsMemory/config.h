@@ -1,5 +1,5 @@
-#ifndef MEMORIA_CONFIG_H_
-#define MEMORIA_CONFIG_H_
+#ifndef MEMORY_CONFIG_H_
+#define MEMORY_CONFIG_H_
 
 #include <commons/collections/list.h>
 #include <commons/config.h>

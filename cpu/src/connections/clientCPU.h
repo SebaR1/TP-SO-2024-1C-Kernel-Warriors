@@ -10,8 +10,9 @@
 
 
 /// @brief Le envia mediante a la memoria el Program Counter pasado por parametro mediante sockets.
+/// @param PID El Process ID
 /// @param PC El Program Counter
-void sendPCToMemory(uint32_t PC);
+void sendPCToMemory(int PID, uint32_t PC);
 
 
 

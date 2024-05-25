@@ -52,4 +52,14 @@ void finishAllServersSignal();
 void receiveClientIteration(int socketServer);
 
 
+// Funcion que se ejecuta cuando la CPU quiere la proxima instruccion.
+void cpuWantsNextInstruction(int* socketClient);
+
+
+// Cuando el kernel me manda un nuevo path para abrir un archivo de pseudocodigo y cargar las instrucciones con su PID, esta funcion se ejecuta.
+void receiveNewProcessFromKernel(int* socketClient);
+
+
+
+
 #endif

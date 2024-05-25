@@ -3,18 +3,18 @@
 #include "connections/clientCPU.h"
 
 
-memoryInstructionString* instructionString;
+instructionString* currentInstructionString;
 
 
-memoryInstructionString* getNextInstruction(uint32_t PC)
+instructionString* getNextInstruction(int PID, uint32_t PC)
 {
 
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
-    sendPCToMemory(PC);
+    sendPCToMemory(PID, PC);
 
     // Espero a que la memoria me responda con la proxima instruccion (El servidor de la CPU para la Memoria va a hacer un signal cuando ya haya recibido la instruccion)
     sem_wait(&semaphoreWaitInstruction);
 
     
-    return instructionString;
+    return currentInstructionString;
 }
