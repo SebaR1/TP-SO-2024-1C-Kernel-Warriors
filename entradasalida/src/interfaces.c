@@ -77,5 +77,5 @@ void serverIOForKernel(int *socketClient){
 }
 
 void ioGenSleep(uint32_t workUnits){
-    sleep(workUnits * ioConfigGeneric()->TIEMPO_UNIDAD_TRABAJO);
+    sleep(workUnits * exampleInterface->config->TIEMPO_UNIDAD_TRABAJO);
 }

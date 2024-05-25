@@ -47,6 +47,6 @@ void serverIOForKernel(int *socketClient);
 
 //void handleInterfaceLoop(interfaceParams params);
 
-void doOperation(char *name, char *operation);
+void ioGenSleep(uint32_t workUnits);
 
 #endif
