@@ -27,11 +27,19 @@ void initLongTermPlanning();
 //Destruye el proceso y libera la memoria
 void destroyProcess(pcb_t *process);
 
+//Compara el pid para encontrar el que proceso que busca.
 bool compare_pid(void *data);
 
-void finalizar_proceso(uint32_t pid);
+//Finaliza el proceso dependiendo en donde se encuentre.
+void endProcess(uint32_t pid);
 
+//Encuentra el pcb y lo segun el pid y lo retorna.
+pcb_t* foundStatePcb(uint32_t pid);
 
+// Define el algoritmo a utilizar en el corto plazo dado por el config
+void defineAlgorithm();
+
+//Pid a encontrar, necesario por la funcion dada por las commons.
 extern int pid_to_find;
 
 #endif

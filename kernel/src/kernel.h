@@ -10,6 +10,7 @@
 #include "utils/utilsGeneral.h"
 #include "longTermPlanning.h"
 #include "shortTermPlanning.h"
+#include "generalPlanning.h"
 
 #include <pthread.h>
 #include <commons/string.h>
@@ -17,6 +18,7 @@
 #include <readline/readline.h>
 #include <commons/string.h>
 #include <stdlib.h>
+#include <commons/temporal.h>
 
 
 

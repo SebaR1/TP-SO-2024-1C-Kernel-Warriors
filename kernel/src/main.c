@@ -22,10 +22,12 @@ int main()
     sem_init(&semMultiProcessing, 0 , 1);
     sem_init(&semaphoreForIO, 0, 1); // Reservo memoria para mi sepaforo y lo inicializo
 
+    sem_init(&semQuantum, 0, 0);
+
     pcbNewList = initListMutex();
     pcbReadyList = initListMutex();
     pcbExecList = initListMutex();
-    pcbBLockList = initListMutex();
+    pcbBlockList = initListMutex();
     pcbExitList = initListMutex();
 
     initLongTermPlanning();
@@ -145,7 +147,7 @@ int main()
     destroyListMutex(pcbNewList);
     destroyListMutex(pcbReadyList);
     destroyListMutex(pcbExecList);
-    destroyListMutex(pcbBLockList);
+    destroyListMutex(pcbBlockList);
     destroyListMutex(pcbExitList);
 
     releaseConnection(socketClientMemory);

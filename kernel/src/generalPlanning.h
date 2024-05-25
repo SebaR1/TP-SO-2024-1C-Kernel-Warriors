@@ -7,12 +7,13 @@
 #include <semaphore.h>
 #include <stdlib.h>
 #include "utils/utilsGeneral.h"
-
+#include <commons/temporal.h>
+#include "kernel.h"
 
 extern listMutex_t *pcbNewList;
 extern listMutex_t *pcbReadyList;
 extern listMutex_t *pcbExecList;
-extern listMutex_t *pcbBLockList;
+extern listMutex_t *pcbBlockList;
 extern listMutex_t *pcbExitList;
 
 extern sem_t semNew;
@@ -25,7 +26,11 @@ extern sem_t semMultiProgramming;
 extern sem_t semMultiProcessing;
 extern sem_t semAddPid;
 
+extern sem_t semQuantum;
+
 extern int pid;
+
+extern t_algorithm algorithm;
 
 extern int socketClientMemory;
 extern int socketClientCPUDispatch;

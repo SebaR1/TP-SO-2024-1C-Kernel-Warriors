@@ -13,17 +13,32 @@ void readyState()
 
         //Si el algoritmo es FIFO no tiene que hacer nada
         //Ya que es el algoritmo por defecto
-        if(string_equals_ignore_case("RR", getKernelConfig()->ALGORITMO_PLANIFICACION)){
-            //Ordenar pcbReadyList segun RR
-        }   else if(string_equals_ignore_case("VRR", getKernelConfig()->ALGORITMO_PLANIFICACION)){
-            //Ordenar pcbReadyList segun VRR 
-        }
         
+        switch (algorithm)
+        {
+        case FIFO:
+            //No hace nada porque es el caso default
+            break;
+        
+        case RR:
+            pthread_t QuantumInterruptThread;
+            pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterrupt, NULL);
+            pthread_detach(QuantumInterruptThread);
+            break;
+
+        case VRR:
+            break;
+
+        default:
+            break;
+        }
+
 
         
         sem_post(&semExec);
     }
 }
+
 
 void execState()
 {
@@ -34,16 +49,23 @@ void execState()
         // Espero que se desocupe la CPU
         pcb_t *pcbToExec = list_pop(pcbReadyList);
         list_push(pcbExecList, pcbToExec);
+        sem_post(&semMultiProgramming);
         pcbToExec->state = PCB_EXEC;
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
-        pcbToExec = list_pop(pcbExecList);
-        
+        if(algorithm == RR){
+            sendContextToCPU(pcbToExec);
+            sem_post(&semQuantum);
+            //recieveResponseOfCPU();
+        } else { // Si es FIFO
         sendContextToCPU(pcbToExec);
+        //recieveResponseOfCPU();
+        }
     }
   
 }
 
-void initShortTermPlanning(){
+void initShortTermPlanning()
+{
     pthread_t readyStateThread;
     pthread_t execStateThread;
     //pthread_t blockStateThread;
@@ -71,4 +93,22 @@ char* _listPids(t_list *list)
     string_append(&pids, " ]");
 
     return pids;
+}
+
+void quantumControlInterrupt()
+{
+    while(1)
+    {
+        sem_wait(&semQuantum);
+        pcb_t* pcbExec = list_get(pcbExecList->list, 0);
+        // Bloquea el hilo durante el quantum de tiempo
+        sleep(getKernelConfig()->QUANTUM/1000);
+
+        
+        // Verifica si el proceso sigue ejecutándose
+        if (pcbExec->state == PCB_EXEC || pcbExec == NULL) {
+            // Enviar interrupción para desalojar el proceso
+            sendInterruptForQuantumEnd();
+        }
+    }
 }
