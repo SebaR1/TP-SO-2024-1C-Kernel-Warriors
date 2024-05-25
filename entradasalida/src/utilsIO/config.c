@@ -16,7 +16,7 @@ ioConfig* getIOConfig()
     return _ioConfig;
 }
 
-// FUncion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
+// Funcion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
 void _getIOData()
 {
     getIOConfig()->TIPO_INTERFAZ = config_get_string_value(_configFile, "TIPO_INTERFAZ");
@@ -61,5 +61,3 @@ void freeIOConfig()
 
     log_info(getLogger(), "Memoria liberada con exito");
 }
-
-

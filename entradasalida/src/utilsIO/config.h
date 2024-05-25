@@ -19,11 +19,11 @@ typedef struct
 } ioConfig;
 
 
-
-
 // Retorna un puntero a la struct propia de la configuracion, la cual deberia contener la informacion de la configuracion del modulo en el que se encuentre. Llame a la funcion init propia de cada modulo antes de usar esta funcion.
 ioConfig* getIOConfig();
 
+// Funcion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
+void _getIOData();
 
 // Obtiene la configuracion del archivo de configuracion especificado en el parametro "path", y los settea en una variable.
 // Para obtener esa variable, llame a la funcion get propio de cada modulo. Debe llamar a esta funcion una sola vez en todo el programa, excepto que el archivo de configuracion se modifique en tiempo de ejecucion (que no deberia ocurrir).
@@ -35,6 +35,6 @@ void initIOConfig(char* path);
 // Loggea con log_info lo que va ocurriendo.
 void freeIOConfig();
 
-
+//ioConfigGeneric *getIOConfigGeneric(ioConfig *config);
 
 #endif
