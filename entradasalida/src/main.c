@@ -1,8 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <utils/client/utils.h>
-#include "utilsIO/logger.h"
-#include "utilsIO/config.h"
+#include "interfaces.h"
+
+extern genericInterface* exampleInterface;
 
 int main(int argc, char* argv[])
 {
@@ -11,6 +9,19 @@ int main(int argc, char* argv[])
 
     // Obtengo la configuracion general.
     initIOConfig("IO.config");
+
+    t_package* initialPackage = createPackage(IO_MODULE);
+    log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel.");
+    int socketClientKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
+    sendPackage(initialPackage, socketClientKernel);
+    log_info(getLogger(), "Paquete enviado con exito.");
+
+    initServerForASocket(socketClientKernel, serverIOForKernel);
+
+    exampleInterface = interfaceCreate("anInterface");
+    log_info(getLogger(), "Se creó una interfaz genérica.");
+
+    /*
 
     t_package* initialPackage = createPackage(IO_MODULE);
 
@@ -48,6 +59,9 @@ int main(int argc, char* argv[])
     destroyPackage(testPackageToKernel);
     destroyPackage(testPackageToMemory);
 
+    */
+
+    destroyPackage(initialPackage);
 
     // Liberando todos los recursos
     freeIOConfig();
