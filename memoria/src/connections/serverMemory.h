@@ -59,6 +59,9 @@ void cpuWantsNextInstruction(int* socketClient);
 // Cuando el kernel me manda un nuevo path para abrir un archivo de pseudocodigo y cargar las instrucciones con su PID, esta funcion se ejecuta.
 void receiveNewProcessFromKernel(int* socketClient);
 
+// Cuando el kernel me manda que se debe finalizar el proceso de un PID, esta funcion se ejecuta.
+void receiveEndProcessFromKernel(int* socketClient);
+
 
 
 

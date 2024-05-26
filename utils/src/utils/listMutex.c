@@ -32,6 +32,17 @@ listMutex_t* initListMutex()
     return list;
 }
 
+
+void* list_remove_by_condition_mutex(listMutex_t *list, bool(*condition)(void*))
+{
+    pthread_mutex_lock(&(list->mutex));
+	void *info = list_remove_by_condition(list->list, condition);
+	pthread_mutex_unlock(&(list->mutex));
+	return info;
+}
+
+
+
 void destroyListMutex(listMutex_t* list)
 {
    	pthread_mutex_lock(&(list->mutex)); 

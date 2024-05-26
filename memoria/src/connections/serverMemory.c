@@ -145,6 +145,10 @@ void serverMemoryForKernel(int* socketClient)
             receiveNewProcessFromKernel(socketClient);
             break;
 
+        case KERNEL_END_PROCESS:
+            receiveEndProcessFromKernel(socketClient);
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -286,6 +290,8 @@ void cpuWantsNextInstruction(int* socketClient)
     nextInstructionRequest.PID = *((int*)list_get(listPackage, 0)); // Obtengo el PID
     nextInstructionRequest.PC = *((int*)list_get(listPackage, 1)); // Obtengo el PC
 
+    // Le envio la instruccion directamente en el mismo hilo porque solo puedo enviar las instrucciones una por una,
+    // entonces no va a pasar que me pidan otra instruccion cuando nisiquiera le mandé la que me pidió anres la CPU.
     sendInstructionToCpu(socketClient, &nextInstructionRequest);
 
     list_destroy_and_destroy_elements(listPackage, free);
@@ -301,9 +307,29 @@ void receiveNewProcessFromKernel(int* socketClient)
     processPath->pid = *pidPointer;
     processPath->path = (char*)list_get(listPackage, 1);
 
-    pthread_t loadProcessThread;
-    pthread_create(&loadProcessThread, NULL, loadProcessByPathWithParams, processPath);
-    pthread_detach(&loadProcessThread);
+    // Creo un hilo que se encarga de agregar el codigo del proceso a la lista con todos los codigos de los procesos.
+    pthread_t loadCodeThread;
+    pthread_create(&loadCodeThread, NULL, loadCodeByPathWithParams, processPath);
+    pthread_detach(&loadCodeThread);
+
+    free(pidPointer);
+    list_destroy(listPackage);
+}
+
+
+void receiveEndProcessFromKernel(int* socketClient)
+{
+    // Recibo el mensaje por parte del Kernel, lo almaceno en el lugar correspondiente y destruyo la lista con sus elementos.
+    t_list *listPackage = getPackage(*socketClient);
+
+    kernelEndProcess* processEnd = malloc(sizeof(kernelEndProcess)); // Es responsabilidad del hilo que se creó y está ejecutando el liberar la memoria cuando ya no la usé.
+    int* pidPointer = (int*)list_get(listPackage, 0);
+    processEnd->pid = *pidPointer;
+
+    // Creo un hilo que se encarga de eliminar el codigo del proceso de la lista con todos los codigos de los procesos.
+    pthread_t destroyCodeThread;
+    pthread_create(&destroyCodeThread, NULL, destroyCode, processEnd);
+    pthread_detach(&destroyCodeThread);
 
     free(pidPointer);
     list_destroy(listPackage);

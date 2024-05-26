@@ -22,3 +22,15 @@ void setCurrentPseudocode(pseudocodeInfo* value)
 {
     currentPseudocode = value;
 }
+
+
+
+
+
+
+int auxPID;
+
+bool closurePIDsAreEqual(void* element)
+{
+    return ((pseudocodeInfo*)element)->PID == auxPID;
+}

@@ -28,7 +28,7 @@ void* list_find_mutex(listMutex_t* list, bool(*closure)(void*));
 void list_push(listMutex_t *list, void *info);
 
 
-/// @brief Remueve el primer elemento de la lista de una determinada posicion y lo retorna.
+/// @brief Remueve el primer elemento de la lista y lo retorna
 /// @param list La lista
 /// @return Retorna el elemento eliminado.
 void* list_pop(listMutex_t *list);
@@ -38,6 +38,14 @@ void* list_pop(listMutex_t *list);
 /// @brief Crea e inicializa una lista mutex.
 /// @return Retorna la lista mutex inicializada.
 listMutex_t* initListMutex();
+
+
+
+/// @brief Remueve el primer elemento de la lista que haga que condition devuelva true.
+/// @param self La lista.
+/// @param condition La condicion que debe cumplirse para remover el elemento.
+/// @return Retorna el campo data del elemento destruido (solo se destruye el nodo de la lista, no la informacion que contiene)
+void* list_remove_by_condition_mutex(listMutex_t *list, bool(*condition)(void*));
 
 
 

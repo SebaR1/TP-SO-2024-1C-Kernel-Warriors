@@ -34,6 +34,7 @@ typedef enum
 	// KERNEL
 	KERNEL_SEND_CONTEXT,
 	KERNEL_SEND_PROCESS_PATH,
+	KERNEL_END_PROCESS,
 	KERNEL_SEND_INTERRUPT_QUANTUM_END,
 	KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS,
 
@@ -47,11 +48,6 @@ typedef enum
 	PACKAGE_FROM_IO,
 } operationCode;
 
-// typedef struct 
-// {
-// 	t_list *list;
-// 	pthread_mutex_t mutex;
-// } listMutex_t;
 
 typedef struct
 {
@@ -101,12 +97,18 @@ typedef struct
 
 } contextProcess;
 
-//Estructura que se le manda a la memoria del path y el pid del proceso a ejecutar.
+// Estructura que se le manda a la memoria del path y el pid del proceso a ejecutar.
 typedef struct
 {
 	uint32_t pid;
 	char* path;
 } kernelPathProcess;
+
+// Estructura que se le manda a la memoria para que elimine un proceso.
+typedef struct
+{
+	uint32_t pid;
+} kernelEndProcess;
 
 // Estructura que se le manda a la memoria para decirle que debe enviarle a la CPU la proxima instruccion.
 typedef struct

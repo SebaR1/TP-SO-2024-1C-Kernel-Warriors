@@ -22,6 +22,9 @@ typedef struct
 } pseudocodeInfo;
 
 
+
+
+
 /// @brief Obtiene la informacion del pseudocodigo que estaba corriendo en la instruccion anterior
 /// @return La informacion del pseudocodigo
 /// @note Es como si fuese una cache. Lo mas probable es que la siguiente instruccion que se pida sea del mismo archivo de pseudocodigo.
@@ -35,6 +38,14 @@ pseudocodeInfo* getCurrentPseudocode();
 void setCurrentPseudocode(pseudocodeInfo* value);
 
 
+
+
+extern int auxPID;
+
+/// @brief Retorna true si el PID pasado como parametro es igual al valor del PID auxiliar.
+/// @param element El PID a comparar con el PID auxiliar.
+/// @return Retorna true si ambos PIDs son iguales.
+bool closurePIDsAreEqual(void* element);
 
 
 #endif
