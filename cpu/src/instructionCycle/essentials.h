@@ -227,6 +227,10 @@ extern int PID;
 uint32_t getPC();
 
 
+/// @brief Incrementa el Program Counter en 1 (hace PC++)
+void incrementPC();
+
+
 /// @brief Settea al PID del proceso actual el valor especificado
 /// @param PID El nuevo valor
 void setCurrentPID(int value);

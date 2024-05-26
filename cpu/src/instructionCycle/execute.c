@@ -181,8 +181,6 @@ void SET(registerType registerType, uint32_t value)
         _SET4(reg4bytes, value);
         break;
     }
-
-    PC++;
 }
 
 void _SET1(uint8_t* reg, uint32_t value)
@@ -258,8 +256,6 @@ void SUM(registerType destination, registerType origin)
 
         break;
     }
-
-    PC++;
 }
 
 void _SUM11(uint8_t* destination, uint8_t* origin)
@@ -325,8 +321,6 @@ void SUB(registerType destination, registerType origin)
 
         break;
     }
-
-    PC++;
 }
 
 void _SUB11(uint8_t* destination, uint8_t* origin)
@@ -380,8 +374,6 @@ void _JNZ1(uint8_t* reg, uint32_t instruction)
         PC = instruction;
         return;
     }
-
-    PC++;
 }
 
 void _JNZ4(uint32_t* reg, uint32_t instruction)
@@ -391,8 +383,6 @@ void _JNZ4(uint32_t* reg, uint32_t instruction)
         PC = instruction;
         return;
     }
-
-    PC++;
 }
 
 
@@ -606,4 +596,9 @@ registerTypeByBytes _typeToRegister(registerType type, uint8_t* outRegister1byte
 uint32_t getPC()
 {
     return PC;
+}
+
+void incrementPC()
+{
+    PC++;
 }
