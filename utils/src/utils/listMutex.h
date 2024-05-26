@@ -3,6 +3,7 @@
 
 #include <commons/collections/list.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 
 // Lista que solo puede ser accedida o modificada por un hilo o proceso a la vez/

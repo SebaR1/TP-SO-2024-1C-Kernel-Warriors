@@ -9,6 +9,7 @@
 #include <readline/readline.h>
 #include <stdlib.h>
 #include <netdb.h>
+#include "listMutex.h"
 
 
 #define DEFAULT_CASE_MESSAGE "Un cliente me envio una operacion no valida o desconocida."
@@ -33,6 +34,8 @@ typedef enum
 	// KERNEL
 	KERNEL_SEND_CONTEXT,
 	KERNEL_SEND_PROCESS_PATH,
+	KERNEL_SEND_INTERRUPT_QUANTUM_END,
+	KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS,
 
 	//IO
 	REQUEST_OPERATION_TO_INTERFACE,
@@ -52,10 +55,24 @@ typedef enum
 
 typedef struct
 {
-	char* AX;
-	//etc
+	uint32_t PC; // Program Counter, indica la próxima instrucción a ejecutar una vez completado un ciclo de ejecucion
+	uint8_t AX; // Registro Numérico de propósito general
+	uint8_t BX; // Registro Numérico de propósito general
+	uint8_t CX; // Registro Numérico de propósito general
+	uint8_t DX; // Registro Numérico de propósito general
+	uint32_t EAX; // Registro Numérico de propósito general
+	uint32_t EBX; // Registro Numérico de propósito general
+	uint32_t ECX; // Registro Numérico de propósito general
+	uint32_t EDX; // Registro Numérico de propósito general
+	uint32_t SI; // Contiene la dirección lógica de memoria de origen desde donde se va a copiar un string.
+	uint32_t DI; // Contiene la dirección lógica de memoria de destino a donde se va a copiar un string.
 } registers_t;
 
+typedef enum{
+	FIFO,
+	RR,
+	VRR,
+} t_algorithm;
 typedef enum
 {
 	PCB_NEW,
@@ -78,7 +95,7 @@ typedef struct
 //Estructura del contexto de ejecucion de los procesos
 typedef struct
 {
-	registers_t *registersCpu;
+	registers_t registersCpu;
 	//instrucciones
 	uint32_t pc;
 
