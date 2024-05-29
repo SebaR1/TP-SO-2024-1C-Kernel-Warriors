@@ -309,7 +309,7 @@ void receiveNewProcessFromKernel(int* socketClient)
 
     // Creo un hilo que se encarga de agregar el codigo del proceso a la lista con todos los codigos de los procesos.
     pthread_t loadCodeThread;
-    pthread_create(&loadCodeThread, NULL, loadCodeByPathWithParams, processPath);
+    pthread_create(&loadCodeThread, NULL, loadProcessByPathWithParams, processPath);
     pthread_detach(&loadCodeThread);
 
     free(pidPointer);

@@ -1,25 +1,25 @@
-#include "codeLoader.h"
+#include "processLoader.h"
 #include "utils/utilsGeneral.h"
 
 
 
-void initPseudocodeList()
+void initProcessesList()
 {
-    pseudocodeOfProcesses = initListMutex();
+    processesList = initListMutex();
 }
 
 
-void loadCodeByPath(int PID, char* pseudocodePath)
+void loadProcessByPath(int PID, char* pseudocodePath)
 {
     FILE* pseudocodeFile = fopen(pseudocodePath, "r");
 
-    if (pseudocodeFile)
+    if (pseudocodeFile == NULL)
     {
         exit(EXIT_FAILURE);
     }
 
 
-    loadCodeByFile(PID, pseudocodeFile);
+    loadProcessByFile(PID, pseudocodeFile);
 
 
     fclose(pseudocodeFile);
@@ -27,10 +27,11 @@ void loadCodeByPath(int PID, char* pseudocodePath)
 
 
 
-void loadCodeByFile(int PID, FILE* pseudocodeFile)
+void loadProcessByFile(int PID, FILE* pseudocodeFile)
 {
-    pseudocodeInfo* newElement = malloc(sizeof(pseudocodeInfo)); // No olvidarse de liberar la memoria antes de eliminar el nodo de la lista.
+    processInfo* newElement = malloc(sizeof(processInfo)); // No olvidarse de liberar la memoria antes de eliminar el nodo de la lista.
     newElement->PID = PID;
+    newElement->pageTable = NULL;
 
     // Obtener las instrucciones del archivo y ponerlas en el newElement->pseudocodeInstructions.
 
@@ -54,36 +55,38 @@ void loadCodeByFile(int PID, FILE* pseudocodeFile)
     free(buffer);
 
     // Agrego la informacion del pseudocodigo del nuevo proceso en la lista.
-    list_push(pseudocodeOfProcesses, newElement); 
+    list_push(processesList, newElement); 
 }
 
 
-void loadCodeByPathWithParams(void* params)
+void loadProcessByPathWithParams(void* params)
 {
     kernelPathProcess* processPath = (kernelPathProcess*)params;
 
-    loadCodeByPath(processPath->pid, processPath->path);
+    loadProcessByPath(processPath->pid, processPath->path);
 
     free(processPath->path);
     free(processPath);
 }
 
 
-void destroyCode(int PID)
+void destroyProcess(int PID)
 {
+    sem_wait(semAuxPID);
     auxPID = PID;
-    pseudocodeInfo* info = list_remove_by_condition_mutex(pseudocodeOfProcesses, closurePIDsAreEqual);
+    sem_post(semAuxPID);
+    processInfo* info = list_remove_by_condition_mutex(processesList, closurePIDsAreEqual);
 
     string_array_destroy(info->pseudocodeInstructions);
     free(info);
 }
 
 
-void destroyCodeByParams(void* params)
+void destroyProcessByParams(void* params)
 {
     kernelEndProcess* processEnd = params;
 
-    destroyCode(processEnd->pid);
+    destroyProcess(processEnd->pid);
 
     free(processEnd);
 }

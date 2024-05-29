@@ -6,7 +6,8 @@
 #include "utils/server/utils.h"
 #include <pthread.h>
 #include "finish.h"
-#include "pseudocodeManagment/codeLoader.h"
+#include "processManagment/processLoader.h"
+#include "paging/memoryUser.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,8 +23,13 @@ int main(int argc, char *argv[])
     sem_init(&semaphoreForCPU, 0, 1);
     sem_init(&semaphoreForIO, 0, 1);
     sem_init(&semaphoreFinishModule, 0, 0);
+    sem_init(&semAuxPID, 0, 1);
+    sem_init(semMemoryUserFrames, 0, 1);
 
-    initPseudocodeList();
+
+    initMemoryUser();
+
+    initProcessesList();
 
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
