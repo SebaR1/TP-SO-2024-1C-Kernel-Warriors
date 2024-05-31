@@ -1,5 +1,6 @@
 #include "processLoader.h"
 #include "utils/utilsGeneral.h"
+#include "paging/memoryUser.h"
 
 
 
@@ -72,12 +73,19 @@ void loadProcessByPathWithParams(void* params)
 
 void destroyProcess(int PID)
 {
-    sem_wait(semAuxPID);
+    sem_wait(&semAuxPID);
     auxPID = PID;
-    sem_post(semAuxPID);
     processInfo* info = list_remove_by_condition_mutex(processesList, closurePIDsAreEqual);
+    sem_post(&semAuxPID);
 
+    // LIbero las instrucciones guardadas
     string_array_destroy(info->pseudocodeInstructions);
+
+
+    // Libero la memoria de usuario
+    int bytesToFree = getAmountOfBytesAllocated(info->amountOfPages, info->internalFragmentation);
+    freeMemory(bytesToFree, info->pageTable, info->amountOfPages, info->internalFragmentation);
+
     free(info);
 }
 

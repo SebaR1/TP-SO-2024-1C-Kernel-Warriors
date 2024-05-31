@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     sem_init(&semaphoreForIO, 0, 1);
     sem_init(&semaphoreFinishModule, 0, 0);
     sem_init(&semAuxPID, 0, 1);
-    sem_init(semMemoryUserFrames, 0, 1);
+    sem_init(&semMemoryUserFrames, 0, 1);
 
 
     initMemoryUser();

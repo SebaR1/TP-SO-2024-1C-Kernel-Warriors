@@ -1,5 +1,5 @@
 #include "clientMemory.h"
-#include "pseudocodeManagment/codeInterpreter.h"
+#include "processManagment/codeInterpreter.h"
 #include "serverMemory.h"
 
 
@@ -12,9 +12,52 @@ void sendInstructionToCpu(int* socketClient, cpuGiveMeNextInstruction* params)
     instructionString newInstruction;
     newInstruction.string = getInstruction(params->PID, params->PC);
 
-    addToPackage(package, &(newInstruction.string), string_length(newInstruction.string) + 1); // Agrego el string de la instruccion (+ 1 en el length por el caracter nulo \0)
+    addToPackage(package, newInstruction.string, string_length(newInstruction.string) + 1); // Agrego el string de la instruccion (+ 1 en el length por el caracter nulo \0)
 
     sendPackage(package, socketClient); // Envio el paquete
 
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+}
+
+
+
+void sendData(int* socketClient, void* data, int size)
+{
+    t_package* package = createPackage(MEMORY_SEND_DATA);
+
+    sendDataInfo info;
+    info.data = data;
+    info.size = size;
+
+    addToPackage(package, info.data, info.size); // Agrego la data al paquete
+
+    sendPackage(package, *socketClient); // Envio la data
+
+    destroyPackage(package);
+}
+
+
+
+void sendConfirmation(int* socketClient)
+{
+    t_package* package = createPackage(MEMORY_OK);
+
+    sendPackage(package, *socketClient); // Envio la confirmacion
+
+    destroyPackage(package);
+}
+
+
+void sendFrame(int* socketClient, int frame)
+{
+    t_package* package = createPackage(MEMORY_SEND_FRAME);
+
+    sendFrameInfo info;
+    info.frame = frame;
+
+    addToPackage(package, &(info.frame), sizeof(int)); // Agrego la data al paquete
+
+    sendPackage(package, *socketClient); // Envio la data
+
+    destroyPackage(package);
 }

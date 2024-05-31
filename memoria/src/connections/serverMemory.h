@@ -63,6 +63,16 @@ void receiveNewProcessFromKernel(int* socketClient);
 void receiveEndProcessFromKernel(int* socketClient);
 
 
+// Cuando me llega una peticion para leer de la memoria de usuario, esta funcion se ejecuta.
+void requestReadMemory(int* socketClient);
+
+
+// Cuando me llega una peticion para escribir en la memoria de usuario, esta funcion se ejecuta.
+void requestWriteMemory(int* socketClient);
+
+
+// Cuando me llega una peticion para que le mande un frame a un socket (tipicamente la CPU), esta funcion se ejecuta.
+void requestFrame(int* socketClient);
 
 
 #endif

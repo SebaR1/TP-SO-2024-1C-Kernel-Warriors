@@ -4,8 +4,9 @@
 #include "utilsMemory/config.h"
 #include "utils/utilsGeneral.h"
 #include "clientMemory.h"
-#include "pseudocodeManagment/codeLoader.h"
+#include "processManagment/processLoader.h"
 #include <pthread.h>
+#include "paging/memoryUser.h"
 
 
 int numberOfKernelClients = 0;
@@ -197,6 +198,18 @@ void serverMemoryForCPU(int* socketClient)
             cpuWantsNextInstruction(socketClient);
             break;
 
+        case READ_MEMORY:
+            requestReadMemory(socketClient);
+            break;
+
+        case WRITE_MEMORY:
+            requestWriteMemory(socketClient);
+            break;
+
+        case CPU_GET_FRAME:
+            
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -237,6 +250,15 @@ void serverMemoryForIO(int* socketClient)
             t_list *listPackage = getPackage(*socketClient);
             log_info(getLogger(), "Paquete obtenido con exito del modulo IO");
             operationPackageFromIO(listPackage);
+            break;
+
+
+        case READ_MEMORY:
+            requestReadMemory(socketClient);
+            break;
+
+        case WRITE_MEMORY:
+            requestWriteMemory(socketClient);
             break;
 
         case DO_NOTHING:
@@ -291,7 +313,7 @@ void cpuWantsNextInstruction(int* socketClient)
     nextInstructionRequest.PC = *((int*)list_get(listPackage, 1)); // Obtengo el PC
 
     // Le envio la instruccion directamente en el mismo hilo porque solo puedo enviar las instrucciones una por una,
-    // entonces no va a pasar que me pidan otra instruccion cuando nisiquiera le mandé la que me pidió anres la CPU.
+    // entonces no va a pasar que me pida otra instruccion el mismo socket cuando ni siquiera le mandé la que me pidió anres la CPU.
     sendInstructionToCpu(socketClient, &nextInstructionRequest);
 
     list_destroy_and_destroy_elements(listPackage, free);
@@ -328,13 +350,70 @@ void receiveEndProcessFromKernel(int* socketClient)
 
     // Creo un hilo que se encarga de eliminar el codigo del proceso de la lista con todos los codigos de los procesos.
     pthread_t destroyCodeThread;
-    pthread_create(&destroyCodeThread, NULL, destroyCode, processEnd);
+    pthread_create(&destroyCodeThread, NULL, destroyProcessByParams, processEnd);
     pthread_detach(&destroyCodeThread);
 
     free(pidPointer);
     list_destroy(listPackage);
 }
 
+
+
+void requestReadMemory(int* socketClient)
+{
+    t_list* listPackage = getPackage(*socketClient);
+
+    requestReadMemoryInfo request;
+
+    request.physicalAddress = *((int*)list_get(listPackage, 0));
+    request.size = *((int*)list_get(listPackage, 1));
+
+    // Leo de la memoria directamente, sin crear otro hilo, ya que el mismo socket va a necesitar terminar esta lectura antes de poder hacer
+    // otra peticion de lectura o escritura.
+    void* data = readBytes(request.physicalAddress, request.size);
+
+    sendData(socketClient, data, request.size);
+
+    free(data);
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
+
+
+void requestWriteMemory(int* socketClient)
+{
+    t_list* listPackage = getPackage(*socketClient);
+
+    requestWriteMemoryInfo request;
+
+    request.data = list_get(listPackage, 0);
+    request.physicalAddress = *((int*)list_get(listPackage, 1));
+    request.size = *((int*)list_get(listPackage, 2));
+
+    // Escribo en la memoria directamente, sin crear otro hilo, ya que el mismo socket va a necesitar terminar esta escritura antes de poder hacer
+    // otra peticion de lectura o escritura.
+    writeBytes(request.data, request.physicalAddress, request.size);
+
+    sendConfirmation(*socketClient);
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
+
+void requestFrame(int* socketClient)
+{
+    t_list* listPackage = getPackage(*socketClient);
+
+    getFrameInfo info;
+
+    info.PID = *((int*)list_get(listPackage, 0));
+    info.page = *((int*)list_get(listPackage, 1));
+
+    sendFrame(*socketClient, getFrame(info.PID, info.page));
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
 
 
 

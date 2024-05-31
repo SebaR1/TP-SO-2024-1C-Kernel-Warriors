@@ -13,10 +13,10 @@ char* getInstruction(int PID, int PC)
 
     if (currentPseudocode == NULL || currentPseudocode->PID != PID)
     {
-        sem_wait(semAuxPID);
+        sem_wait(&semAuxPID);
         auxPID = PID;
-        sem_post(semAuxPID);
         currentPseudocode = list_find_mutex(processesList, closurePIDsAreEqual);
+        sem_post(&semAuxPID);
         if (currentPseudocode == NULL)
         {
             exit(EXIT_FAILURE);

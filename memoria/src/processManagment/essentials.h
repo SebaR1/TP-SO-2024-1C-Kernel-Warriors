@@ -10,6 +10,9 @@
 #include "utilsMemory/config.h"
 
 
+
+
+
 // Lista que contiene toda la info de los procesos, tanto su PID, su tabla de paginas como sus instrucciones de pseudocodigo.
 extern listMutex_t* processesList;
 
