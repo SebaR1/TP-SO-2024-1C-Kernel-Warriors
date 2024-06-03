@@ -30,7 +30,7 @@ void exitState()
         //Pido a memoria que libere todo lo asociado al proceso
         log_info(getLogger(), "Se borro el proceso con PID: %d", process->pid);
         destroyProcess(process);
-        if(prevState == PCB_READY){ // Este if porque si viene de exec ya envio un sem_post al grado de multiprogramacion al entrar en exec Y PCB_NEW no afecta
+        if(prevState != PCB_NEW){ // Este if es porque se fija si estaba en NEW, porque en ese lugar no afectaba al grado de multiprogramacion
         sem_post(&semMultiProgramming); //Manda un aviso que libera una parte del grado de multiprogramacion
         }
     }
@@ -55,7 +55,8 @@ pcb_t* createProcess()
     sem_post(&semAddPid);
     process->pc = 0;
     process->state = PCB_NEW;
-    process->registersCpu = malloc(sizeof(register_t));
+    process->resources = initListMutex();
+    process->registersCpu = malloc(sizeof(t_registers));
     process->registersCpu->AX = 0;
     process->registersCpu->BX = 0;
     process->registersCpu->CX = 0;
@@ -83,25 +84,41 @@ void addPcbToNew(char* path)
 
 void destroyProcess(pcb_t *process)
 {
+    for(int i = 0; i < list_size(process->resources->list); i++) // Pasa por todos los recursos asignados que tiene para basicamente hacerles un signal.
+    {
+        resource_t* resourceToFree = list_pop(process->resources); // Popea el recurso asignado
+        resourceToFree->instances++;
+
+        if(list_mutex_size(resourceToFree->blockList) > 0){ // Se fija si el tiene procesos bloqueados que esperen este recurso.
+        pcb_t* processBlockToReady = list_pop(resourceToFree->blockList);
+        processBlockToReady->state = PCB_READY;
+        list_push(pcbReadyList, processBlockToReady);
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
+        }
+
+    }   
+
+    destroyListMutex(process->resources); 
     free(process->registersCpu);
     free(process);
 }
 
-int pid_to_find;
+int pidToFind;
 
 bool compare_pid(void *data) 
 {
     pcb_t *pcb = (pcb_t *)data;
-    return pcb->pid == pid_to_find;
+    return pcb->pid == pidToFind;
 }
 
-void endProcess(uint32_t pid)
+void killProcess(uint32_t pid)
 {
     
     pcb_t* processFound = foundStatePcb(pid);
 
     if(processFound == NULL){
         log_info(getLogger(), "PID: %d - No encontrado", pid);
+        return;
     }
 
     switch (processFound->state)
@@ -130,6 +147,7 @@ void endProcess(uint32_t pid)
         break;
 
     default:
+        //Nada
         break;
     }
 
@@ -137,7 +155,7 @@ void endProcess(uint32_t pid)
 
 pcb_t* foundStatePcb(uint32_t pid)
 {
-    pid_to_find = pid;
+    pidToFind = pid;
 
     pcb_t* processFound = (pcb_t *)list_find(pcbNewList->list, compare_pid);
     if(processFound != NULL) return processFound;
@@ -152,13 +170,4 @@ pcb_t* foundStatePcb(uint32_t pid)
     if(processFound != NULL) return processFound;
 
     return NULL;
-}
-
-void defineAlgorithm()
-{
-
-    if(string_equals_ignore_case(getKernelConfig()->ALGORITMO_PLANIFICACION, "FIFO")) algorithm = FIFO;
-    else if(string_equals_ignore_case(getKernelConfig()->ALGORITMO_PLANIFICACION, "RR")) algorithm = RR;
-    else if(string_equals_ignore_case(getKernelConfig()->ALGORITMO_PLANIFICACION, "VRR")) algorithm = VRR;
-
 }

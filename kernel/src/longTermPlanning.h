@@ -7,6 +7,9 @@
 #include "utilsKernel/logger.h"
 #include "connections/clientKernel.h"
 #include "connections/serverKernel.h"
+#include "utils/utilsGeneral.h"
+
+#include <commons/collections/list.h>
 
 
 //Controla la Lista NEW y los manda a la lista READY
@@ -31,15 +34,10 @@ void destroyProcess(pcb_t *process);
 bool compare_pid(void *data);
 
 //Finaliza el proceso dependiendo en donde se encuentre.
-void endProcess(uint32_t pid);
+void killProcess(uint32_t pid);
 
 //Encuentra el pcb y lo segun el pid y lo retorna.
 pcb_t* foundStatePcb(uint32_t pid);
 
-// Define el algoritmo a utilizar en el corto plazo dado por el config
-void defineAlgorithm();
-
-//Pid a encontrar, necesario por la funcion dada por las commons.
-extern int pid_to_find;
 
 #endif

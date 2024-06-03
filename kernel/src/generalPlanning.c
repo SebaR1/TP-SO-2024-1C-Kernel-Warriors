@@ -6,6 +6,8 @@ listMutex_t *pcbExecList;
 listMutex_t *pcbBlockList;
 listMutex_t *pcbExitList;
 
+listMutex_t *resourcesBlockList;
+
 sem_t semNew;
 sem_t semExit;
 sem_t semReady;

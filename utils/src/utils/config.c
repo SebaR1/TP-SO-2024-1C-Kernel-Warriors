@@ -59,8 +59,10 @@ t_list* _fromConfigToListOfInts(char** listChars)
     int i = 0;
     while (listChars[i] != NULL)
     {
-        int temp = atoi(listChars[i]); //Para evitar el warning, agrego un temporal
-        list_add(list, &temp);
+        int *temp = malloc(sizeof(int));
+        *temp = atoi(listChars[i]);
+        //int temp = atoi(listChars[i]); //Para evitar el warning, agrego un temporal
+        list_add(list, temp);
         i++;
     }
 

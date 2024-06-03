@@ -14,6 +14,9 @@ typedef struct
 } listMutex_t;
 
 
+int list_mutex_size(listMutex_t *list);
+
+bool list_mutex_is_empty(listMutex_t *list);
 
 /// @brief Retorna el primer valor encontrado que haga que la condicion retorne true
 /// @param list La lista mutex

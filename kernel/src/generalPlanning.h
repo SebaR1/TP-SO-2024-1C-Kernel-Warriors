@@ -17,6 +17,8 @@ extern listMutex_t *pcbExecList;
 extern listMutex_t *pcbBlockList;
 extern listMutex_t *pcbExitList;
 
+extern listMutex_t *resourcesBlockList;
+
 extern sem_t semNew;
 extern sem_t semExit;
 extern sem_t semReady;

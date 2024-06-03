@@ -23,5 +23,7 @@ void initShortTermPlanning(void);
 //Controla el limite de quantum y si es que lo pasa manda la interrupcion
 void quantumControlInterrupt();
  
+// Define el algoritmo a utilizar en el corto plazo dado por el config
+void defineAlgorithm();
 
 #endif

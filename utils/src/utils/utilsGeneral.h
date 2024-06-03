@@ -62,6 +62,14 @@ typedef enum
 	PACKAGE_FROM_IO,
 } operationCode;
 
+// Estructura de un recurso en Kernel. 
+typedef struct 
+{
+	char* name;
+	int instances;
+	listMutex_t *blockList;
+} resource_t;
+
 
 typedef struct
 {
@@ -76,13 +84,16 @@ typedef struct
 	uint32_t EDX; // Registro Numérico de propósito general
 	uint32_t SI; // Contiene la dirección lógica de memoria de origen desde donde se va a copiar un string.
 	uint32_t DI; // Contiene la dirección lógica de memoria de destino a donde se va a copiar un string.
-} registers_t;
+} t_registers;
 
+// Tipo de algoritmo seleccionado. 
 typedef enum{
 	FIFO,
 	RR,
 	VRR,
 } t_algorithm;
+
+//Estructura de los estados del PCB. 
 typedef enum
 {
 	PCB_NEW,
@@ -98,17 +109,16 @@ typedef struct
 	uint32_t pid;
 	uint32_t pc;
 	uint32_t timer;
-	registers_t *registersCpu;
+	t_registers *registersCpu;
+	listMutex_t *resources;
 	pcbState_t state;
 } pcb_t;
 
 //Estructura del contexto de ejecucion de los procesos
 typedef struct
 {
-	registers_t registersCpu;
-	//instrucciones
 	uint32_t pc;
-
+	t_registers registersCpu;
 } contextProcess;
 
 // Estructura que se le manda a la memoria del path y el pid del proceso a ejecutar.

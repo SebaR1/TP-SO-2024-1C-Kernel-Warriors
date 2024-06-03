@@ -8,6 +8,7 @@
 #include "utilsKernel/config.h"
 #include <pthread.h>
 #include <semaphore.h>
+#include "../kernel.h"
 
 
 #define MAX_IO_CLIENTS 4096
@@ -31,10 +32,26 @@ void operationPackageFromIO(t_list* package);
 void receiveClientIteration(int socketServer);
 
 
+// Hilo que funciona como servidor para recibir paquetes de un cliente especificado por parametro, y realizar determinadas operaciones en base al paquete recibido
+void serverKernelForCPU(int *socketClient);
 
 
+// Recibe la opCode de que el proceso termino y lo manda a PcbExitList.
+void cpuSendEndProcess();
 
 
+// Recibe el contexto del proceso que paso por la interrupcion del Quantum y manda al proceso a PcbReadyList.
+void cpuSendInterruptQ(int *socketClientCPUDispatch);
+
+
+void cpuSendWaitOfProcess(int *socketClientCPUDispatch);
+
+
+// Recibe el contexto del proceso de un package y lo retorna. 
+contextProcess recieveContextFromPackage(t_list* package);
+
+
+pcb_t* assignContextToPcb(contextProcess contextProcess);
 
 
 

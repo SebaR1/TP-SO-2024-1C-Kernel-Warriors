@@ -30,6 +30,20 @@ int main()
     pcbBlockList = initListMutex();
     pcbExitList = initListMutex();
 
+    resourcesBlockList = initListMutex();
+
+    initResources();
+
+    resource_t* recurso1 = list_pop(resourcesBlockList);
+    resource_t* recurso2 = list_pop(resourcesBlockList);
+    resource_t* recurso3 = list_pop(resourcesBlockList);
+    resource_t* recurso4 = list_pop(resourcesBlockList);
+    resource_t* recurso5 = list_pop(resourcesBlockList);
+
+    log_info(getLogger(), "RECURSOS: %s, %d, %s, %d, %s, %d, %s, %d, %s, %d", recurso1->name, recurso1->instances, recurso2->name, recurso2->instances, recurso3->name, recurso3->instances,recurso4->name, recurso4->instances, recurso5->name, recurso5->instances);
+
+    defineAlgorithm();
+
     initLongTermPlanning();
     initShortTermPlanning();
 
@@ -42,8 +56,6 @@ int main()
     pthread_t waitClientsLoopThread;
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
     //pthread_detach(waitClientsLoopThread);
-    
-
 
 
     t_package* initialPackageM = createPackage(KERNEL_MODULE);
@@ -57,6 +69,8 @@ int main()
     socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
     sendPackage(initialPackageCD, socketClientCPUDispatch);
     log_info(getLogger(), "Paquete enviado con exito dispatch.");
+
+    serverKernelForCPU(&socketClientCPUDispatch);
 
     pthread_t kernelConsoleThread;
     pthread_create(&kernelConsoleThread, NULL, (void*)readKernelConsole, NULL);

@@ -1,11 +1,28 @@
 #include "listMutex.h"
 
+int list_mutex_size(listMutex_t *list)
+{
+	pthread_mutex_lock(&(list->mutex));
+	int size = list_size(list->list);
+	pthread_mutex_unlock(&(list->mutex));
+	return size;
+}
+
+
+bool list_mutex_is_empty(listMutex_t *list)
+{
+	pthread_mutex_lock(&(list->mutex));
+	bool is_empty = list_is_empty(list->list);
+	pthread_mutex_unlock(&(list->mutex));
+	return is_empty;
+}
 
 void* list_find_mutex(listMutex_t* list, bool(*closure)(void*))
 {
     pthread_mutex_lock(&(list->mutex));
     void* info = list_find(list->list, closure);
 	pthread_mutex_unlock(&(list->mutex));
+    return info;
 }
 
 void list_push(listMutex_t *list, void *info)

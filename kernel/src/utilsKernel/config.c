@@ -69,7 +69,7 @@ void freeKernelConfig()
     log_info(getLogger(), "Liberando la memoria usada para el archivo de configuracion");
 
     list_destroy_and_destroy_elements(getKernelConfig()->RECURSOS, free);
-    list_destroy(getKernelConfig()->INSTANCIAS_RECURSOS);
+    list_destroy_and_destroy_elements(getKernelConfig()->INSTANCIAS_RECURSOS, free);
     config_destroy(_configFile);
     free(getKernelConfig());
 

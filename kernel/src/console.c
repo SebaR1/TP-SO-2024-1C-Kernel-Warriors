@@ -66,7 +66,7 @@ void attendInstruction(char* instruction)
         addPcbToNew(consoleCommand[1]);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "FINALIZAR_PROCESO")){
-        endProcess(atoi(consoleCommand[1]));
+        killProcess(atoi(consoleCommand[1]));
     }
     else if(string_equals_ignore_case(consoleCommand[0], "DETENER_PLANIFICACION")){
         //Implementacion para DETENER_PLANIFICACION

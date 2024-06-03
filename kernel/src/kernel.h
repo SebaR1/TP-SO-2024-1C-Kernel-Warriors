@@ -11,6 +11,7 @@
 #include "longTermPlanning.h"
 #include "shortTermPlanning.h"
 #include "generalPlanning.h"
+#include "resources.h"
 
 #include <pthread.h>
 #include <commons/string.h>
