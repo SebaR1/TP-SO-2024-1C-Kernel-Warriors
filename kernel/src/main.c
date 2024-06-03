@@ -163,6 +163,7 @@ int main()
     destroyListMutex(pcbExecList);
     destroyListMutex(pcbBlockList);
     destroyListMutex(pcbExitList);
+    destroyListMutex(resourcesBlockList);
 
     releaseConnection(socketClientMemory);
     releaseConnection(socketClientCPUDispatch);

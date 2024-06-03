@@ -13,4 +13,8 @@ bool compareNameResource(void *data);
 resource_t* foundResource(char* resourceName);
 
 
+void addInstanceResource(resource_t* resource);
+
+void subtractInstanceResource(resource_t* resource);
+
 #endif

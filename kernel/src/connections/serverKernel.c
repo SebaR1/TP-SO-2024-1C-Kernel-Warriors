@@ -126,13 +126,13 @@ void serverKernelForCPU(int *socketClient)
         {
 
         case KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS: // Mock si llegara una señal de CPU si el proceso termino y pasa a exit
-            cpuSendEndProcess();
+            cpuSendEndProcess(socketClient);
             break;
 
         case KERNEL_SEND_INTERRUPT_QUANTUM_END: // Mock si llegara una señal de CPU por una interrupcion de kernel
             cpuSendInterruptQ(socketClient);
             break;
-    
+
         case KERNEL_SEND_PROCESS_PATH: // Mock si llegara un WAIT de algun recurso. 
             cpuSendWaitOfProcess(socketClient);
 
@@ -167,10 +167,19 @@ void finishAllServersSignal()
     _finishAllServersSignal = true;
 }
 
-void cpuSendEndProcess()
+void cpuSendEndProcess(int *socketClientCPUDispatch)
 {
-    pcb_t* processExecToExit = list_pop(pcbExecList);
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
+    pcb_t *processExecToExit = assignContextToPcb(contextProcess);
+
     log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExecToExit->pid);
+    log_info(getLogger(), "Finaliza el proceso %d - Motivo: SUCCESS", processExecToExit->pid);
+
     list_push(pcbExitList, processExecToExit);
     sem_post(&semExit);
     sem_post(&semMultiProcessing);
@@ -183,7 +192,7 @@ void cpuSendInterruptQ(int *socketClientCPUDispatch)
     // Recibo el contexto del paquete
     contextProcess contextProcess = recieveContextFromPackage(listPackage);
 
-    // Asigno todo el contexto que recibi de CPU al proceso 
+    // Asigno todo el contexto que recibi de CPU al proceso popeado en Exec.
     pcb_t *processExecToReady = assignContextToPcb(contextProcess);
 
     list_push(pcbReadyList, processExecToReady);
@@ -204,7 +213,7 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
     // Recibo el contexto del paquete
     contextProcess contextProcess = recieveContextFromPackage(listPackage);
 
-    // Asigno todo el contexto que recibi de CPU al proceso 
+    // Asigno todo el contexto que recibi de CPU al proceso popeado en Exec
     pcb_t *processExec = assignContextToPcb(contextProcess);
 
     char* resourceName = (char*)list_remove(listPackage, 0);
@@ -215,13 +224,14 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
         list_push(pcbExitList, processExec);
         processExec->state = PCB_EXIT;
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_RESOURCE", processExec->pid);
 
         sem_post(&semMultiProcessing);
         sem_post(&semExit);
 
     } else {
 
-        resourceFound->instances--; //Resta una instancia del recurso
+        subtractInstanceResource(resourceFound); // Resta una instancia del recurso.
 
         if(resourceFound->instances >= 0){ //Si el recurso queda >= 0 se le asigna ese recurso al proceso
             list_push(processExec->resources, resourceFound); // Asigna el recurso al proceso
@@ -260,12 +270,13 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
         list_push(pcbExitList, processExec);
         processExec->state = PCB_EXIT;
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_RESOURCE", processExec->pid);
 
         sem_post(&semMultiProcessing);
         sem_post(&semExit);
 
     } else {
-        resourceFound->instances++;
+        addInstanceResource(resourceFound); // Suma uno a la instancia del recurso.
 
         // Se fija si el proceso tenia el recurso asignado, si lo tiene lo libera.
         if(list_remove_element(processExec->resources->list, resourceFound)){ // Se deberia hacer un mutex de esto... NOTA PARA SEBA DEL FUTURO

@@ -126,6 +126,7 @@ void killProcess(uint32_t pid)
     case PCB_NEW:
         list_remove_element(pcbNewList->list, processFound);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_EXIT", processFound->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         list_push(pcbExitList, processFound);
         sem_post(&semExit);
         break;
@@ -133,6 +134,7 @@ void killProcess(uint32_t pid)
     case PCB_READY:
         list_remove_element(pcbReadyList->list, processFound);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXIT", processFound->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         list_push(pcbExitList, processFound);
         sem_post(&semExit);
         break;
@@ -140,6 +142,7 @@ void killProcess(uint32_t pid)
     case PCB_EXEC:
         list_remove_element(pcbExecList->list, processFound);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processFound->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         list_push(pcbExitList, processFound);
         sendInterruptForConsoleEndProcess();
         sem_post(&semExit);

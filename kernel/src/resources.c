@@ -43,3 +43,16 @@ resource_t* foundResource(char* resourceName)
     return resourceFound;
 }
 
+void addInstanceResource(resource_t* resource)
+{
+    pthread_mutex_lock(&(resource->mutexForInstances));
+    resource->instances++;
+    pthread_mutex_unlock(&(resource->mutexForInstances));
+}
+
+void subtractInstanceResource(resource_t* resource)
+{
+    pthread_mutex_lock(&(resource->mutexForInstances));
+    resource->instances++;
+    pthread_mutex_unlock(&(resource->mutexForInstances));
+}

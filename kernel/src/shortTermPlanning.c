@@ -38,9 +38,9 @@ void execState()
             break;
         
         case RR:
+            sendContextToCPU(pcbToExec);
             pthread_t QuantumInterruptThread;
             pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterrupt, pcbToExec);
-            sendContextToCPU(pcbToExec);
             pthread_detach(QuantumInterruptThread);
             break;
 

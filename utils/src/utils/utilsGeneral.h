@@ -67,6 +67,7 @@ typedef struct
 {
 	char* name;
 	int instances;
+	pthread_mutex_t mutexForInstances;
 	listMutex_t *blockList;
 } resource_t;
 
