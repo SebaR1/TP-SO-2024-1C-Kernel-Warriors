@@ -46,11 +46,14 @@ typedef enum
 	MEMORY_SEND_FRAME,
 
 	// ENVIADOS DESDE KERNEL
-	KERNEL_SEND_CONTEXT,
 	KERNEL_SEND_PROCESS_PATH,
 	KERNEL_END_PROCESS,
+
+	KERNEL_SEND_CONTEXT,
 	KERNEL_SEND_INTERRUPT_QUANTUM_END,
 	KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS,
+	
+	KERNEL_SEND_OPERATION_TO_GENERIC_INTERFACE,
 
 	// ENVIADOS DESDE IO
 	REQUEST_OPERATION_TO_INTERFACE,
@@ -61,16 +64,6 @@ typedef enum
 	PACKAGE_FROM_MEMORY,
 	PACKAGE_FROM_IO,
 } operationCode;
-
-// Estructura de un recurso en Kernel. 
-typedef struct 
-{
-	char* name;
-	int instances;
-	pthread_mutex_t mutexForInstances;
-	listMutex_t *blockList;
-} resource_t;
-
 
 typedef struct
 {
@@ -86,13 +79,6 @@ typedef struct
 	uint32_t SI; // Contiene la dirección lógica de memoria de origen desde donde se va a copiar un string.
 	uint32_t DI; // Contiene la dirección lógica de memoria de destino a donde se va a copiar un string.
 } t_registers;
-
-// Tipo de algoritmo seleccionado. 
-typedef enum{
-	FIFO,
-	RR,
-	VRR,
-} t_algorithm;
 
 //Estructura de los estados del PCB. 
 typedef enum
@@ -114,6 +100,42 @@ typedef struct
 	listMutex_t *resources;
 	pcbState_t state;
 } pcb_t;
+
+// Estructura de un recurso en Kernel. 
+typedef struct 
+{
+	char* name;
+	int instances;
+	pthread_mutex_t mutexForInstances;
+	listMutex_t *blockList;
+} resource_t;
+
+typedef enum
+{
+	Generic, 
+	STDIN, 
+	STDOUT, 
+	DialFS
+} interfaceType;
+
+// Estructura de una interfaz en Kernel.
+typedef struct 
+{
+	char* name;
+	interfaceType interfaceType;
+	bool isBusy;
+	pcb_t *processAssign;
+	listMutex_t *blockList;
+} interface_t;
+
+// Tipo de algoritmo seleccionado. 
+typedef enum
+{
+	FIFO,
+	RR,
+	VRR,
+} t_algorithm;
+
 
 //Estructura del contexto de ejecucion de los procesos
 typedef struct
