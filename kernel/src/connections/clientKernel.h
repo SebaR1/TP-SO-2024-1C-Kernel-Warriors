@@ -31,4 +31,6 @@ void sendInterruptForQuantumEnd();
 void sendInterruptForConsoleEndProcess();
 
 
+void sendIOGenSleepOperation(char* interfaceName, int timeOfOperation);
+
 #endif

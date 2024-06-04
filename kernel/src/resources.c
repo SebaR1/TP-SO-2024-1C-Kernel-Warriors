@@ -56,3 +56,18 @@ void subtractInstanceResource(resource_t* resource)
     resource->instances++;
     pthread_mutex_unlock(&(resource->mutexForInstances));
 }
+
+void destroyResources()
+{
+    t_list* resourcesList = getKernelConfig()->RECURSOS;
+    int sizeResources = list_size(resourcesList); //Necesito el tamaño de uno porque si llega a este punto no necesita verificar que sean iguales.
+
+    for(int i = 0; i < sizeResources; i++){
+        resource_t *resourceToDestroy = list_pop(resourcesBlockList);
+        destroyListMutex(resourceToDestroy->blockList);
+        pthread_mutex_destroy(&(resourceToDestroy->mutexForInstances));
+        free(resourceToDestroy);
+    }
+
+    destroyListMutex(resourcesBlockList);
+}

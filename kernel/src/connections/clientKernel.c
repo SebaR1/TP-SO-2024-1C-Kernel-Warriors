@@ -66,3 +66,8 @@ void sendInterruptForConsoleEndProcess()
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 
 }
+
+void sendIOGenSleepOperation(char* interfaceName, int timeOfOperation)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_GENERIC_INTERFACE);
+}

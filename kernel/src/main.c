@@ -32,15 +32,9 @@ int main()
 
     resourcesBlockList = initListMutex();
 
+    interfacesList = initListMutex();
+
     initResources();
-
-    resource_t* recurso1 = list_pop(resourcesBlockList);
-    resource_t* recurso2 = list_pop(resourcesBlockList);
-    resource_t* recurso3 = list_pop(resourcesBlockList);
-    resource_t* recurso4 = list_pop(resourcesBlockList);
-    resource_t* recurso5 = list_pop(resourcesBlockList);
-
-    log_info(getLogger(), "RECURSOS: %s, %d, %s, %d, %s, %d, %s, %d, %s, %d", recurso1->name, recurso1->instances, recurso2->name, recurso2->instances, recurso3->name, recurso3->instances,recurso4->name, recurso4->instances, recurso5->name, recurso5->instances);
 
     defineAlgorithm();
 
@@ -64,13 +58,19 @@ int main()
     sendPackage(initialPackageM, socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito a memoria.");
 
-    t_package* initialPackageCD = createPackage(KERNEL_MODULE);
+    t_package* initialPackageToCpuInterrupt = createPackage(KERNEL_MODULE_TO_CPU_INTERRUPT);
+    log_info(getLogger(), "Creando conexion con CpuInterrupt. Se enviara un mensaje a CpuInterrupt");
+    socketClientCPUInterrupt = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_INTERRUPT);
+    sendPackage(initialPackageToCpuInterrupt, socketClientCPUInterrupt);
+    log_info(getLogger(), "Paquete enviado con exito a interrupt.");
+
+    t_package* initialPackageToCpuDispatch = createPackage(KERNEL_MODULE_TO_CPU_DISPATCH);
     log_info(getLogger(), "Creando conexion con CpuDispatch. Se enviara un mensaje a CpuDispatch");
     socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
-    sendPackage(initialPackageCD, socketClientCPUDispatch);
+    sendPackage(initialPackageToCpuDispatch, socketClientCPUDispatch);
     log_info(getLogger(), "Paquete enviado con exito dispatch.");
 
-    serverKernelForCPU(&socketClientCPUDispatch);
+    initServerForASocket(socketClientCPUDispatch, serverKernelForCPU);
 
     pthread_t kernelConsoleThread;
     pthread_create(&kernelConsoleThread, NULL, (void*)readKernelConsole, NULL);
@@ -163,7 +163,8 @@ int main()
     destroyListMutex(pcbExecList);
     destroyListMutex(pcbBlockList);
     destroyListMutex(pcbExitList);
-    destroyListMutex(resourcesBlockList);
+    destroyResources();
+    destroyListMutex(interfacesList);
 
     releaseConnection(socketClientMemory);
     releaseConnection(socketClientCPUDispatch);

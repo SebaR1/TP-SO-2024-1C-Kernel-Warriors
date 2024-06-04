@@ -17,4 +17,6 @@ void addInstanceResource(resource_t* resource);
 
 void subtractInstanceResource(resource_t* resource);
 
+void destroyResources();
+
 #endif

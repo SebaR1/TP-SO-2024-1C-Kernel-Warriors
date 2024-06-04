@@ -8,6 +8,8 @@ listMutex_t *pcbExitList;
 
 listMutex_t *resourcesBlockList;
 
+listMutex_t *interfacesList;
+
 sem_t semNew;
 sem_t semExit;
 sem_t semReady;
@@ -27,3 +29,4 @@ t_algorithm algorithm;
 int socketClientMemory;
 int socketClientCPUDispatch;
 int socketClientCPUInterrupt;
+int socketClientIo;

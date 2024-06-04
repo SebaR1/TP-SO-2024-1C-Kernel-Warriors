@@ -19,6 +19,8 @@ extern listMutex_t *pcbExitList;
 
 extern listMutex_t *resourcesBlockList;
 
+extern listMutex_t *interfacesList;
+
 extern sem_t semNew;
 extern sem_t semExit;
 extern sem_t semReady;
@@ -38,5 +40,6 @@ extern t_algorithm algorithm;
 extern int socketClientMemory;
 extern int socketClientCPUDispatch;
 extern int socketClientCPUInterrupt;
+extern int socketClientIo;
 
 #endif

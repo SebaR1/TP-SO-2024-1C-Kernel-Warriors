@@ -69,6 +69,8 @@ void receiveClientIteration(int socketServer)
 
 void serverKernelForIO(int *socketClient)
 {
+    socketClientIo = *socketClient;
+
     bool exitLoop = false;
     while (!exitLoop || _finishAllServersSignal)
     {
@@ -89,6 +91,10 @@ void serverKernelForIO(int *socketClient)
             break;
 
         case DO_NOTHING:
+            break;
+
+        case MEMORY_OK: // Mock si llegara una interfaz de I/O.
+            ioSendInterface(socketClient);
             break;
 
 
@@ -116,6 +122,7 @@ void serverKernelForCPU(int *socketClient)
     while (!exitLoop || _finishAllServersSignal)
     {
         // Recibir el codigo de operacion y hacer la operacion recibida.
+        log_info(getLogger(), "HOLA PASANDO POR ACA ANTES DE BLOQUEARMO");
         operationCode opCode = getOperation(*socketClient);
         if (_finishAllServersSignal)
         {
@@ -135,6 +142,15 @@ void serverKernelForCPU(int *socketClient)
 
         case KERNEL_SEND_PROCESS_PATH: // Mock si llegara un WAIT de algun recurso. 
             cpuSendWaitOfProcess(socketClient);
+            break;
+
+        case CPU_GIVE_ME_NEXT_INSTRUCTION: // Mock si llegara un SIGNAL de algun recurso. 
+            cpuSendSignalofProcess(socketClient);
+            break;
+
+        case CPU_GET_FRAME: // Mock si llegara una operacion IO_GEN_SLEEP.
+            cpuSendRequestForIOGenSleep(socketClient);
+            break;
 
         case DO_NOTHING:
             break;
@@ -162,6 +178,22 @@ void operationPackageFromIO(t_list *package)
     list_iterate(package, (void*)listIterator);
 }
 
+void ioSendInterface(int *socketClientIO)
+{
+    t_list *listPackage = getPackage(*socketClientIO);
+
+    // Recibo el nombre y tipo de la interfaz.
+    char* nameInterface = (char*)list_remove(listPackage, 0);
+    interfaceType typeInterface = (interfaceType)list_remove(listPackage, 0);
+    
+    // Creo la interfaz
+    interface_t *newInterface = createInterface(nameInterface, typeInterface);
+
+    list_push(interfacesList, newInterface);
+
+    list_destroy(listPackage);
+}
+
 void finishAllServersSignal()
 {
     _finishAllServersSignal = true;
@@ -181,6 +213,9 @@ void cpuSendEndProcess(int *socketClientCPUDispatch)
     log_info(getLogger(), "Finaliza el proceso %d - Motivo: SUCCESS", processExecToExit->pid);
 
     list_push(pcbExitList, processExecToExit);
+
+    list_destroy(listPackage);
+
     sem_post(&semExit);
     sem_post(&semMultiProcessing);
 }
@@ -296,8 +331,58 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
 
         sem_post(&semBlock);
     }
+
+    list_destroy(listPackage);
 }
 
+void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso 
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    // Recibo la cantidad de tiempo a utilizar.
+    int timeOfOperation = *(int*)list_remove(listPackage, 0);
+
+
+
+    // Busco la interfaz por el nombre identificador.
+    interface_t *interfaceFound = foundInterface(nameRequestInterface);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != Generic){ // El tipo de interfaz Generic es el unico que puede realizar la operacion IO_GEN_SLEEP. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+        } else {
+            if(!interfaceFound->isBusy){ // Una vez pasada las validaciones se fija si esta ocupada.
+                //sendIOGenSleepOperation();
+            }
+        }
+    }
+
+}
 
 contextProcess recieveContextFromPackage(t_list* package)
 {
