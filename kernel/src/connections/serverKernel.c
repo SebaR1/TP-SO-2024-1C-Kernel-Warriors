@@ -221,7 +221,17 @@ void ioSendEndOperation(int *socketClientIO)
         interfaceFound->processAssign = processBlocked;
         interfaceFound->isBusy = true;
 
-        // Aca estoy en la duda de como saber el parametro que tiene el que estuvo en cola, 1ra opcion es meter los parametros en la estructura del pcb y poner un switch de la interfaz con el tipo. Otra es que IO me mande la finalizacion por tipo. No sé cual es la más optima.
+        switch (interfaceFound->interfaceType)
+        {
+        case Generic:
+            int timeOfOperation = atoi(processBlocked->params->param1); // Agarro el parametro que tenia y lo convierto a int.
+            uint32_t timeOfOperationCast = (uint32_t)timeOfOperation; // Lo casteo para que se mande de esa forma por problemas de arquitectura entre computadoras. 
+            sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperationCast); 
+            break;
+        
+        default:
+            break;
+        }
     }
 
 }
@@ -350,9 +360,10 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
             log_info(getLogger(), "Se libero el recurso que tenia en WAIT");
         }
 
-        // Se fija si hay algun proceso que este bloqueado para liberarlo por el signal.
+        // Se fija si hay algun proceso que este bloqueado para asignarlo por el signal.
         if(list_mutex_size(resourceFound->blockList) > 0){
             pcb_t* processBlockToReady = list_pop(resourceFound->blockList);
+            list_push(processBlockToReady->resources, resourceFound);
             processBlockToReady->state = PCB_READY;
             list_push(pcbReadyList, processBlockToReady);
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
@@ -383,7 +394,6 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
     // Recibo la cantidad de tiempo a utilizar.
     uint32_t timeOfOperation = *(uint32_t*)list_remove(listPackage, 0);
 
-
     // Busco la interfaz por el nombre identificador.
     interface_t *interfaceFound = foundInterface(nameRequestInterface);
 
@@ -407,15 +417,17 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             sem_post(&semExit);
 
         } else {
-            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             
-            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada.
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
                 sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperation);
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
+                processExec->params->param1 = string_itoa(timeOfOperation); // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
             }
         }
     }

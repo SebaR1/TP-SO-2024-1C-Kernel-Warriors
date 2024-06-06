@@ -106,6 +106,7 @@ void destroyProcess(pcb_t *process)
     }   
 
     destroyListMutex(process->resources); 
+    free(process->params);
     free(process->registersCpu);
     free(process);
 }

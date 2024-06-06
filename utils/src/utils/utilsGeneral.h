@@ -90,12 +90,21 @@ typedef enum
 	PCB_EXIT
 } pcbState_t;
 
+typedef struct
+{
+	char* param1;
+	char* param2;
+	char* param3;
+	char* param4;
+} paramsKernelForIO;
+
 //Estructra del pcb del proceso
 typedef struct 
 {
 	uint32_t pid;
 	uint32_t pc;
 	uint32_t timer;
+	paramsKernelForIO *params;
 	t_registers *registersCpu;
 	listMutex_t *resources;
 	pcbState_t state;
