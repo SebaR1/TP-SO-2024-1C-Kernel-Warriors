@@ -13,6 +13,7 @@ typedef struct
 	pthread_mutex_t mutex;
 } listMutex_t;
 
+bool list_remove_element_mutex(listMutex_t *list, void* element);
 
 int list_mutex_size(listMutex_t *list);
 

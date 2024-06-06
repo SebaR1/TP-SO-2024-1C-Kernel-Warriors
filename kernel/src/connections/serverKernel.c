@@ -97,6 +97,9 @@ void serverKernelForIO(int *socketClient)
             ioSendInterface(socketClient);
             break;
 
+        case IO_MODULE: // MOcK si llegara una finalizacion de una operacion de una interfaz de I/O.
+            ioSendEndOperation(socketClient);
+            break;
 
         case ERROR:
             log_error(getLogger(), ERROR_CASE_MESSAGE);
@@ -136,7 +139,7 @@ void serverKernelForCPU(int *socketClient)
             cpuSendEndProcess(socketClient);
             break;
 
-        case KERNEL_SEND_INTERRUPT_QUANTUM_END: // Mock si llegara una señal de CPU por una interrupcion de kernel
+        case KERNEL_SEND_INTERRUPT_QUANTUM_END: // Mock si llegara una señal de respuesta de CPU por una interrupcion de quantum de kernel
             cpuSendInterruptQ(socketClient);
             break;
 
@@ -184,7 +187,7 @@ void ioSendInterface(int *socketClientIO)
 
     // Recibo el nombre y tipo de la interfaz.
     char* nameInterface = (char*)list_remove(listPackage, 0);
-    interfaceType typeInterface = (interfaceType)list_remove(listPackage, 0);
+    interfaceType typeInterface = *(interfaceType*)list_remove(listPackage, 0);
     
     // Creo la interfaz
     interface_t *newInterface = createInterface(nameInterface, typeInterface);
@@ -192,6 +195,35 @@ void ioSendInterface(int *socketClientIO)
     list_push(interfacesList, newInterface);
 
     list_destroy(listPackage);
+}
+
+void ioSendEndOperation(int *socketClientIO)
+{
+    t_list *listPackage = getPackage(*socketClientIO);
+
+    // Recibo el nombre y tipo de la interfaz.
+    char* nameInterface = (char*)list_remove(listPackage, 0);
+
+    // Busco la interfaz por el nombre identificador.
+    interface_t *interfaceFound = foundInterface(nameInterface);
+
+    pcb_t *processBlockToReady = interfaceFound->processAssign;
+
+    list_remove_element_mutex(pcbBlockList, processBlockToReady); // Remuevo el proceso de la pcbBlockList.
+    list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion, ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
+
+    interfaceFound->isBusy = false;
+    interfaceFound->processAssign = NULL;
+
+    if(!list_mutex_is_empty(interfaceFound->blockList)){ // Se fija si la interfaz tiene algun otro proceso en espera 
+        pcb_t* processBlocked = list_pop(interfaceFound->blockList);
+
+        interfaceFound->processAssign = processBlocked;
+        interfaceFound->isBusy = true;
+
+        // Aca estoy en la duda de como saber el parametro que tiene el que estuvo en cola, 1ra opcion es meter los parametros en la estructura del pcb y poner un switch de la interfaz con el tipo. Otra es que IO me mande la finalizacion por tipo. No sé cual es la más optima.
+    }
+
 }
 
 void finishAllServersSignal()
@@ -314,7 +346,7 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
         addInstanceResource(resourceFound); // Suma uno a la instancia del recurso.
 
         // Se fija si el proceso tenia el recurso asignado, si lo tiene lo libera.
-        if(list_remove_element(processExec->resources->list, resourceFound)){ // Se deberia hacer un mutex de esto... NOTA PARA SEBA DEL FUTURO
+        if(list_remove_element_mutex(processExec->resources, resourceFound)){ 
             log_info(getLogger(), "Se libero el recurso que tenia en WAIT");
         }
 
@@ -349,8 +381,7 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
     char* nameRequestInterface = list_remove(listPackage, 0);
 
     // Recibo la cantidad de tiempo a utilizar.
-    int timeOfOperation = *(int*)list_remove(listPackage, 0);
-
+    uint32_t timeOfOperation = *(uint32_t*)list_remove(listPackage, 0);
 
 
     // Busco la interfaz por el nombre identificador.
@@ -367,17 +398,24 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
 
     } else {
         if(interfaceFound->interfaceType != Generic){ // El tipo de interfaz Generic es el unico que puede realizar la operacion IO_GEN_SLEEP. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
-        list_push(pcbExitList, processExec);
-        processExec->state = PCB_EXIT;
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
-        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
 
-        sem_post(&semMultiProcessing);
-        sem_post(&semExit);
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
 
         } else {
-            if(!interfaceFound->isBusy){ // Una vez pasada las validaciones se fija si esta ocupada.
-                //sendIOGenSleepOperation();
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList
+            
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada.
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+                sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperation);
+                
+            } else {
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
             }
         }
     }

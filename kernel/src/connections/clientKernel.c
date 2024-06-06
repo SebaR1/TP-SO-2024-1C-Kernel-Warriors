@@ -45,29 +45,50 @@ void sendProcessPathToMemory(pcb_t *process, char* path)
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 }
 
-void sendInterruptForQuantumEnd()
+void sendInterruptForQuantumEnd(pcb_t* process)
 {
 
     t_package* package = createPackage(KERNEL_SEND_INTERRUPT_QUANTUM_END);
 
+    addToPackage(package, &(process->pid), sizeof(uint32_t));
+
     sendPackage(package, socketClientCPUInterrupt); //Envio el paquete a memoria
     
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 
 }
 
-void sendInterruptForConsoleEndProcess()
+void sendInterruptForConsoleEndProcess(pcb_t* process)
 {
-    
     t_package* package = createPackage(KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS);
 
+    addToPackage(package, &(process->pid), sizeof(uint32_t));
+
     sendPackage(package, socketClientCPUInterrupt); //Envio el paquete a memoria
     
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 
 }
 
-void sendIOGenSleepOperation(char* interfaceName, int timeOfOperation)
+void sendIOGenSleepOperationToIO(char* interfaceName, uint32_t timeOfOperation)
 {
     t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_GENERIC_INTERFACE);
+
+    addToPackage(package, &(interfaceName), sizeof(string_length(interfaceName) + 1)); // +1 por el nulo.
+    addToPackage(package, &(timeOfOperation), sizeof(uint32_t));
+
+    sendPackage(package, socketClientIo);
+
+    destroyPackage(package);
+}
+
+void sendEndProcessToMemory(pcb_t* processToEnd)
+{
+    t_package* package = createPackage(KERNEL_END_PROCESS);
+
+    addToPackage(package, &(processToEnd->pid), sizeof(uint32_t)); // Agrego el PID para mandar la senial a memoria y que termine el proceso.
+
+    sendPackage(package, socketClientMemory);
+
+    destroyPackage(package);
 }

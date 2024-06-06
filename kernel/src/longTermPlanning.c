@@ -8,10 +8,12 @@ void newState()
     {
         sem_wait(&semMultiProgramming);
         sem_wait(&semNew);
+
         if(!list_is_empty(pcbNewList->list)){
         pcb_t* pcbToReady = list_pop(pcbNewList);
         list_push(pcbReadyList, pcbToReady);
         pcbToReady->state = PCB_READY;
+
         //Log obligatorio
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_READY", pcbToReady->pid);
         sem_post(&semReady);
@@ -24,12 +26,17 @@ void exitState()
 {
     while(1){
         sem_wait(&semExit);
+
         pcb_t *process = list_pop(pcbExitList);
         pcbState_t prevState = process->state;
         process->state = PCB_EXIT;
-        //Pido a memoria que libere todo lo asociado al proceso
+
+        // Pido a memoria que libere todo lo asociado al proceso.
+        sendEndProcessToMemory(process);
+
         log_info(getLogger(), "Se borro el proceso con PID: %d", process->pid);
         destroyProcess(process);
+
         if(prevState != PCB_NEW){ // Este if es porque se fija si estaba en NEW, porque en ese lugar no afectaba al grado de multiprogramacion
         sem_post(&semMultiProgramming); //Manda un aviso que libera una parte del grado de multiprogramacion
         }
@@ -144,7 +151,7 @@ void killProcess(uint32_t pid)
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processFound->pid);
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         list_push(pcbExitList, processFound);
-        sendInterruptForConsoleEndProcess();
+        sendInterruptForConsoleEndProcess(processFound);
         sem_post(&semExit);
         sem_post(&semMultiProcessing);        
         break;

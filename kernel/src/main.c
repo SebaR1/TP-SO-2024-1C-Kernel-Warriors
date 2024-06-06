@@ -9,7 +9,7 @@ int main()
     // Obtengo la configuracion general del kernel.
     initKernelConfig("kernel.config");
 
-    //Inicializo todo
+    // Inicializo todo.
     pid = 0;
 
     sem_init(&semNew, 0, 0);
@@ -18,11 +18,9 @@ int main()
     sem_init(&semBlock, 0, 0);
     sem_init(&semExit, 0, 0);
     sem_init(&semAddPid, 0, 1);
-    sem_init(&semMultiProgramming, 0 , getKernelConfig()->GRADO_MULTIPROGRAMACION);
     sem_init(&semMultiProcessing, 0 , 1);
-    sem_init(&semaphoreForIO, 0, 1); // Reservo memoria para mi sepaforo y lo inicializo
-
-    sem_init(&semQuantum, 0, 0);
+    sem_init(&semaphoreForIO, 0, 1); 
+    sem_init(&semMultiProgramming, 0 , getKernelConfig()->GRADO_MULTIPROGRAMACION);
 
     pcbNewList = initListMutex();
     pcbReadyList = initListMutex();
@@ -51,27 +49,31 @@ int main()
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
     //pthread_detach(waitClientsLoopThread);
 
-
+    // Mando un paquete inicial a memoria para tener conexion. 
     t_package* initialPackageM = createPackage(KERNEL_MODULE);
     log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
     socketClientMemory = createConection(getLogger(), getKernelConfig()->IP_MEMORIA, getKernelConfig()->PUERTO_MEMORIA);
     sendPackage(initialPackageM, socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito a memoria.");
 
+    // Mando un paquete inicial a CPUDispatch para tener conexion. 
     t_package* initialPackageToCpuInterrupt = createPackage(KERNEL_MODULE_TO_CPU_INTERRUPT);
     log_info(getLogger(), "Creando conexion con CpuInterrupt. Se enviara un mensaje a CpuInterrupt");
     socketClientCPUInterrupt = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_INTERRUPT);
     sendPackage(initialPackageToCpuInterrupt, socketClientCPUInterrupt);
     log_info(getLogger(), "Paquete enviado con exito a interrupt.");
 
+    // Mando un paquete inicial a CPUInterrupt para tener conexion. 
     t_package* initialPackageToCpuDispatch = createPackage(KERNEL_MODULE_TO_CPU_DISPATCH);
     log_info(getLogger(), "Creando conexion con CpuDispatch. Se enviara un mensaje a CpuDispatch");
     socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
     sendPackage(initialPackageToCpuDispatch, socketClientCPUDispatch);
     log_info(getLogger(), "Paquete enviado con exito dispatch.");
 
+    // Con el socket de CPUDispatch abro un server para escucharlo.
     initServerForASocket(socketClientCPUDispatch, serverKernelForCPU);
 
+    // Inicio consola de Kernel. Si termina la consola termina todo el programa.
     pthread_t kernelConsoleThread;
     pthread_create(&kernelConsoleThread, NULL, (void*)readKernelConsole, NULL);
     pthread_join(kernelConsoleThread, NULL);
@@ -141,10 +143,10 @@ int main()
 
 */
 
-    // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion
+    // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion.
     finishAllServersSignal();
 
-    // Liberando todos los recursos
+    // Liberando todos los recursos.
     freeKernelConfig();
     destroyLogger();
 

@@ -24,13 +24,16 @@ void sendProcessPathToMemory(pcb_t *process, char* path);
 
 
 /// @brief Le envia a CPUInterrupt la interrupcion de fin de Quantum.
-void sendInterruptForQuantumEnd();
+void sendInterruptForQuantumEnd(pcb_t* process);
 
 
 /// @brief Le envia a CPUInterrupt la interrupcion de finalizar proceso por la consola.
-void sendInterruptForConsoleEndProcess();
+void sendInterruptForConsoleEndProcess(pcb_t* process);
 
 
-void sendIOGenSleepOperation(char* interfaceName, int timeOfOperation);
+void sendIOGenSleepOperationToIO(char* interfaceName, uint32_t timeOfOperation);
+
+
+void sendEndProcessToMemory(pcb_t* processToEnd);
 
 #endif

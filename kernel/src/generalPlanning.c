@@ -20,8 +20,6 @@ sem_t semMultiProgramming;
 sem_t semMultiProcessing;
 sem_t semAddPid;
 
-sem_t semQuantum;
-
 int pid;
 
 t_algorithm algorithm;

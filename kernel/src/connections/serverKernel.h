@@ -54,6 +54,8 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch);
 
 void ioSendInterface(int *socketClientIO);
 
+void ioSendEndOperation(int *socketClientIO);
+
 
 // Recibe el contexto del proceso de un package y lo retorna. 
 contextProcess recieveContextFromPackage(t_list* package);

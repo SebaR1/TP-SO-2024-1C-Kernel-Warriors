@@ -16,7 +16,7 @@ char* interfaceNameToFind;
 bool compareNameInterface(void *data)
 {
     interface_t *interface = (interface_t *)data;
-    return interface->name == interfaceNameToFind;
+    return string_equals_ignore_case(interface->name, interfaceNameToFind);
 }
 
 interface_t *foundInterface(char* nameRequestInterface)

@@ -103,7 +103,7 @@ void quantumControlInterrupt(pcb_t* pcbToExec)
         // Verifica si el proceso sigue ejecutándose o si termino el proceso y se elimino
         if (pcbToExec->state == PCB_EXEC || pcbToExec == NULL) {
             // Enviar interrupción para desalojar el proceso
-            sendInterruptForQuantumEnd();
+            sendInterruptForQuantumEnd(pcbToExec);
         }
 }
 
