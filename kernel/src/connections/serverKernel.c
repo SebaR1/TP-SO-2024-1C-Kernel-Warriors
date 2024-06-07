@@ -125,7 +125,6 @@ void serverKernelForCPU(int *socketClient)
     while (!exitLoop || _finishAllServersSignal)
     {
         // Recibir el codigo de operacion y hacer la operacion recibida.
-        log_info(getLogger(), "HOLA PASANDO POR ACA ANTES DE BLOQUEARMO");
         operationCode opCode = getOperation(*socketClient);
         if (_finishAllServersSignal)
         {
@@ -593,7 +592,7 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
 
         sendContextToCPU(processExec);
 
-        sem_post(&semBlock);
+        sem_post(&semBlock);  // No hace nada pero me quedaba bonito. :s
     }
 
     list_destroy(listPackage);

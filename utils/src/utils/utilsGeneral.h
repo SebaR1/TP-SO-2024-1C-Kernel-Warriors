@@ -9,6 +9,7 @@
 #include <readline/readline.h>
 #include <stdlib.h>
 #include <netdb.h>
+#include <commons/temporal.h>
 #include "listMutex.h"
 
 
@@ -105,7 +106,7 @@ typedef struct
 {
 	uint32_t pid;
 	uint32_t pc;
-	uint32_t timer;
+	t_temporal* quantumForVRR;
 	paramsKernelForIO *params;
 	t_registers *registersCpu;
 	listMutex_t *resources;
@@ -147,6 +148,11 @@ typedef enum
 	VRR,
 } t_algorithm;
 
+// Parametros para el hilo de quantum para VRR.
+typedef struct{
+	pcb_t* process;
+	int64_t timeForQuantum;
+} paramsQuantumVRRThread;
 
 //Estructura del contexto de ejecucion de los procesos
 typedef struct

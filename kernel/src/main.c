@@ -22,11 +22,15 @@ int main()
     sem_init(&semaphoreForIO, 0, 1); 
     sem_init(&semMultiProgramming, 0 , getKernelConfig()->GRADO_MULTIPROGRAMACION);
 
+    defineAlgorithm();
+
     pcbNewList = initListMutex();
     pcbReadyList = initListMutex();
     pcbExecList = initListMutex();
     pcbBlockList = initListMutex();
     pcbExitList = initListMutex();
+
+    if(algorithm == VRR) pcbReadyPriorityList = initListMutex();
 
     resourcesBlockList = initListMutex();
 
@@ -34,7 +38,6 @@ int main()
 
     initResources();
 
-    defineAlgorithm();
 
     initLongTermPlanning();
     initShortTermPlanning();
@@ -148,7 +151,7 @@ int main()
 
     // Liberando todos los recursos.
     freeKernelConfig();
-    destroyLogger();
+    
 
     sem_destroy(&semaphoreForIO);
     sem_destroy(&semNew);
@@ -165,13 +168,15 @@ int main()
     destroyListMutex(pcbExecList);
     destroyListMutex(pcbBlockList);
     destroyListMutex(pcbExitList);
+    if(algorithm == VRR) destroyListMutex(pcbReadyPriorityList);
+
     destroyResources();
     destroyInterfaces();
-    destroyListMutex(interfacesList);
 
     releaseConnection(socketClientMemory);
     releaseConnection(socketClientCPUDispatch);
 
+    destroyLogger();
 
     return 0;
 }

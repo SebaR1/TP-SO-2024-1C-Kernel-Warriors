@@ -21,14 +21,36 @@ void execState()
 {
     while(1)
     {
-        sem_wait(&semMultiProcessing);
-        sem_wait(&semExec);
-        // Espero que se desocupe la CPU
-        pcb_t *pcbToExec = list_pop(pcbReadyList);
-        list_push(pcbExecList, pcbToExec);
-        pcbToExec->state = PCB_EXEC;
+        sem_wait(&semMultiProcessing); // Espero que se desocupe la CPU
+        sem_wait(&semExec); 
 
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
+        pcb_t *pcbToExec;
+        bool flagAuxVRR = false; // Utilizo esto para saber si el proceso estaba anteriormente en pcbReadyPriorityList o no.
+
+        if(algorithm != VRR){ // FIFO Y RR tienen practicamente el mismo comportamiento. 
+            pcbToExec = list_pop(pcbReadyList);
+            list_push(pcbExecList, pcbToExec);
+            pcbToExec->state = PCB_EXEC;
+
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
+
+        } else {
+            if(list_mutex_is_empty(pcbReadyPriorityList)){ // Si el algoritmo de planificacion es VRR y pcbReadyPriorityList esta vacia, tiene el mismo comportamiento que RR o FIFO.
+                pcbToExec = list_pop(pcbReadyList);
+                list_push(pcbExecList, pcbToExec);
+                pcbToExec->state = PCB_EXEC;
+
+                log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
+
+            } else {
+                pcbToExec = list_pop(pcbReadyPriorityList);
+                list_push(pcbExecList, pcbToExec);
+                pcbToExec->state = PCB_EXEC;
+                log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
+                flagAuxVRR = true;
+            }
+        }
+        
 
         switch (algorithm)
         {
@@ -45,6 +67,20 @@ void execState()
             break;
 
         case VRR:
+            if(flagAuxVRR){ //Quiere decir que estaba en pcbReadyPriorityList, entonces me aseguro que tiene algo de quantum sobrante.
+
+                paramsQuantumVRRThread paramsQuantumVRR;
+                paramsQuantumVRR.process = pcbToExec;
+                paramsQuantumVRR.timeForQuantum = temporal_gettime(pcbToExec->quantumForVRR);
+
+                sendContextToCPU(pcbToExec);
+                pthread_t QuantumInterruptThread;
+                pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterruptVRR, &paramsQuantumVRR);
+                pthread_detach(QuantumInterruptThread);
+
+            } else {
+                
+            }
             break;
 
         default:
@@ -107,6 +143,20 @@ void quantumControlInterrupt(pcb_t* pcbToExec)
         }
 }
 
+void quantumControlInterruptVRR(paramsQuantumVRRThread* paramsQuantumVRRThread)
+{
+    // Bloquea el hilo durante el quantum de tiempo
+    pcb_t* pcbToExec = paramsQuantumVRRThread->process;
+    int64_t timeQuantum = paramsQuantumVRRThread->timeForQuantum;
+
+    usleep(timeQuantum*1000);
+
+    // Verifica si el proceso sigue ejecutándose o si termino el proceso y se elimino
+    if (pcbToExec->state == PCB_EXEC || pcbToExec == NULL) {
+        // Enviar interrupción para desalojar el proceso
+        sendInterruptForQuantumEnd(pcbToExec);
+    }
+}
 
 void defineAlgorithm()
 {

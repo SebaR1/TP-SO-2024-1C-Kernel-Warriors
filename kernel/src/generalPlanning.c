@@ -6,6 +6,8 @@ listMutex_t *pcbExecList;
 listMutex_t *pcbBlockList;
 listMutex_t *pcbExitList;
 
+listMutex_t *pcbReadyPriorityList;
+
 listMutex_t *resourcesBlockList;
 
 listMutex_t *interfacesList;
