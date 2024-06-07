@@ -224,16 +224,24 @@ void ioSendEndOperation(int *socketClientIO)
     processBlockToReady->params->param3 = NULL;
     processBlockToReady->params->param4 = NULL;
 
-    list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion, ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
+    if(algorithm != VRR){ //ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
+        list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion.
 
-    log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
 
-    sem_post(&semReady);
+        sem_post(&semReady);
 
+    } else {
+        list_push(pcbReadyPriorityList, processBlockToReady); // Pasa a pcbReadyPriorityList porque es casi seguro que no se va a dar la casualidad de que haya entrado a block justo en el tiempo que se termino el Quantum.
+
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY_PLUS", processBlockToReady->pid);
+
+        sem_post(&semReady);
+
+    }
 
     interfaceFound->isBusy = false;
     interfaceFound->processAssign = NULL;
-    
 
     if(!list_mutex_is_empty(interfaceFound->blockList)){ // Se fija si la interfaz tiene algun otro proceso en espera. 
         pcb_t* processBlocked = list_pop(interfaceFound->blockList);
@@ -311,7 +319,11 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
             log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
-            sem_post(&semMultiProcessing);; // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
+
+            sem_post(&semMultiProcessing); // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+
             
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
@@ -371,6 +383,9 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
             log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
 
             sem_post(&semMultiProcessing);; // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
             
@@ -435,6 +450,9 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
             log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR);
+            
             sem_post(&semMultiProcessing);; // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
             
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 

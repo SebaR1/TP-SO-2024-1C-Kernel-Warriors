@@ -71,15 +71,23 @@ void execState()
 
                 paramsQuantumVRRThread paramsQuantumVRR;
                 paramsQuantumVRR.process = pcbToExec;
-                paramsQuantumVRR.timeForQuantum = temporal_gettime(pcbToExec->quantumForVRR);
+                paramsQuantumVRR.timeForQuantum = getKernelConfig()->QUANTUM - temporal_gettime(pcbToExec->quantumForVRR); // El tiempo del Quantum - el tiempo que estuve en exec. Ese es el tiempo que va a estar en exec por estar en pcbReadyPriorityList.
 
                 sendContextToCPU(pcbToExec);
+
                 pthread_t QuantumInterruptThread;
                 pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterruptVRR, &paramsQuantumVRR);
                 pthread_detach(QuantumInterruptThread);
 
-            } else {
-                
+            } else { // Como no hay nada en pcbReadyPriorityList, actua como RR pero ademas contando el tiempo.
+
+                pcbToExec->quantumForVRR = temporal_create(); // Antes del send inicia el tiempo. A tener en cuenta la diferencia de ms, puede ser que se tenga que iniciar el temporizador despues de que se mande.
+                sendContextToCPU(pcbToExec);
+
+                pthread_t QuantumInterruptThread;
+                pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterrupt, pcbToExec);
+                pthread_detach(QuantumInterruptThread);
+
             }
             break;
 
@@ -146,7 +154,7 @@ void quantumControlInterrupt(pcb_t* pcbToExec)
 void quantumControlInterruptVRR(paramsQuantumVRRThread* paramsQuantumVRRThread)
 {
     // Bloquea el hilo durante el quantum de tiempo
-    pcb_t* pcbToExec = paramsQuantumVRRThread->process;
+    pcb_t *pcbToExec = paramsQuantumVRRThread->process;
     int64_t timeQuantum = paramsQuantumVRRThread->timeForQuantum;
 
     usleep(timeQuantum*1000);
