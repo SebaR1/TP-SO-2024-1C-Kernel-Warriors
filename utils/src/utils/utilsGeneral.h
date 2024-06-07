@@ -88,6 +88,7 @@ typedef enum
 {
 	PCB_NEW,
 	PCB_READY,
+	PCB_READY_PLUS,
 	PCB_EXEC,
 	PCB_BLOCK,
 	PCB_EXIT

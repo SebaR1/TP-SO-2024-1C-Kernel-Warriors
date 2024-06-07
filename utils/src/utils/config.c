@@ -59,7 +59,7 @@ t_list* _fromConfigToListOfInts(char** listChars)
     int i = 0;
     while (listChars[i] != NULL)
     {
-        int *temp = malloc(sizeof(int));
+        int *temp = malloc(sizeof(int)); // Sin este malloc, no persiste el valor asignado por fuera de esta funcion la variable int *temp.
         *temp = atoi(listChars[i]);
         //int temp = atoi(listChars[i]); //Para evitar el warning, agrego un temporal
         list_add(list, temp);
