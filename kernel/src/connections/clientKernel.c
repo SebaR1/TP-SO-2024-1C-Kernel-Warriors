@@ -82,6 +82,33 @@ void sendIOGenSleepOperationToIO(char* interfaceName, uint32_t timeOfOperation)
     destroyPackage(package);
 }
 
+void sendIOStdinReadOperationToIO(char* interfaceName, uint32_t registerDirection, uint32_t registerSize)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_STDIN_INTERFACE);
+
+    addToPackage(package, &(interfaceName), sizeof(string_length(interfaceName) + 1)); // +1 por el nulo.
+    addToPackage(package, &(registerDirection), sizeof(uint32_t));
+    addToPackage(package, &(registerSize), sizeof(uint32_t));
+
+    sendPackage(package, socketClientIo);
+
+    destroyPackage(package);
+}
+
+void sendIOStdoutWriteOperationToIO(char* interfaceName, uint32_t registerDirection, uint32_t registerSize)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_STDOUT_INTERFACE);
+
+    addToPackage(package, &(interfaceName), sizeof(string_length(interfaceName) + 1)); // +1 por el nulo.
+    addToPackage(package, &(registerDirection), sizeof(uint32_t));
+    addToPackage(package, &(registerSize), sizeof(uint32_t));
+
+    sendPackage(package, socketClientIo);
+
+    destroyPackage(package);
+}
+
+
 void sendEndProcessToMemory(pcb_t* processToEnd)
 {
     t_package* package = createPackage(KERNEL_END_PROCESS);

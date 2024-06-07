@@ -30,3 +30,15 @@ interface_t *foundInterface(char* nameRequestInterface)
     return interfaceFound;
 }
 
+void destroyInterfaces()
+{
+    int interfacesSize = list_mutex_size(interfacesList);
+
+    for(int i = 0; i < interfacesSize; i++){
+        interface_t *interfaceToDestroy = list_pop(interfacesList);
+        destroyListMutex(interfaceToDestroy->blockList);
+        free(interfaceToDestroy);
+    }
+
+    destroyListMutex(interfacesList);
+}

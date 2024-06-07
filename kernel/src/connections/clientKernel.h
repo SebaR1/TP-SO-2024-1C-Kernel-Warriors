@@ -34,6 +34,13 @@ void sendInterruptForConsoleEndProcess(pcb_t* process);
 void sendIOGenSleepOperationToIO(char* interfaceName, uint32_t timeOfOperation);
 
 
+void sendIOStdinReadOperationToIO(char* interfaceName, uint32_t registerDirection, uint32_t registerSize);
+
+
+void sendIOStdoutWriteOperationToIO(char* interfaceName, uint32_t registerDirection, uint32_t registerSize);
+
+
 void sendEndProcessToMemory(pcb_t* processToEnd);
+
 
 #endif

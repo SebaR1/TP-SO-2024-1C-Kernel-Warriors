@@ -59,8 +59,7 @@ void subtractInstanceResource(resource_t* resource)
 
 void destroyResources()
 {
-    t_list* resourcesList = getKernelConfig()->RECURSOS;
-    int sizeResources = list_size(resourcesList); //Necesito el tamaño de uno porque si llega a este punto no necesita verificar que sean iguales.
+    int sizeResources = list_mutex_size(resourcesBlockList); //Necesito el tamaño de uno porque si llega a este punto no necesita verificar que sean iguales.
 
     for(int i = 0; i < sizeResources; i++){
         resource_t *resourceToDestroy = list_pop(resourcesBlockList);

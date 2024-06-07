@@ -49,6 +49,9 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch);
 
 void cpuSendSignalofProcess(int *socketClientCPUDispatch);
 
+void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch);
+
+void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch);
 
 void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch);
 

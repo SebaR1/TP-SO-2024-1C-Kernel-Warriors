@@ -155,6 +155,14 @@ void serverKernelForCPU(int *socketClient)
             cpuSendRequestForIOGenSleep(socketClient);
             break;
 
+        case MEMORY_SEND_DATA: // Mock si llegara una operacion de IO_STDIN_READ.
+            cpuSendRequestForIOStdinRead(socketClient);
+            break;
+
+        case MEMORY_SEND_FRAME: // Mock si llegara una operacion de IO_STDOUT_WRITE.
+            cpuSendRequestForIOStdoutWrite(socketClient);
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -189,7 +197,7 @@ void ioSendInterface(int *socketClientIO)
     char* nameInterface = (char*)list_remove(listPackage, 0);
     interfaceType typeInterface = *(interfaceType*)list_remove(listPackage, 0);
     
-    // Creo la interfaz
+    // Creo la interfaz.
     interface_t *newInterface = createInterface(nameInterface, typeInterface);
 
     list_push(interfacesList, newInterface);
@@ -210,12 +218,25 @@ void ioSendEndOperation(int *socketClientIO)
     pcb_t *processBlockToReady = interfaceFound->processAssign;
 
     list_remove_element_mutex(pcbBlockList, processBlockToReady); // Remuevo el proceso de la pcbBlockList.
+
+    // No sé si es necesario esto porque si llegara a usar otra interfaz se sobreasignaria la asignacion que tenia anteriormente, pero para evitar bugs -_-. Y que quede claro que no se tienen que volver a usar los valores anteriores.
+    processBlockToReady->params->param1 = NULL;
+    processBlockToReady->params->param2 = NULL;
+    processBlockToReady->params->param3 = NULL;
+    processBlockToReady->params->param4 = NULL;
+
     list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion, ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
+
+    log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
+
+    sem_post(&semReady);
+
 
     interfaceFound->isBusy = false;
     interfaceFound->processAssign = NULL;
+    
 
-    if(!list_mutex_is_empty(interfaceFound->blockList)){ // Se fija si la interfaz tiene algun otro proceso en espera 
+    if(!list_mutex_is_empty(interfaceFound->blockList)){ // Se fija si la interfaz tiene algun otro proceso en espera. 
         pcb_t* processBlocked = list_pop(interfaceFound->blockList);
 
         interfaceFound->processAssign = processBlocked;
@@ -228,13 +249,213 @@ void ioSendEndOperation(int *socketClientIO)
             uint32_t timeOfOperationCast = (uint32_t)timeOfOperation; // Lo casteo para que se mande de esa forma por problemas de arquitectura entre computadoras. 
             sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperationCast); 
             break;
+
+        case STDIN:
+            int registerDirectionRead = atoi(processBlocked->params->param1);
+            int registerSizeRead = atoi(processBlocked->params->param2);
+            sendIOStdinReadOperationToIO(interfaceFound->name, registerDirectionRead, registerSizeRead);
+            break;
         
+        case STDOUT:
+            int registerDirectionWrite = atoi(processBlocked->params->param1);
+            int registerSizeWrite = atoi(processBlocked->params->param2);
+            sendIOStdoutWriteOperationToIO(interfaceFound->name, registerDirectionWrite, registerSizeWrite);
+            break;
+
         default:
             break;
         }
     }
 
 }
+
+void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso 
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    // Recibo la cantidad de tiempo a utilizar.
+    uint32_t timeOfOperation = *(uint32_t*)list_remove(listPackage, 0);
+
+    // Busco la interfaz por el nombre identificador.
+    interface_t *interfaceFound = foundInterface(nameRequestInterface);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != Generic){ // El tipo de interfaz Generic es el unico que puede realizar la operacion IO_GEN_SLEEP. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            sem_post(&semMultiProcessing);; // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+            
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+                sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperation);
+                
+            } else {
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
+                processExec->params->param1 = string_itoa(timeOfOperation); // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+            }
+        }
+    }
+}
+
+void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso 
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    uint32_t registerDirection = *(uint32_t*)list_remove(listPackage, 0);
+
+    uint32_t registerSize = *(uint32_t*)list_remove(listPackage, 0);
+
+    // Busco la interfaz por el nombre identificador.
+    interface_t *interfaceFound = foundInterface(nameRequestInterface);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != STDIN){ // El tipo de interfaz STDIN es el unico que puede realizar la operacion IO_STDIN_READ. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            sem_post(&semMultiProcessing);; // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+            
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+                sendIOStdinReadOperationToIO(interfaceFound->name, registerDirection, registerSize);
+                
+            } else {
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
+                processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+
+            }
+        }
+    }
+}
+
+void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso 
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    uint32_t registerDirection = *(uint32_t*)list_remove(listPackage, 0);
+
+    uint32_t registerSize = *(uint32_t*)list_remove(listPackage, 0);
+
+    // Busco la interfaz por el nombre identificador.
+    interface_t *interfaceFound = foundInterface(nameRequestInterface);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != STDOUT){ // El tipo de interfaz STDOUT es el unico que puede realizar la operacion IO_STDOUT_WRITE. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            sem_post(&semMultiProcessing);; // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+            
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+                sendIOStdoutWriteOperationToIO(interfaceFound->name, registerDirection, registerSize);
+                
+            } else {
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
+                processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+
+            }
+        }
+    }
+}
+
+
 
 void finishAllServersSignal()
 {
@@ -376,62 +597,6 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
     }
 
     list_destroy(listPackage);
-}
-
-void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
-{
-    t_list *listPackage = getPackage(*socketClientCPUDispatch);
-
-    // Recibo el contexto del paquete
-    contextProcess contextProcess = recieveContextFromPackage(listPackage);
-
-    // Asigno todo el contexto que recibi de CPU al proceso 
-    pcb_t *processExec = assignContextToPcb(contextProcess);
-
-    // Recibo el nombre de la interfaz a usar.
-    char* nameRequestInterface = list_remove(listPackage, 0);
-
-    // Recibo la cantidad de tiempo a utilizar.
-    uint32_t timeOfOperation = *(uint32_t*)list_remove(listPackage, 0);
-
-    // Busco la interfaz por el nombre identificador.
-    interface_t *interfaceFound = foundInterface(nameRequestInterface);
-
-    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
-        list_push(pcbExitList, processExec);
-        processExec->state = PCB_EXIT;
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
-        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
-
-        sem_post(&semMultiProcessing);
-        sem_post(&semExit);
-
-    } else {
-        if(interfaceFound->interfaceType != Generic){ // El tipo de interfaz Generic es el unico que puede realizar la operacion IO_GEN_SLEEP. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
-            list_push(pcbExitList, processExec);
-            processExec->state = PCB_EXIT;
-            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
-            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
-
-            sem_post(&semMultiProcessing);
-            sem_post(&semExit);
-
-        } else {
-            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
-            
-            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
-                interfaceFound->isBusy = true;
-                interfaceFound->processAssign = processExec;
-                sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperation);
-                
-            } else {
-                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
-                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
-                processExec->params->param1 = string_itoa(timeOfOperation); // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
-            }
-        }
-    }
-
 }
 
 contextProcess recieveContextFromPackage(t_list* package)
