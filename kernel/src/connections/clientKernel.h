@@ -31,13 +31,13 @@ void sendInterruptForQuantumEnd(pcb_t* process);
 void sendInterruptForConsoleEndProcess(pcb_t* process);
 
 
-void sendIOGenSleepOperationToIO(char* interfaceName, uint32_t timeOfOperation);
+void sendIOGenSleepOperationToIO(interface_t* interface, uint32_t timeOfOperation);
 
 
-void sendIOStdinReadOperationToIO(char* interfaceName, uint32_t registerDirection, uint32_t registerSize);
+void sendIOStdinReadOperationToIO(interface_t* interface, uint32_t registerDirection, uint32_t registerSize);
 
 
-void sendIOStdoutWriteOperationToIO(char* interfaceName, uint32_t registerDirection, uint32_t registerSize);
+void sendIOStdoutWriteOperationToIO(interface_t* interface, uint32_t registerDirection, uint32_t registerSize);
 
 
 void sendEndProcessToMemory(pcb_t* processToEnd);

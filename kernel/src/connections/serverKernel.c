@@ -69,7 +69,6 @@ void receiveClientIteration(int socketServer)
 
 void serverKernelForIO(int *socketClient)
 {
-    socketClientIo = *socketClient;
 
     bool exitLoop = false;
     while (!exitLoop || _finishAllServersSignal)
@@ -135,7 +134,7 @@ void serverKernelForCPU(int *socketClient)
         {
 
         case KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS: // Mock si llegara una señal de CPU si el proceso termino y pasa a exit
-            cpuSendEndProcess(socketClient);
+            cpuSendExitProcess(socketClient);
             break;
 
         case KERNEL_SEND_INTERRUPT_QUANTUM_END: // Mock si llegara una señal de respuesta de CPU por una interrupcion de quantum de kernel
@@ -199,6 +198,9 @@ void ioSendInterface(int *socketClientIO)
     // Creo la interfaz.
     interface_t *newInterface = createInterface(nameInterface, typeInterface);
 
+    // Guardo el socket, para tener la conexion.
+    newInterface->socket = socketClientIO;
+
     list_push(interfacesList, newInterface);
 
     list_destroy(listPackage);
@@ -254,19 +256,19 @@ void ioSendEndOperation(int *socketClientIO)
         case Generic:
             int timeOfOperation = atoi(processBlocked->params->param1); // Agarro el parametro que tenia y lo convierto a int.
             uint32_t timeOfOperationCast = (uint32_t)timeOfOperation; // Lo casteo para que se mande de esa forma por problemas de arquitectura entre computadoras. 
-            sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperationCast); 
+            sendIOGenSleepOperationToIO(interfaceFound, timeOfOperationCast); 
             break;
 
         case STDIN:
             int registerDirectionRead = atoi(processBlocked->params->param1);
             int registerSizeRead = atoi(processBlocked->params->param2);
-            sendIOStdinReadOperationToIO(interfaceFound->name, registerDirectionRead, registerSizeRead);
+            sendIOStdinReadOperationToIO(interfaceFound, registerDirectionRead, registerSizeRead);
             break;
         
         case STDOUT:
             int registerDirectionWrite = atoi(processBlocked->params->param1);
             int registerSizeWrite = atoi(processBlocked->params->param2);
-            sendIOStdoutWriteOperationToIO(interfaceFound->name, registerDirectionWrite, registerSizeWrite);
+            sendIOStdoutWriteOperationToIO(interfaceFound, registerDirectionWrite, registerSizeWrite);
             break;
 
         default:
@@ -328,7 +330,7 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
-                sendIOGenSleepOperationToIO(interfaceFound->name, timeOfOperation);
+                sendIOGenSleepOperationToIO(interfaceFound, timeOfOperation);
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
@@ -392,7 +394,7 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
-                sendIOStdinReadOperationToIO(interfaceFound->name, registerDirection, registerSize);
+                sendIOStdinReadOperationToIO(interfaceFound, registerDirection, registerSize);
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
@@ -458,7 +460,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
-                sendIOStdoutWriteOperationToIO(interfaceFound->name, registerDirection, registerSize);
+                sendIOStdoutWriteOperationToIO(interfaceFound, registerDirection, registerSize);
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
@@ -479,7 +481,7 @@ void finishAllServersSignal()
     _finishAllServersSignal = true;
 }
 
-void cpuSendEndProcess(int *socketClientCPUDispatch)
+void cpuSendExitProcess(int *socketClientCPUDispatch)
 {
     t_list *listPackage = getPackage(*socketClientCPUDispatch);
 

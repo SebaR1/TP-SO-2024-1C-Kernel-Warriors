@@ -40,6 +40,5 @@ extern t_algorithm algorithm;
 extern int socketClientMemory;
 extern int socketClientCPUDispatch;
 extern int socketClientCPUInterrupt;
-extern int socketClientIo;
 
 #endif

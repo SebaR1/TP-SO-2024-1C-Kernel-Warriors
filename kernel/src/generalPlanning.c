@@ -29,4 +29,3 @@ t_algorithm algorithm;
 int socketClientMemory;
 int socketClientCPUDispatch;
 int socketClientCPUInterrupt;
-int socketClientIo;

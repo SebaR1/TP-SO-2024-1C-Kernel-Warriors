@@ -37,7 +37,7 @@ void serverKernelForCPU(int *socketClient);
 
 
 // Recibe la opCode de que el proceso termino y lo manda a PcbExitList.
-void cpuSendEndProcess(int *socketClientCPUDispatch);
+void cpuSendExitProcess(int *socketClientCPUDispatch);
 
 
 // Recibe el contexto del proceso que paso por la interrupcion del Quantum y manda al proceso a PcbReadyList.

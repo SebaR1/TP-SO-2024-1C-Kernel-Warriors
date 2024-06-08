@@ -138,6 +138,7 @@ typedef struct
 	interfaceType interfaceType;
 	bool isBusy;
 	pcb_t *processAssign;
+	int *socket;
 	listMutex_t *blockList;
 } interface_t;
 
