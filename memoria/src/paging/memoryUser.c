@@ -87,6 +87,7 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
     // Si no hay suficientes paginas para reservar la cantidad que se pide, retorna Out Of Memory (-1)
     if (amountOfNewPages > amountOfFramesFree)
     {
+        sem_post(&semMemoryUserFrames);
         return OUT_OF_MEMORY;
     }
 
