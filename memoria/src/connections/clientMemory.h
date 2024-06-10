@@ -6,6 +6,8 @@
 #include "utils/client/utils.h"
 
 
+void sendTamPagina(int* socketClient, int tamPagina);
+
 void sendInstructionToCpu(int* socketClient, cpuGiveMeNextInstruction* params);
 
 

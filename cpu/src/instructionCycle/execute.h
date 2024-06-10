@@ -1,5 +1,5 @@
-#ifndef CPU_INSTRUCTIONS_H_
-#define CPU_INSTRUCTIONS_H_
+#ifndef CPU_EXECUTE_H_
+#define CPU_EXECUTE_H_
 
 #include <stdio.h>
 #include <stdint.h>

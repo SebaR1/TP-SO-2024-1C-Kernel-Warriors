@@ -79,6 +79,8 @@ void receiveClientIteration(int socketServer)
 
         log_info(getLogger(), "Se conecto un modulo CPU");
 
+        sendTamPagina(&socketClient, getMemoryConfig()->TAM_PAGINA);
+
         initServerForASocket(socketClient, serverMemoryForCPU);
 
         sem_wait(&semaphoreForCPU);

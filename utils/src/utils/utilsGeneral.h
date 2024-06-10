@@ -45,6 +45,7 @@ typedef enum
 	MEMORY_SEND_DATA,
 	MEMORY_OK,
 	MEMORY_SEND_FRAME,
+	MEMORY_TAM_PAGINA,
 
 	// ENVIADOS DESDE KERNEL
 	KERNEL_SEND_PROCESS_PATH,
@@ -226,6 +227,10 @@ typedef struct
 	int frame;
 } sendFrameInfo;
 
+typedef struct
+{
+	int tamPagina;
+} memoryTamPagina;
 
 
 

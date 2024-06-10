@@ -57,6 +57,7 @@ void operationPackageFromKernel(t_list* package);
 void memoryNextInstruction(int* socketClient);
 
 
+void memoryTamPaginaRecive(int* socketClient);
 
 
 

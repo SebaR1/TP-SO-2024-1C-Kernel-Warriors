@@ -4,6 +4,7 @@
 #include "utilsCPU/config.h"
 #include "utils/utilsGeneral.h"
 #include "instructionCycle/fetch.h"
+#include "MMU/MMU.h"
 
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
@@ -248,6 +249,10 @@ void serverCPUForMemory(int *socketClient)
             memoryNextInstruction(socketClient);
             break;
 
+        case MEMORY_TAM_PAGINA:
+            memoryTamPaginaRecive(socketClient);
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -282,6 +287,19 @@ void memoryNextInstruction(int* socketClient)
     sem_post(&semaphoreWaitInstruction); // Le aviso a la fase fetch del ciclo de instruccion que ya se obtuvo la instruccion en forma de string
 
     list_destroy(listPackage);
+}
+
+void memoryTamPaginaRecive(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    memoryTamPagina tamPagina;
+    tamPagina.tamPagina = *((int*)list_get(listPackage, 0)); // Obtengo el tamaño de pagina
+
+    setTamPagina(tamPagina.tamPagina);
+
+    list_destroy_and_destroy_elements(listPackage, free);
 }
 
 void finishAllServersSignal()

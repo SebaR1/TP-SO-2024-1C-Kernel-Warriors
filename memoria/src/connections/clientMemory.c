@@ -4,6 +4,22 @@
 
 
 
+void sendTamPagina(int* socketClient, int tamPagina)
+{
+    // Envio el tamaño de pagina a la CPU.
+    t_package* package = createPackage(MEMORY_TAM_PAGINA);
+
+    memoryTamPagina tamPaginaStruct;
+    tamPaginaStruct.tamPagina = getMemoryConfig()->TAM_PAGINA;
+
+    addToPackage(package, &(tamPaginaStruct.tamPagina), sizeof(int)); // Agrego la info al paquete
+
+    sendPackage(package, socketClient); // Envio el paquete
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+}
+
+
 void sendInstructionToCpu(int* socketClient, cpuGiveMeNextInstruction* params)
 {
     // Envio el string con la instruccion.
