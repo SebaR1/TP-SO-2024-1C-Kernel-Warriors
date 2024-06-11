@@ -57,7 +57,12 @@ void operationPackageFromKernel(t_list* package);
 void memoryNextInstruction(int* socketClient);
 
 
+// Recibe el tamaño de pagina por parte de la Memoria.
 void memoryTamPaginaRecive(int* socketClient);
+
+
+// Recibe un frame.
+void memoryGetFrame(int* socketClient);
 
 
 

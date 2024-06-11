@@ -5,6 +5,7 @@
 #include "utils/utilsGeneral.h"
 #include "instructionCycle/fetch.h"
 #include "MMU/MMU.h"
+#include "MMU/TLB.h"
 
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
@@ -253,6 +254,10 @@ void serverCPUForMemory(int *socketClient)
             memoryTamPaginaRecive(socketClient);
             break;
 
+        case MEMORY_SEND_FRAME:
+            memoryGetFrame(socketClient);
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -298,6 +303,22 @@ void memoryTamPaginaRecive(int* socketClient)
     tamPagina.tamPagina = *((int*)list_get(listPackage, 0)); // Obtengo el tamaño de pagina
 
     setTamPagina(tamPagina.tamPagina);
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
+void memoryGetFrame(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    sendFrameInfo frameInfo;
+    frameInfo.frame = *((int*)list_get(listPackage, 0)); // Obtengo el frame
+
+    setCurrentFrame(frameInfo.frame);
+
+    sem_post(&semTLBMiss); // Le aviso a la TLB que ya le llegó el frame de la Memoria.
+
 
     list_destroy_and_destroy_elements(listPackage, free);
 }

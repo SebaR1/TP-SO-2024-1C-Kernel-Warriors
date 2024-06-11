@@ -2,8 +2,10 @@
 #include <commons/config.h>
 #include "logger.h"
 #include "utils/config.h"
+#include "commons/string.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 
@@ -29,7 +31,17 @@ void _getCPUData()
 
     getCPUConfig()->CANTIDAD_ENTRADAS_TLB = config_get_int_value(_configFile, "CANTIDAD_ENTRADAS_TLB");
 
-    getCPUConfig()->ALGORITMO_TLB = config_get_string_value(_configFile, "ALGORITMO_TLB");
+    getCPUConfig()->ALGORITMO_TLB = getTLBAlgorithm(config_get_string_value(_configFile, "ALGORITMO_TLB"));
+}
+
+ALGORITMO_TLB_TYPE getTLBAlgorithm(char* ALGORITMO_TLB)
+{
+    ALGORITMO_TLB_TYPE type;
+
+    if(strcmp(ALGORITMO_TLB, "FIFO")) type = ALGORITMO_FIFO;
+    else if(strcmp(ALGORITMO_LRU, "LRU")) type = ALGORITMO_LRU;
+
+    return type;
 }
 
 void initCPUConfig(char* path)

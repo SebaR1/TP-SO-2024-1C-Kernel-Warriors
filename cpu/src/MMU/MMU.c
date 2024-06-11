@@ -1,4 +1,5 @@
 #include "MMU.h"
+#include <math.h>
 
 int TAM_PAGINA;
 
@@ -15,3 +16,8 @@ int getTamPagina()
 
 
 
+void getPageAndOffset(int logicalAddress, pageAndOffset* outPageAndOffset)
+{
+    outPageAndOffset->page = floor(logicalAddress / getTamPagina());
+    outPageAndOffset->offset = logicalAddress - outPageAndOffset->page * getTamPagina();
+}

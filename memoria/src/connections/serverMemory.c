@@ -209,7 +209,7 @@ void serverMemoryForCPU(int* socketClient)
             break;
 
         case CPU_GET_FRAME:
-            
+            requestFrame(socketClient);
             break;
 
         case DO_NOTHING:
@@ -409,6 +409,7 @@ void requestFrame(int* socketClient)
 
     getFrameInfo info;
 
+    
     info.PID = *((int*)list_get(listPackage, 0));
     info.page = *((int*)list_get(listPackage, 1));
 

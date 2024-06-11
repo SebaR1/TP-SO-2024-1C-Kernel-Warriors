@@ -16,6 +16,10 @@ void sendPCToMemory(int PID, uint32_t PC);
 
 
 
+/// @brief Le pide a la Memoria el frame correspondiente a los parametros
+/// @param pid Process id
+/// @param page La pagina para pedir
+void requestFrame(int pid, int page);
 
 
 

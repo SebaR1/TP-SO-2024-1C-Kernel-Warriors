@@ -4,6 +4,15 @@
 #include <commons/collections/list.h>
 #include <commons/config.h>
 
+
+
+typedef enum
+{
+    ALGORITMO_FIFO,
+    ALGORITMO_LRU,
+} ALGORITMO_TLB_TYPE;
+
+
 // Configuracion del archivo de configuracion de la cpu
 typedef struct
 {
@@ -12,7 +21,7 @@ typedef struct
     char* PUERTO_ESCUCHA_DISPATCH;
     char* PUERTO_ESCUCHA_INTERRUPT;
     int CANTIDAD_ENTRADAS_TLB;
-    char* ALGORITMO_TLB;
+    ALGORITMO_TLB_TYPE ALGORITMO_TLB;
 } cpuConfig;
 
 
@@ -31,6 +40,13 @@ void initCPUConfig(char* path);
 // Libera la memoria usada que almacenaba la configuracion del modulo en el que se esta parado.
 // Loggea con log_info lo que va ocurriendo.
 void freeCPUConfig();
+
+
+/// @brief Retorna el tipo de algoritmo de la TLB en base al string pasado por parametro
+/// @param ALGORITMO_TLB EL string que determina el tipo de algoritmo de reemplazo de TLB que aparece en el config.
+/// @return Retorna el tipo de algoritmo de reemplazo.
+ALGORITMO_TLB_TYPE getTLBAlgorithm(char* ALGORITMO_TLB);
+
 
 
 

@@ -4,6 +4,7 @@
 #include "utils/server/utils.h"
 #include "utils/client/utils.h"
 #include "instructionCycle/essentials.h"
+#include "MMU/TLB.h"
 #include "finish.h"
 
 
@@ -22,6 +23,7 @@ int main()
     sem_init(&semaphoreWaitInstruction, 0, 0);
     sem_init(&semaphoreFinishModule, 0, 0);
 
+    initTLB();
 
     // Creo y pongo a correr el/los threads de el/los servidores de este modulo
     waitClientsLoopParams paramsDispatch;
