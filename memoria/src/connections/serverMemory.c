@@ -413,6 +413,8 @@ void requestFrame(int* socketClient)
     info.PID = *((int*)list_get(listPackage, 0));
     info.page = *((int*)list_get(listPackage, 1));
 
+    // Le mando el frame directamente, sin crear otro hilo, ya que el mismo socket (CPU en este caso) va a necesitar
+    // terminar esta peticion antes de poder hacer otra.
     sendFrame(*socketClient, getFrame(info.PID, info.page));
 
     list_destroy_and_destroy_elements(listPackage, free);

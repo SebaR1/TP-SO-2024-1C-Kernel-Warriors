@@ -1,6 +1,7 @@
 #include "processLoader.h"
 #include "utils/utilsGeneral.h"
 #include "paging/memoryUser.h"
+#include "utilsMemory/delay.h"
 
 
 
@@ -62,6 +63,11 @@ void loadProcessByFile(int PID, FILE* pseudocodeFile)
 
 void loadProcessByPathWithParams(void* params)
 {
+    // Retardo de la operacion
+    memoryDelay();
+
+    // La operacion
+
     kernelPathProcess* processPath = (kernelPathProcess*)params;
 
     loadProcessByPath(processPath->pid, processPath->path);
@@ -92,6 +98,11 @@ void destroyProcess(int PID)
 
 void destroyProcessByParams(void* params)
 {
+    // Retardo de la operacion
+    memoryDelay();
+
+    // La operacion
+    
     kernelEndProcess* processEnd = params;
 
     destroyProcess(processEnd->pid);

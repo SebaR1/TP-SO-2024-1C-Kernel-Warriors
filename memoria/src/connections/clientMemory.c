@@ -1,6 +1,7 @@
 #include "clientMemory.h"
 #include "processManagment/codeInterpreter.h"
 #include "serverMemory.h"
+#include "utilsMemory/delay.h"
 
 
 
@@ -66,6 +67,10 @@ void sendConfirmation(int* socketClient)
 
 void sendFrame(int* socketClient, int frame)
 {
+    // Retardo de la operacion
+    memoryDelay();
+
+    // La operacion
     t_package* package = createPackage(MEMORY_SEND_FRAME);
 
     sendFrameInfo info;
