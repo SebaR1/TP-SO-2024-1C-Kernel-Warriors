@@ -3,6 +3,8 @@
 extern t_interfaceData interfaceData;
 extern t_resultsForStdin resultsForStdin;
 extern t_resultsForStdout resultsForStdout;
+extern sem_t semaphoreForStdin;
+extern sem_t semaphoreForStdout;
 bool _finishAllServersSignal = false;
 
 int socketKernel;
@@ -77,7 +79,7 @@ void serverIOForMemory(int *socketClient)
                 break;
 
             case MEMORY_OK:
-                // sem post
+                sem_post(&semaphoreForStdin);
                 break;
 
             case ERROR:
@@ -142,9 +144,9 @@ void receiveDataFromMemory()
 {
     t_list *listPackage = getPackage(socketKernel);
 
-    resultsForStdout.resultsFromRead = (char*)list_get(listPackage, 0);
+    resultsForStdout.resultsForWrite = (char*)list_get(listPackage, 0);
 
-    //sem_post
+    sem_post(&semaphoreForStdout);
 
     list_destroy(listPackage);
 }

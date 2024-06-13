@@ -4,42 +4,54 @@ t_interfaceData interfaceData;
 t_resultsForStdin resultsForStdin;
 t_resultsForStdout resultsForStdout;
 
-void createInterface(t_interfaceData *interfaceData)
+sem_t semaphoreForStdin;
+sem_t semaphoreForStdout;
+
+void createInterface()
 {
-    interfaceData->name = malloc(sizeof(char) * 8);
+    interfaceData.name = malloc(sizeof(char) * 8);
     printf("Name: ");
-    scanf(" %s", interfaceData->name);
+    scanf(" %s", interfaceData.name);
 
     if (string_equals_ignore_case(getIOConfig()->TIPO_INTERFAZ, "GENERICA"))
-        interfaceData->type = GENERIC_TYPE;
+        interfaceData.type = Generic;
     else if (string_equals_ignore_case(getIOConfig()->TIPO_INTERFAZ, "STDIN"))
-        interfaceData->type = STDIN_TYPE;
+        interfaceData.type = STDIN;
     else if (string_equals_ignore_case(getIOConfig()->TIPO_INTERFAZ, "STDOUT"))
-        interfaceData->type = STDOUT_TYPE;
+        interfaceData.type = STDOUT;
     else if (string_equals_ignore_case(getIOConfig()->TIPO_INTERFAZ, "DIALFS"))
-        interfaceData->type = DIALFS_TYPE;
+        interfaceData.type = DialFS;
 
-    interfaceData->workUnits = getIOConfig()->TIEMPO_UNIDAD_TRABAJO;
+    interfaceData.workUnits = getIOConfig()->TIEMPO_UNIDAD_TRABAJO;
 
-    interfaceData->currentOperation.pid = -1;
-    interfaceData->currentOperation.operation = IO_NULL;
-    switch (interfaceData->type)
+    interfaceData.currentOperation.pid = -1;
+    interfaceData.currentOperation.operation = IO_NULL;
+    switch (interfaceData.type)
     {
-        case GENERIC_TYPE:
-        interfaceData->currentOperation.params = malloc(sizeof(t_paramsForGenericInterface));
+        case Generic:
+        interfaceData.currentOperation.params = malloc(sizeof(t_paramsForGenericInterface));
         break;
 
-        case STDIN_TYPE:
-        interfaceData->currentOperation.params = malloc(sizeof(t_paramsForStdinInterface));
+        case STDIN:
+        interfaceData.currentOperation.params = malloc(sizeof(t_paramsForStdinInterface));
         resultsForStdin.resultsFromRead = NULL;
         break;
 
-        case STDOUT_TYPE:
-        interfaceData->currentOperation.params = malloc(sizeof(t_paramsForStdoutInterface));
-        resultsForStdout.resultsFromRead = NULL;
+        case STDOUT:
+        interfaceData.currentOperation.params = malloc(sizeof(t_paramsForStdoutInterface));
+        resultsForStdout.resultsForWrite = NULL;
+        break;
+
+        case DialFS:
         break;
 
         default:
         break;
     }
+}
+
+void destroyInterface()
+{
+    free(interfaceData.name);
+    free(interfaceData.currentOperation.params);
 }

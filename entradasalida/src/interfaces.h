@@ -13,6 +13,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <commons/collections/list.h>
+#include <semaphore.h>
 
 typedef enum
 {   
@@ -27,13 +28,13 @@ typedef enum
     IO_FS_READ
 } supported_operations;
 
-typedef enum
+/*typedef enum
 {
     GENERIC_TYPE,
     STDIN_TYPE,
     STDOUT_TYPE,
     DIALFS_TYPE
-} interface_type;
+} interface_type;*/
 
 typedef struct
 {   
@@ -45,7 +46,7 @@ typedef struct
 typedef struct
 {
     char *name;
-    interface_type type;
+    interfaceType type;
     t_currentOperation currentOperation;
     uint32_t workUnits;
 } t_interfaceData;
@@ -74,10 +75,12 @@ typedef struct
 
 typedef struct
 {
-    char *resultsFromRead;
+    char *resultsForWrite;
 } t_resultsForStdout;
 
 
-void createInterface(t_interfaceData *interfaceData);
+void createInterface();
+
+void destroyInterface();
 
 #endif

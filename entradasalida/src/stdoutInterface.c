@@ -1,9 +1,10 @@
 #include "stdoutInterface.h"
 
 extern t_interfaceData interfaceData;
-extern t_resultsForStdin resultsForStdout;
+extern t_resultsForStdout resultsForStdout;
 extern int socketKernel;
 extern int socketMemory;
+extern sem_t semaphoreForStdout;
 
 void executeIOStdoutWriteAndSendResults()
 {
@@ -11,8 +12,8 @@ void executeIOStdoutWriteAndSendResults()
 
     sendIOStdoutWriteResultsToKernel();
 
-    free(resultsForStdout.resultsFromRead);
-    resultsForStdout.resultsFromRead = NULL;
+    free(resultsForStdout.resultsForWrite);
+    resultsForStdout.resultsForWrite = NULL;
 
     interfaceData.currentOperation.operation = IO_NULL;
     free(interfaceData.currentOperation.params);
@@ -20,9 +21,11 @@ void executeIOStdoutWriteAndSendResults()
 }
 
 void executeIOStdoutWrite()
-{
+{   
+    log_info(getLogger(), "PID: %d - Operacion: IO_STDOUT_WRITE", (int)interfaceData.currentOperation.pid);
     sendIOReadRequestToMemory();
-    //sem wait
+    
+    sem_wait(&semaphoreForStdout);
 
-    printf("%s", resultsForStdout.resultsFromRead);
+    printf("%s", resultsForStdout.resultsForWrite);
 }

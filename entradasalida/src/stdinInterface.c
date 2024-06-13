@@ -4,6 +4,7 @@ extern t_interfaceData interfaceData;
 extern t_resultsForStdin resultsForStdin;
 extern int socketKernel;
 extern int socketMemory;
+extern sem_t semaphoreForStdin;
 
 void executeIOStdinReadAndSendResults()
 {   
@@ -11,7 +12,7 @@ void executeIOStdinReadAndSendResults()
 
     sendResultsFromStdinToMemory();
 
-    //sem wait
+    sem_wait(&semaphoreForStdin);
 
     sendIOStdinReadResultsToKernel();
 
@@ -25,7 +26,7 @@ void executeIOStdinReadAndSendResults()
 }
 
 void executeIOStdinRead()
-{
+{   
     log_info(getLogger(), "PID: %d - Operacion: IO_STDIN_READ", (int)interfaceData.currentOperation.pid);
     //t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
 
