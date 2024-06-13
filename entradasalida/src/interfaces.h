@@ -5,48 +5,79 @@
 #include "utilsIO/logger.h"
 #include "utils/client/utils.h"
 #include "utils/server/utils.h"
+#include "connections/serverIO.h"
+#include "connections/clientIO.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <commons/collections/list.h>
 
-// Configuración del archivo de configuración para las interfaces genéricas
+typedef enum
+{   
+    IO_NULL,
+    IO_GEN_SLEEP,
+    IO_STDIN_READ,
+    IO_STDOUT_WRITE,
+    IO_FS_CREATE,
+    IO_FS_DELETE,
+    IO_FS_TRUNCATE,
+    IO_FS_WRITE,
+    IO_FS_READ
+} supported_operations;
+
+typedef enum
+{
+    GENERIC_TYPE,
+    STDIN_TYPE,
+    STDOUT_TYPE,
+    DIALFS_TYPE
+} interface_type;
+
+typedef struct
+{   
+    uint32_t pid;
+    supported_operations operation;
+    void* params;
+} t_currentOperation;
+
 typedef struct
 {
-    int TIEMPO_UNIDAD_TRABAJO;
-    char* IP_KERNEL;
-    char* PUERTO_KERNEL;
-} ioConfigGeneric;
-
-typedef struct{
     char *name;
-    ioConfigGeneric *config;
-} genericInterface;
+    interface_type type;
+    t_currentOperation currentOperation;
+    uint32_t workUnits;
+} t_interfaceData;
 
-/*typedef struct{
-    char *name;
+typedef struct
+{
+    uint32_t workUnits;
+} t_paramsForGenericInterface;
 
-} interfaceParams;
-*/
+typedef struct
+{
+    uint32_t registerDirection;
+    uint32_t registerSize;
+} t_paramsForStdinInterface;
+
+typedef struct
+{
+    uint32_t registerDirection;
+    uint32_t registerSize;
+} t_paramsForStdoutInterface;
+
+typedef struct
+{
+    char *resultsFromRead;
+} t_resultsForStdin;
+
+typedef struct
+{
+    char *resultsFromRead;
+} t_resultsForStdout;
 
 
-// Retorna un puntero a la struct propia de la configuracion, la cual deberia contener la informacion de la configuracion de la interfaz genérica.
-ioConfigGeneric* getIOConfigGeneric(genericInterface *interface);
-
-// Funcion auxiliar para settear todos los datos desde el config hasta la variable global correspondiente
-void getIODataForGenericInterface(genericInterface *interface);
-
-genericInterface *genericInterfaceCreate(char *_name);
-
-void *interfaceCreate(char *name);
-
-void genericInterfaceDestroy(genericInterface *interface);
-
-void serverIOForKernel(int *socketClient);
-
-//void handleInterfaceLoop(interfaceParams params);
-
-void ioGenSleep(uint32_t workUnits);
+void createInterface(t_interfaceData *interfaceData);
 
 #endif

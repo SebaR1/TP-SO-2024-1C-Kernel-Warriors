@@ -1,25 +1,33 @@
 #include "interfaces.h"
 
-extern genericInterface* exampleInterface;
+extern t_interfaceData interfaceData;
+extern t_currentOperation currentOperation;
 
 int main(int argc, char* argv[])
-{
+{   
     // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
     initLogger("IO.log", "entrada salida", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
     initIOConfig("IO.config");
 
-    t_package* initialPackage = createPackage(IO_MODULE);
+    // Se llena la lista global de operaciones posibles a realizar en base a la informacion del config
+    createInterface(&interfaceData);
+
+    t_package* initialPackageForKernel = createPackage(IO_MODULE);
     log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel.");
     int socketClientKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
-    sendPackage(initialPackage, socketClientKernel);
-    log_info(getLogger(), "Paquete enviado con exito.");
+    sendPackage(initialPackageForKernel, socketClientKernel);
+    log_info(getLogger(), "Paquete enviado con exito al Kernel.");
+
+    t_package* initialPackageForMemory = createPackage(IO_MODULE);
+    log_info(getLogger(), "Creando conexion con la memoria. Se enviara un mensaje a la Memoria.");
+    int socketClientMemory = createConection(getLogger(), getIOConfig()->IP_MEMORIA, getIOConfig()->PUERTO_MEMORIA);
+    sendPackage(initialPackageForMemory, socketClientMemory);
+    log_info(getLogger(), "Paquete enviado con exito a la memoria.");
 
     initServerForASocket(socketClientKernel, serverIOForKernel);
-
-    exampleInterface = interfaceCreate("anInterface");
-    log_info(getLogger(), "Se creó una interfaz genérica.");
+    initServerForASocket(socketClientMemory, serverIOForMemory);
 
     /*
 
@@ -61,7 +69,8 @@ int main(int argc, char* argv[])
 
     */
 
-    destroyPackage(initialPackage);
+    destroyPackage(initialPackageForKernel);
+    destroyPackage(initialPackageForMemory);
 
     // Liberando todos los recursos
     freeIOConfig();
