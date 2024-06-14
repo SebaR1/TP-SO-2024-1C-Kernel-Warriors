@@ -144,3 +144,8 @@ void receiveDataFromMemory()
 
     list_destroy(listPackage);
 }
+
+void finishAllServersSignal()
+{
+    _finishAllServersSignal = true;
+}

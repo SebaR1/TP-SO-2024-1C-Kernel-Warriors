@@ -22,4 +22,6 @@ void sendResultsFromIOStdoutWriteToKernel();
 
 void receiveDataFromMemory();
 
+void finishAllServersSignal();
+
 #endif

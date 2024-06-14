@@ -35,7 +35,6 @@ void sendIOStdinReadResultsToKernel()
 void sendIOStdoutWriteResultsToKernel()
 {
     t_package* package = createPackage(IO_OK);
-    //cambiar codigo de operacion
 
     sendPackage(package, socketKernel);
     
