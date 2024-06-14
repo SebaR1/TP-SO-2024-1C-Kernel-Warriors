@@ -5,6 +5,7 @@ extern t_resultsForStdin resultsForStdin;
 extern t_resultsForStdout resultsForStdout;
 extern sem_t semaphoreForStdin;
 extern sem_t semaphoreForStdout;
+extern sem_t semaphoreForModule;
 bool _finishAllServersSignal = false;
 
 int socketKernel;
@@ -53,6 +54,7 @@ void serverIOForKernel(int *socketClient)
     }
 
     free(socketClient);
+    sem_post(&semaphoreForModule);
 }
 
 void serverIOForMemory(int *socketClient)
@@ -94,6 +96,7 @@ void serverIOForMemory(int *socketClient)
     }
 
     free(socketClient);
+    sem_post(&semaphoreForModule);
 }
 
 void sendResultsFromIOGenSleepToKernel()
@@ -101,7 +104,7 @@ void sendResultsFromIOGenSleepToKernel()
     t_list *listPackage = getPackage(socketKernel);
 
     interfaceData.currentOperation.operation = IO_GEN_SLEEP;
-    interfaceData.currentOperation.pid = *((uint8_t*)list_get(listPackage, 0));
+    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
     t_paramsForGenericInterface *params = (t_paramsForGenericInterface*)interfaceData.currentOperation.params;
     params->workUnits = *((uint32_t*)list_get(listPackage, 1));
 
@@ -115,7 +118,7 @@ void sendResultsFromIOStdinReadToKernel()
     t_list *listPackage = getPackage(socketKernel);
 
     interfaceData.currentOperation.operation = IO_STDIN_READ;
-    interfaceData.currentOperation.pid = *((uint8_t*)list_get(listPackage, 0));
+    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
     params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
     params->registerSize = *((uint32_t*)list_get(listPackage, 2));
@@ -130,7 +133,7 @@ void sendResultsFromIOStdoutWriteToKernel()
     t_list *listPackage = getPackage(socketKernel);
 
     interfaceData.currentOperation.operation = IO_STDOUT_WRITE;
-    interfaceData.currentOperation.pid = *((uint8_t*)list_get(listPackage, 0));
+    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
     t_paramsForStdoutInterface *params = (t_paramsForStdoutInterface*)interfaceData.currentOperation.params;
     params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
     params->registerSize = *((uint32_t*)list_get(listPackage, 2));

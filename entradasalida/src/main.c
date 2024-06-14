@@ -4,6 +4,7 @@ extern t_interfaceData interfaceData;
 extern t_currentOperation currentOperation;
 extern sem_t semaphoreForStdin;
 extern sem_t semaphoreForStdout;
+extern sem_t semaphoreForModule;
 
 int main(int argc, char* argv[])
 {   
@@ -16,13 +17,12 @@ int main(int argc, char* argv[])
     // Inicializacion de semaforos y reserva de memoria
     sem_init(&semaphoreForStdin, 0, 1);
     sem_init(&semaphoreForStdout, 0, 1);
+    sem_init(&semaphoreForModule, 0, 1);
 
     // Se llena la lista global de operaciones posibles a realizar en base a la informacion del config
     createInterface(&interfaceData);
 
     t_package* initialPackageForKernel = createPackage(IO_MODULE);
-    addToPackage(initialPackageForKernel, interfaceData.name, sizeof(char) * 8);
-    addToPackage(initialPackageForKernel, &interfaceData.type, sizeof(interfaceType));
     log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel con el nombre y tipo de la interfaz.");
     int socketClientKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
     sendPackage(initialPackageForKernel, socketClientKernel);
@@ -34,8 +34,12 @@ int main(int argc, char* argv[])
     sendPackage(initialPackageForMemory, socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito a la memoria.");
 
+    sendInterfaceToKernel();
+
     initServerForASocket(socketClientKernel, serverIOForKernel);
     initServerForASocket(socketClientMemory, serverIOForMemory);
+
+    sem_wait(&semaphoreForModule);
 
     /*
 

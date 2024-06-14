@@ -6,9 +6,10 @@ t_resultsForStdout resultsForStdout;
 
 sem_t semaphoreForStdin;
 sem_t semaphoreForStdout;
+sem_t semaphoreForModule;
 
 void createInterface()
-{
+{   
     interfaceData.name = malloc(sizeof(char) * 8);
     printf("Name: ");
     scanf(" %s", interfaceData.name);

@@ -5,9 +5,21 @@ extern int socketMemory;
 extern t_interfaceData interfaceData;
 extern t_resultsForStdin resultsForStdin;
 
+void sendInterfaceToKernel()
+{   
+    t_package* package = createPackage(IO_SEND_INTERFACE);
+
+    addToPackage(package, interfaceData.name, sizeof(char) * 8);
+    addToPackage(package, &interfaceData.type, sizeof(interfaceType));
+
+    sendPackage(package, socketKernel);
+
+    destroyPackage(package);
+}
+
 void sendIOGenSleepResultsToKernel()
 {
-    t_package* package = createPackage(GEN_IO_SLEEP_OK);
+    t_package* package = createPackage(IO_OK);
 
     sendPackage(package, socketKernel);
     
@@ -16,7 +28,7 @@ void sendIOGenSleepResultsToKernel()
 
 void sendIOStdinReadResultsToKernel()
 {
-    t_package* package = createPackage(STDIN_READ_OK);
+    t_package* package = createPackage(IO_OK);
 
     addToPackage(package, resultsForStdin.resultsFromRead, string_length(resultsForStdin.resultsFromRead));
 
@@ -27,7 +39,7 @@ void sendIOStdinReadResultsToKernel()
 
 void sendIOStdoutWriteResultsToKernel()
 {
-    t_package* package = createPackage(STDOUT_WRITE_OK);
+    t_package* package = createPackage(IO_OK);
     //cambiar codigo de operacion
 
     sendPackage(package, socketKernel);
