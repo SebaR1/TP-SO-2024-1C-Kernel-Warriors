@@ -18,18 +18,18 @@ int main(int argc, char* argv[])
 
     t_package* initialPackageForKernel = createPackage(IO_MODULE);
     log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel con el nombre y tipo de la interfaz.");
-    int socketClientKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
-    sendPackage(initialPackageForKernel, socketClientKernel);
+    socketKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
+    sendPackage(initialPackageForKernel, socketKernel);
     log_info(getLogger(), "Paquete enviado con exito al Kernel.");
 
     t_package* initialPackageForMemory = createPackage(IO_MODULE);
     log_info(getLogger(), "Creando conexion con la memoria. Se enviara un mensaje a la Memoria.");
-    int socketClientMemory = createConection(getLogger(), getIOConfig()->IP_MEMORIA, getIOConfig()->PUERTO_MEMORIA);
-    sendPackage(initialPackageForMemory, socketClientMemory);
+    socketMemory = createConection(getLogger(), getIOConfig()->IP_MEMORIA, getIOConfig()->PUERTO_MEMORIA);
+    sendPackage(initialPackageForMemory, socketMemory);
     log_info(getLogger(), "Paquete enviado con exito a la memoria.");
 
-    initServerForASocket(socketClientKernel, serverIOForKernel);
-    initServerForASocket(socketClientMemory, serverIOForMemory);
+    initServerForASocket(socketKernel, serverIOForKernel);
+    initServerForASocket(socketMemory, serverIOForMemory);
 
     sendInterfaceToKernel();
 
@@ -81,6 +81,9 @@ int main(int argc, char* argv[])
     // Liberando todos los recursos
     freeIOConfig();
     destroyLogger();
+
+    releaseConnection(socketKernel);
+    releaseConnection(socketMemory);
 
     sem_destroy(&semaphoreForStdin);
     sem_destroy(&semaphoreForStdout);
