@@ -1,11 +1,5 @@
 #include "stdoutInterface.h"
 
-extern t_interfaceData interfaceData;
-extern t_resultsForStdout resultsForStdout;
-extern int socketKernel;
-extern int socketMemory;
-extern sem_t semaphoreForStdout;
-
 void executeIOStdoutWriteAndSendResults()
 {
     executeIOStdoutWrite();

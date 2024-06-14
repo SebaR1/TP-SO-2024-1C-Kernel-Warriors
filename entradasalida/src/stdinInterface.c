@@ -1,11 +1,5 @@
 #include "stdinInterface.h"
 
-extern t_interfaceData interfaceData;
-extern t_resultsForStdin resultsForStdin;
-extern int socketKernel;
-extern int socketMemory;
-extern sem_t semaphoreForStdin;
-
 void executeIOStdinReadAndSendResults()
 {   
     executeIOStdinRead();

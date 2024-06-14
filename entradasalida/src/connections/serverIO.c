@@ -1,15 +1,6 @@
 #include "serverIO.h"
 
-extern t_interfaceData interfaceData;
-extern t_resultsForStdin resultsForStdin;
-extern t_resultsForStdout resultsForStdout;
-extern sem_t semaphoreForStdin;
-extern sem_t semaphoreForStdout;
-extern sem_t semaphoreForModule;
 bool _finishAllServersSignal = false;
-
-int socketKernel;
-int socketMemory;
 
 void serverIOForKernel(int *socketClient)
 {   
@@ -100,7 +91,7 @@ void serverIOForMemory(int *socketClient)
 }
 
 void sendResultsFromIOGenSleepToKernel()
-{
+{   
     t_list *listPackage = getPackage(socketKernel);
 
     interfaceData.currentOperation.operation = IO_GEN_SLEEP;

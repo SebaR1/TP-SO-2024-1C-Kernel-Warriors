@@ -14,7 +14,6 @@
 #include <commons/string.h>
 #include <commons/collections/list.h>
 #include <semaphore.h>
-
 typedef enum
 {   
     IO_NULL,
@@ -78,6 +77,16 @@ typedef struct
     char *resultsForWrite;
 } t_resultsForStdout;
 
+extern t_interfaceData interfaceData;
+extern t_resultsForStdin resultsForStdin;
+extern t_resultsForStdout resultsForStdout;
+
+extern sem_t semaphoreForStdin;
+extern sem_t semaphoreForStdout;
+extern sem_t semaphoreForModule;
+
+extern int socketKernel;
+extern int socketMemory;
 
 void createInterface();
 

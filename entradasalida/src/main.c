@@ -1,11 +1,5 @@
 #include "interfaces.h"
 
-extern t_interfaceData interfaceData;
-extern t_currentOperation currentOperation;
-extern sem_t semaphoreForStdin;
-extern sem_t semaphoreForStdout;
-extern sem_t semaphoreForModule;
-
 int main(int argc, char* argv[])
 {   
     // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
@@ -15,9 +9,9 @@ int main(int argc, char* argv[])
     initIOConfig("IO.config");
 
     // Inicializacion de semaforos y reserva de memoria
-    sem_init(&semaphoreForStdin, 0, 1);
-    sem_init(&semaphoreForStdout, 0, 1);
-    sem_init(&semaphoreForModule, 0, 1);
+    sem_init(&semaphoreForStdin, 0, 0);
+    sem_init(&semaphoreForStdout, 0, 0);
+    sem_init(&semaphoreForModule, 0, 0);
 
     // Se llena la lista global de operaciones posibles a realizar en base a la informacion del config
     createInterface(&interfaceData);
@@ -34,10 +28,10 @@ int main(int argc, char* argv[])
     sendPackage(initialPackageForMemory, socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito a la memoria.");
 
-    sendInterfaceToKernel();
-
     initServerForASocket(socketClientKernel, serverIOForKernel);
     initServerForASocket(socketClientMemory, serverIOForMemory);
+
+    sendInterfaceToKernel();
 
     sem_wait(&semaphoreForModule);
 
@@ -90,6 +84,7 @@ int main(int argc, char* argv[])
 
     sem_destroy(&semaphoreForStdin);
     sem_destroy(&semaphoreForStdout);
+    sem_destroy(&semaphoreForModule);
 
     return 0;
 }

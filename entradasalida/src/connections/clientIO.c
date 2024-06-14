@@ -1,10 +1,5 @@
 #include "clientIO.h"
 
-extern int socketKernel;
-extern int socketMemory;
-extern t_interfaceData interfaceData;
-extern t_resultsForStdin resultsForStdin;
-
 void sendInterfaceToKernel()
 {   
     t_package* package = createPackage(IO_SEND_INTERFACE);

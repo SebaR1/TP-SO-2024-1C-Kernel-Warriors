@@ -1,10 +1,7 @@
 #include "genericInterface.h"
 
-extern t_interfaceData interfaceData;
-extern int socketKernel;
-
 void executeIOGenSleepAndSendResults()
-{
+{   
     executeIOGenSleep();
 
     sendIOGenSleepResultsToKernel();

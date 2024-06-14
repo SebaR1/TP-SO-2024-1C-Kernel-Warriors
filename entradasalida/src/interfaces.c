@@ -8,6 +8,9 @@ sem_t semaphoreForStdin;
 sem_t semaphoreForStdout;
 sem_t semaphoreForModule;
 
+int socketKernel;
+int socketMemory;
+
 void createInterface()
 {   
     interfaceData.name = malloc(sizeof(char) * 8);
