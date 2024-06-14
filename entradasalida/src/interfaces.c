@@ -11,11 +11,10 @@ sem_t semaphoreForModule;
 int socketKernel;
 int socketMemory;
 
-void createInterface()
+void createInterface(char *name)
 {   
-    interfaceData.name = malloc(sizeof(char) * 8);
-    printf("Name: ");
-    scanf(" %s", interfaceData.name);
+    interfaceData.name = malloc(string_length(name) + 1);
+    strcpy(interfaceData.name, name);
 
     if (string_equals_ignore_case(getIOConfig()->TIPO_INTERFAZ, "GENERICA"))
         interfaceData.type = Generic;
@@ -34,19 +33,23 @@ void createInterface()
     {
         case Generic:
         interfaceData.currentOperation.params = malloc(sizeof(t_paramsForGenericInterface));
+        log_info(getLogger(), "Creada interfaz de tipo Generica, con nombre \"%s\"", interfaceData.name);
         break;
 
         case STDIN:
         interfaceData.currentOperation.params = malloc(sizeof(t_paramsForStdinInterface));
         resultsForStdin.resultsFromRead = NULL;
+        log_info(getLogger(), "Creada interfaz de tipo STDIN, con nombre \"%s\"", interfaceData.name);
         break;
 
         case STDOUT:
         interfaceData.currentOperation.params = malloc(sizeof(t_paramsForStdoutInterface));
         resultsForStdout.resultsForWrite = NULL;
+        log_info(getLogger(), "Creada interfaz de tipo STDOUT, con nombre \"%s\"", interfaceData.name);
         break;
 
         case DialFS:
+        log_info(getLogger(), "Creada interfaz de tipo DialFS, con nombre \"%s\"", interfaceData.name);
         break;
 
         default:

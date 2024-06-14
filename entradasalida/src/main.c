@@ -13,11 +13,20 @@ int main(int argc, char* argv[])
     sem_init(&semaphoreForStdout, 0, 0);
     sem_init(&semaphoreForModule, 0, 0);
 
-    // Se llena la lista global de operaciones posibles a realizar en base a la informacion del config
-    createInterface(&interfaceData);
+    // Se crea el nombre de la interfaz
+    if (argc > 1) createInterface(argv[1]);
+    else
+    {   
+        // Esta variante pide el nombre cuando no se lo ingresa como parámetro del main, es para pruebas, luego se eliminará
+        char *name = malloc(sizeof(char) * 6);
+        printf("Nombre: ");
+        scanf(" %s", name);
+        createInterface(name);
+        free(name);
+    }
 
     t_package* initialPackageForKernel = createPackage(IO_MODULE);
-    log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel con el nombre y tipo de la interfaz.");
+    log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel.");
     socketKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
     sendPackage(initialPackageForKernel, socketKernel);
     log_info(getLogger(), "Paquete enviado con exito al Kernel.");
@@ -31,7 +40,9 @@ int main(int argc, char* argv[])
     initServerForASocket(socketKernel, serverIOForKernel);
     initServerForASocket(socketMemory, serverIOForMemory);
 
+    log_info(getLogger(), "Se enviara el tipo y nombre de la interfaz al Kernel.");
     sendInterfaceToKernel();
+    log_info(getLogger(), "Tipo y nombre de la interfaz enviado al Kernel.");
     
     sem_wait(&semaphoreForModule);
 

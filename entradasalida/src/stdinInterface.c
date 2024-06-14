@@ -16,7 +16,6 @@ void executeIOStdinReadAndSendResults()
     interfaceData.currentOperation.operation = IO_NULL;
     free(interfaceData.currentOperation.params);
     interfaceData.currentOperation.pid = -1;
-    //resultsForStdin.resultsFromRead
 }
 
 void executeIOStdinRead()

@@ -72,6 +72,7 @@ void serverIOForMemory(int *socketClient)
                 break;
 
             case MEMORY_OK:
+                log_info(getLogger(), "Recibida confirmacion desde la memoria.");
                 sem_post(&semaphoreForStdin);
                 break;
 
@@ -99,13 +100,15 @@ void sendResultsFromIOGenSleepToKernel()
     t_paramsForGenericInterface *params = (t_paramsForGenericInterface*)interfaceData.currentOperation.params;
     params->workUnits = *((uint32_t*)list_get(listPackage, 1));
 
+    log_info(getLogger(), "Solicitud de operacion IO_GEN_SLEEP recibida desde el Kernel.");
+
     executeIOGenSleepAndSendResults();
 
     list_destroy_and_destroy_elements(listPackage, free);
 }
 
 void sendResultsFromIOStdinReadToKernel()
-{
+{   
     t_list *listPackage = getPackage(socketKernel);
 
     interfaceData.currentOperation.operation = IO_STDIN_READ;
@@ -114,13 +117,15 @@ void sendResultsFromIOStdinReadToKernel()
     params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
     params->registerSize = *((uint32_t*)list_get(listPackage, 2));
 
+    log_info(getLogger(), "Solicitud de operacion STDIN_READ recibida desde el Kernel.");
+
     executeIOStdinReadAndSendResults();
 
     list_destroy_and_destroy_elements(listPackage, free);
 }
 
 void sendResultsFromIOStdoutWriteToKernel()
-{
+{   
     t_list *listPackage = getPackage(socketKernel);
 
     interfaceData.currentOperation.operation = IO_STDOUT_WRITE;
@@ -129,16 +134,20 @@ void sendResultsFromIOStdoutWriteToKernel()
     params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
     params->registerSize = *((uint32_t*)list_get(listPackage, 2));
 
+    log_info(getLogger(), "Solicitud de operacion STDOUT_WRITE recibida desde el Kernel.");
+
     executeIOStdoutWriteAndSendResults();
 
     list_destroy_and_destroy_elements(listPackage, free);
 }
 
 void receiveDataFromMemory()
-{
+{   
     t_list *listPackage = getPackage(socketKernel);
 
     resultsForStdout.resultsForWrite = (char*)list_get(listPackage, 0);
+
+    log_info(getLogger(), "Contenido solicitado a la memoria recibido.");
 
     sem_post(&semaphoreForStdout);
 

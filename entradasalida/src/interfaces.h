@@ -88,7 +88,7 @@ extern sem_t semaphoreForModule;
 extern int socketKernel;
 extern int socketMemory;
 
-void createInterface();
+void createInterface(char* name);
 
 void destroyInterface();
 
