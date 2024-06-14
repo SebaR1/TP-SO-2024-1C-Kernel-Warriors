@@ -7,8 +7,7 @@ extern t_resultsForStdin resultsForStdin;
 
 void sendIOGenSleepResultsToKernel()
 {
-    t_package* package = createPackage(IO_MODULE);
-    //cambiar codigo de operacion
+    t_package* package = createPackage(GEN_IO_SLEEP_OK);
 
     sendPackage(package, socketKernel);
     
@@ -17,9 +16,19 @@ void sendIOGenSleepResultsToKernel()
 
 void sendIOStdinReadResultsToKernel()
 {
-    t_package* package = createPackage(IO_MODULE);
-    //cambiar codigo de operacion
+    t_package* package = createPackage(STDIN_READ_OK);
+
     addToPackage(package, resultsForStdin.resultsFromRead, string_length(resultsForStdin.resultsFromRead));
+
+    sendPackage(package, socketKernel);
+    
+    destroyPackage(package);
+}
+
+void sendIOStdoutWriteResultsToKernel()
+{
+    t_package* package = createPackage(STDOUT_WRITE_OK);
+    //cambiar codigo de operacion
 
     sendPackage(package, socketKernel);
     
@@ -35,16 +44,6 @@ void sendResultsFromStdinToMemory()
     addToPackage(package, resultsForStdin.resultsFromRead, string_length(resultsForStdin.resultsFromRead) + 1);
     addToPackage(package, &params->registerDirection, sizeof(uint32_t));
     addToPackage(package, &params->registerSize, sizeof(uint32_t));
-
-    sendPackage(package, socketKernel);
-    
-    destroyPackage(package);
-}
-
-void sendIOStdoutWriteResultsToKernel()
-{
-    t_package* package = createPackage(IO_MODULE);
-    //cambiar codigo de operacion
 
     sendPackage(package, socketKernel);
     
