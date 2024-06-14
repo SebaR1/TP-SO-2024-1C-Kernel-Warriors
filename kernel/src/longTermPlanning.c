@@ -9,7 +9,7 @@ void newState()
         sem_wait(&semMultiProgramming);
         sem_wait(&semNew);
 
-        if(!list_is_empty(pcbNewList->list)){
+        if(!list_mutex_is_empty(pcbNewList)){
         pcb_t* pcbToReady = list_pop(pcbNewList);
         list_push(pcbReadyList, pcbToReady);
         pcbToReady->state = PCB_READY;
@@ -94,13 +94,15 @@ void destroyProcess(pcb_t *process)
     for(int i = 0; i < list_size(process->resources->list); i++) // Pasa por todos los recursos asignados que tiene para basicamente hacerles un signal.
     {
         resource_t* resourceToFree = list_pop(process->resources); // Popea el recurso asignado
-        resourceToFree->instances++;
-
+        addInstanceResource(resourceToFree);
+        
         if(list_mutex_size(resourceToFree->blockList) > 0){ // Se fija si el tiene procesos bloqueados que esperen este recurso.
         pcb_t* processBlockToReady = list_pop(resourceToFree->blockList);
         processBlockToReady->state = PCB_READY;
         list_push(pcbReadyList, processBlockToReady);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
+
+        sem_post(&semReady);
         }
 
     }   
@@ -132,7 +134,7 @@ void killProcess(uint32_t pid)
     switch (processFound->state)
     {
     case PCB_NEW:
-        list_remove_element(pcbNewList->list, processFound);
+        list_remove_element_mutex(pcbNewList, processFound);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_EXIT", processFound->pid);
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         list_push(pcbExitList, processFound);
@@ -140,7 +142,7 @@ void killProcess(uint32_t pid)
         break;
     
     case PCB_READY:
-        list_remove_element(pcbReadyList->list, processFound);
+        list_remove_element_mutex(pcbReadyList, processFound);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXIT", processFound->pid);
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         list_push(pcbExitList, processFound);
@@ -148,7 +150,7 @@ void killProcess(uint32_t pid)
         break;
 
     case PCB_EXEC:
-        list_remove_element(pcbExecList->list, processFound);
+        list_remove_element_mutex(pcbExecList, processFound);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processFound->pid);
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         list_push(pcbExitList, processFound);

@@ -28,22 +28,7 @@ void sendContextToCPU(pcb_t *process)
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 }
 
-void sendProcessPathToMemory(pcb_t *process, char* path)
-{
-    
-    t_package* package = createPackage(KERNEL_SEND_PROCESS_PATH);
 
-    kernelPathProcess kernelPathProcess;
-    kernelPathProcess.pid = process->pid;
-    kernelPathProcess.path = path;
-
-    addToPackage(package, &(kernelPathProcess.pid), sizeof(uint32_t));
-    addToPackage(package, &(kernelPathProcess.path), string_length(kernelPathProcess.path)+1); // +1 por el nulo 
-
-    sendPackage(package, socketClientMemory); //Envio el paquete a memoria
-
-    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
-}
 
 void sendInterruptForQuantumEnd(pcb_t* process)
 {
@@ -74,7 +59,7 @@ void sendIOGenSleepOperationToIO(interface_t* interface, uint32_t timeOfOperatio
 {
     t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_GENERIC_INTERFACE);
 
-    addToPackage(package, &(interface->name), sizeof(string_length(interface->name) + 1)); // +1 por el nulo.
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
     addToPackage(package, &(timeOfOperation), sizeof(uint32_t));
 
     // Uso el socket de la interfaz.
@@ -87,7 +72,7 @@ void sendIOStdinReadOperationToIO(interface_t* interface, uint32_t registerDirec
 {
     t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_STDIN_INTERFACE);
 
-    addToPackage(package, &(interface->name), sizeof(string_length(interface->name) + 1)); // +1 por el nulo.
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
     addToPackage(package, &(registerDirection), sizeof(uint32_t));
     addToPackage(package, &(registerSize), sizeof(uint32_t));
 
@@ -101,7 +86,7 @@ void sendIOStdoutWriteOperationToIO(interface_t* interface, uint32_t registerDir
 {
     t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_STDOUT_INTERFACE);
 
-    addToPackage(package, &(interface->name), sizeof(string_length(interface->name) + 1)); // +1 por el nulo.
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
     addToPackage(package, &(registerDirection), sizeof(uint32_t));
     addToPackage(package, &(registerSize), sizeof(uint32_t));
 
@@ -111,6 +96,22 @@ void sendIOStdoutWriteOperationToIO(interface_t* interface, uint32_t registerDir
     destroyPackage(package);
 }
 
+void sendProcessPathToMemory(pcb_t *process, char* path)
+{
+    
+    t_package* package = createPackage(KERNEL_SEND_PROCESS_PATH);
+
+    kernelPathProcess kernelPathProcess;
+    kernelPathProcess.pid = process->pid;
+    kernelPathProcess.path = path;
+
+    addToPackage(package, &(kernelPathProcess.pid), sizeof(uint32_t));
+    addToPackage(package, &(kernelPathProcess.path), string_length(kernelPathProcess.path)+1); // +1 por el nulo 
+
+    sendPackage(package, socketClientMemory); //Envio el paquete a memoria
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+}
 
 void sendEndProcessToMemory(pcb_t* processToEnd)
 {

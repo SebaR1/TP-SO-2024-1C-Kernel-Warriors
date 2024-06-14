@@ -23,7 +23,7 @@ interface_t *foundInterface(char* nameRequestInterface)
 {
     interfaceNameToFind = nameRequestInterface;
 
-    interface_t *interfaceFound = (interface_t*)list_find(interfacesList->list, compareNameInterface);
+    interface_t *interfaceFound = (interface_t*)list_find_mutex(interfacesList, compareNameInterface);
 
     if (interfaceFound == NULL) return NULL;
 

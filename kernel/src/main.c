@@ -59,6 +59,7 @@ int main()
     sendPackage(initialPackageM, socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito a memoria.");
 
+
     // Mando un paquete inicial a CPUDispatch para tener conexion. 
     t_package* initialPackageToCpuInterrupt = createPackage(KERNEL_MODULE_TO_CPU_INTERRUPT);
     log_info(getLogger(), "Creando conexion con CpuInterrupt. Se enviara un mensaje a CpuInterrupt");

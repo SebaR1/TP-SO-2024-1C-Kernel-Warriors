@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include "../kernel.h"
+#include "generalPlanning.h"
 
 
 #define MAX_IO_CLIENTS 4096

@@ -276,6 +276,8 @@ void ioSendEndOperation(int *socketClientIO)
         }
     }
 
+    list_destroy(listPackage);
+
 }
 
 void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
@@ -326,7 +328,7 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
 
             sem_post(&semMultiProcessing); // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
 
-            
+
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
@@ -340,6 +342,9 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             }
         }
     }
+
+    list_destroy(listPackage);
+
 }
 
 void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
@@ -406,6 +411,9 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
             }
         }
     }
+
+    list_destroy(listPackage);
+
 }
 
 void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
@@ -472,6 +480,9 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
             }
         }
     }
+
+    list_destroy(listPackage);
+
 }
 
 
