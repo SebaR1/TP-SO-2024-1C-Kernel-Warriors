@@ -30,6 +30,12 @@ bool _isAnInstruction(char* instruction){
             return true;
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
+    else if(string_equals_ignore_case(consoleCommand[0], "EJECUTAR_SCRIPT")){
+        if(string_array_size(consoleCommand) == 2) {
+            string_array_destroy(consoleCommand);
+            return true;
+            } //Se fija si tiene la cantidad de parametros que pide la instruccion
+    }
     else if(string_equals_ignore_case(consoleCommand[0], "FINALIZAR_PROCESO")){
         if(string_array_size(consoleCommand) == 2) {
             string_array_destroy(consoleCommand);
@@ -56,6 +62,7 @@ bool _isAnInstruction(char* instruction){
     return false;
 }
 
+bool flagAuxStopPlanning = false;
 
 //Atiende la instruccion
 void attendInstruction(char* instruction)
@@ -69,10 +76,15 @@ void attendInstruction(char* instruction)
         killProcess(atoi(consoleCommand[1]));
     }
     else if(string_equals_ignore_case(consoleCommand[0], "DETENER_PLANIFICACION")){
-        //Implementacion para DETENER_PLANIFICACION
+        sem_wait(&semPausePlanning);
+        flagAuxStopPlanning = true;
     }
     else if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PLANIFICACION")){
-        //Implementacion para INICIAR_PLANIFICACION
+        if(flagAuxStopPlanning) sem_post(&semPausePlanning);
+        flagAuxStopPlanning = false;
+    }
+    else if(string_equals_ignore_case(consoleCommand[0], "EJECUTAR_SCRIPT")){
+        executeScript(consoleCommand[1]);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "MULTIPROGRAMACION")){
         //Implementacion para MULTIPROGRAMACION
@@ -82,4 +94,15 @@ void attendInstruction(char* instruction)
     }
 
      string_array_destroy(consoleCommand);
+}
+
+void executeScript(char* path)
+{
+    FILE *fileScript = fopen(path, "r");
+
+    if (fileScript == NULL) {
+
+        exit(EXIT_FAILURE);
+
+    }
 }

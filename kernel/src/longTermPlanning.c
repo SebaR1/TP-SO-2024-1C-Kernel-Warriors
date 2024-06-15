@@ -1,5 +1,6 @@
 #include "longTermPlanning.h"
 
+
 //Hilo aparte que esta a la espera de que llegue la creacion de
 //un proceso y lo mande a la lista de NEW
 void newState()
@@ -8,6 +9,9 @@ void newState()
     {
         sem_wait(&semMultiProgramming);
         sem_wait(&semNew);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
 
         if(!list_mutex_is_empty(pcbNewList)){
         pcb_t* pcbToReady = list_pop(pcbNewList);
@@ -26,6 +30,9 @@ void exitState()
 {
     while(1){
         sem_wait(&semExit);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
 
         pcb_t *process = list_pop(pcbExitList);
         pcbState_t prevState = process->state;
@@ -170,16 +177,16 @@ pcb_t* foundStatePcb(uint32_t pid)
 {
     pidToFind = pid;
 
-    pcb_t* processFound = (pcb_t *)list_find(pcbNewList->list, compare_pid);
+    pcb_t* processFound = (pcb_t *)list_find_mutex(pcbNewList, compare_pid);
     if(processFound != NULL) return processFound;
     
-    processFound = (pcb_t *)list_find(pcbReadyList->list, compare_pid);
+    processFound = (pcb_t *)list_find_mutex(pcbReadyList, compare_pid);
     if(processFound != NULL) return processFound;
 
-    processFound = (pcb_t *)list_find(pcbBlockList->list, compare_pid);
+    processFound = (pcb_t *)list_find_mutex(pcbBlockList, compare_pid);
     if(processFound != NULL) return processFound;
 
-    processFound = (pcb_t *)list_find(pcbExecList->list, compare_pid);
+    processFound = (pcb_t *)list_find_mutex(pcbExecList, compare_pid);
     if(processFound != NULL) return processFound;
 
     return NULL;

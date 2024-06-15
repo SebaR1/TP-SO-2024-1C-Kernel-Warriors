@@ -18,5 +18,7 @@ bool _isAnInstruction(char* instruction);
 //Atiende la instruccion validada
 void attendInstruction(char* instruction);
 
+void executeScript(char* path);
+
 
 #endif

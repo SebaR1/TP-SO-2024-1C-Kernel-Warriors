@@ -6,12 +6,15 @@ void readyState()
     while (1)
     {
         sem_wait(&semReady);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         char* listPids = _listPids(pcbReadyList->list);
         //Log Obligatorio
         log_info(getLogger(), listPids, getKernelConfig()->ALGORITMO_PLANIFICACION);
         free(listPids);
-
-        
+    
         sem_post(&semExec);
     }
 }
@@ -23,6 +26,10 @@ void execState()
     {
         sem_wait(&semMultiProcessing); // Espero que se desocupe la CPU
         sem_wait(&semExec); 
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
 
         pcb_t *pcbToExec;
         bool flagAuxVRR = false; // Utilizo esto para saber si el proceso estaba anteriormente en pcbReadyPriorityList o no.

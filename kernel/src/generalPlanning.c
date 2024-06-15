@@ -22,6 +22,8 @@ sem_t semMultiProgramming;
 sem_t semMultiProcessing;
 sem_t semAddPid;
 
+sem_t semPausePlanning;
+
 int pid;
 
 t_algorithm algorithm;

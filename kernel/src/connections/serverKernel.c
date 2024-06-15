@@ -92,11 +92,11 @@ void serverKernelForIO(int *socketClient)
         case DO_NOTHING:
             break;
 
-        case MEMORY_OK: // Mock si llegara una interfaz de I/O.
+        case IO_SEND_INTERFACE: // Mock si llegara una interfaz de I/O.
             ioSendInterface(socketClient);
             break;
 
-        case IO_MODULE: // MOcK si llegara una finalizacion de una operacion de una interfaz de I/O.
+        case IO_OK: // MOcK si llegara una finalizacion de una operacion de una interfaz de I/O.
             ioSendEndOperation(socketClient);
             break;
 
@@ -204,6 +204,7 @@ void ioSendInterface(int *socketClientIO)
     list_push(interfacesList, newInterface);
 
     list_destroy(listPackage);
+
 }
 
 void ioSendEndOperation(int *socketClientIO)
@@ -218,6 +219,9 @@ void ioSendEndOperation(int *socketClientIO)
 
     pcb_t *processBlockToReady = interfaceFound->processAssign;
 
+    sem_wait(&semPausePlanning);
+    sem_post(&semPausePlanning);
+
     list_remove_element_mutex(pcbBlockList, processBlockToReady); // Remuevo el proceso de la pcbBlockList.
 
     // No sé si es necesario esto porque si llegara a usar otra interfaz se sobreasignaria la asignacion que tenia anteriormente, pero para evitar bugs -_-. Y que quede claro que no se tienen que volver a usar los valores anteriores.
@@ -227,6 +231,10 @@ void ioSendEndOperation(int *socketClientIO)
     processBlockToReady->params->param4 = NULL;
 
     if(algorithm != VRR){ //ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion.
 
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
@@ -234,6 +242,10 @@ void ioSendEndOperation(int *socketClientIO)
         sem_post(&semReady);
 
     } else {
+        
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         list_push(pcbReadyPriorityList, processBlockToReady); // Pasa a pcbReadyPriorityList porque es casi seguro que no se va a dar la casualidad de que haya entrado a block justo en el tiempo que se termino el Quantum.
 
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY_PLUS", processBlockToReady->pid);
@@ -244,6 +256,7 @@ void ioSendEndOperation(int *socketClientIO)
 
     interfaceFound->isBusy = false;
     interfaceFound->processAssign = NULL;
+
 
     if(!list_mutex_is_empty(interfaceFound->blockList)){ // Se fija si la interfaz tiene algun otro proceso en espera. 
         pcb_t* processBlocked = list_pop(interfaceFound->blockList);
@@ -303,6 +316,10 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
         list_push(pcbExitList, processExec);
         processExec->state = PCB_EXIT;
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
 
         sem_post(&semMultiProcessing);
@@ -313,6 +330,10 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             list_push(pcbExitList, processExec);
             processExec->state = PCB_EXIT;
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
             log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
 
             sem_post(&semMultiProcessing);
@@ -502,7 +523,12 @@ void cpuSendExitProcess(int *socketClientCPUDispatch)
     // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
     pcb_t *processExecToExit = assignContextToPcb(contextProcess);
 
+
     log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExecToExit->pid);
+
+    sem_wait(&semPausePlanning);
+    sem_post(&semPausePlanning);
+
     log_info(getLogger(), "Finaliza el proceso %d - Motivo: SUCCESS", processExecToExit->pid);
 
     list_push(pcbExitList, processExecToExit);
@@ -525,8 +551,13 @@ void cpuSendInterruptQ(int *socketClientCPUDispatch)
 
     list_push(pcbReadyList, processExecToReady);
     processExecToReady->state = PCB_READY;
-    log_info(getLogger(), "PID: %d - Desalojado por fin de Quantum", processExecToReady->pid);
+
     log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_READY", processExecToReady->pid);
+
+    sem_wait(&semPausePlanning);
+    sem_post(&semPausePlanning);
+
+    log_info(getLogger(), "PID: %d - Desalojado por fin de Quantum", processExecToReady->pid);
 
     list_destroy(listPackage);
 
@@ -548,10 +579,16 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
 
     resource_t* resourceFound = foundResource(resourceName);
 
+
     if(resourceFound == NULL){ //Si el recurso pedido no existe, el proceso pasa a exit y se destruye.
+
         list_push(pcbExitList, processExec);
         processExec->state = PCB_EXIT;
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_RESOURCE", processExec->pid);
 
         sem_post(&semMultiProcessing);
@@ -562,7 +599,11 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
         subtractInstanceResource(resourceFound); // Resta una instancia del recurso.
 
         if(resourceFound->instances >= 0){ //Si el recurso queda >= 0 se le asigna ese recurso al proceso
+
             list_push(processExec->resources, resourceFound); // Asigna el recurso al proceso
+
+            list_push(pcbExecList, processExec); // El proceso tiene que volver devuelta a exec PORQUE PUEDE. (Podria generar segmentacion fault sino)
+
             sendContextToCPU(processExec); // Manda el contexto devuelta a la Cpu para que siga ejecutando.
 
         } else { 
@@ -598,6 +639,10 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
         list_push(pcbExitList, processExec);
         processExec->state = PCB_EXIT;
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_RESOURCE", processExec->pid);
 
         sem_post(&semMultiProcessing);
@@ -620,6 +665,7 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
 
         }
+        list_push(pcbExecList, processExec); // El proceso tiene que volver devuelta a exec PORQUE PUEDE. (Podria generar segmentacion fault sino)
 
         sendContextToCPU(processExec);
 
