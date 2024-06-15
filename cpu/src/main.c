@@ -5,6 +5,7 @@
 #include "utils/client/utils.h"
 #include "instructionCycle/essentials.h"
 #include "MMU/TLB.h"
+#include "instructionCycle/instructionCycle.h"
 #include "finish.h"
 
 
@@ -21,6 +22,8 @@ int main()
     sem_init(&semaphoreForKernelDispatch, 0, 1);
     sem_init(&semaphoreForKernelInterrupt, 0, 1);
     sem_init(&semaphoreWaitInstruction, 0, 0);
+    sem_init(&semContinueInstructionCycle, 0, 0);
+    sem_init(&semCheckInterrupt, 0, 1);
     sem_init(&semaphoreFinishModule, 0, 0);
 
     initTLB();
@@ -54,6 +57,11 @@ int main()
 
 
     destroyPackage(initialPackage);
+
+
+    pthread_t runInstructionCycleThread;
+    pthread_create(&runInstructionCycleThread, NULL, (void*)runInstructionCycle, NULL);
+    pthread_detach(runInstructionCycleThread);
 
 
     // Espero para ver si me llegan mensajes.

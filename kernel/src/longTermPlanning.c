@@ -80,7 +80,6 @@ pcb_t* createProcess()
     process->registersCpu->ECX = 0;
     process->registersCpu->EDX = 0;
     process->registersCpu->SI = 0;
-    process->registersCpu->PC = 0;
     return process;
 };
 

@@ -200,7 +200,7 @@ void _SET4(uint32_t* reg, uint32_t value)
 
 void MOV_IN(registerType data, registerType direction)
 {
-
+    
 }
 
 
@@ -593,12 +593,43 @@ registerTypeByBytes _typeToRegister(registerType type, uint8_t* outRegister1byte
 
 
 
-uint32_t getPC()
-{
-    return PC;
-}
-
 void incrementPC()
 {
     PC++;
 }
+
+uint32_t getPC() { return PC; }
+
+uint8_t getAX() { return AX; }
+
+uint8_t getBX() { return BX; }
+
+uint8_t getCX() { return CX; }
+
+uint8_t getDX() { return DX; }
+
+uint32_t getEAX() { return EAX; }
+
+uint32_t getEBX() { return EBX; }
+
+uint32_t getECX() { return ECX; }
+
+uint32_t getEDX() { return EDX; }
+
+uint32_t getSI() { return SI; }
+
+uint32_t getDI() { return DI; }
+
+
+
+void setPC(uint32_t pc) { PC = pc; }
+void setAX(uint8_t ax) { AX = ax; }
+void setBX(uint8_t bx) { BX = bx; }
+void setCX(uint8_t cx) { CX = cx; }
+void setDX(uint8_t dx) { DX = dx; }
+void setEAX(uint32_t eax) { EAX = eax; }
+void setEBX(uint32_t ebx) { EBX = ebx; }
+void setECX(uint32_t ecx) { ECX = ecx; }
+void setEDX(uint32_t edx) { EDX = edx; }
+void setDI(uint32_t di) { DI = di; }
+void setSI(uint32_t si) { SI = si; }

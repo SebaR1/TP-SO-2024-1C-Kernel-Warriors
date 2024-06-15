@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include "utilsMemory/config.h"
 #include "math.h"
+#include "utilsMemory/delay.h"
+#include "processManagment/essentials.h"
+#include <commons/log.h>
+#include "utilsMemory/logger.h"
+#include "utils/mathMemory.h"
 #include <string.h>
 
 
@@ -56,6 +61,48 @@ bool isFrameBusy(int frame)
 }
 
 
+
+int pidAux; // Pid auxiliar usado para la closure para buscar el pid en una lista
+
+sem_t semPidAux; // Semaforo para la posible condicion de carrera del pidAux
+
+bool closureFindPID(processInfo* processInfo)
+{
+    return pidAux == processInfo->PID;
+}
+
+
+void resizeMemory(int pid, int bytes)
+{
+    memoryDelay();
+
+    sem_wait(&semPidAux);
+
+    pidAux = pid;
+    processInfo* info = (processInfo*)list_find_mutex(processesList, closureFindPID);
+
+    sem_post(&semPidAux);
+
+
+    int amountOfBytesAllocated = getAmountOfBytesAllocated(getMemoryConfig()->TAM_PAGINA, info->amountOfPages, info->internalFragmentation);
+
+    if (bytes > amountOfBytesAllocated) // Hay que reservar más espacio en memoria del usuario
+    {
+        allocMemory(bytes - amountOfBytesAllocated, info->pageTable, info->amountOfPages, info->internalFragmentation);
+        log_info(getLogger(), "Ampliación de proceso - PID: %d - Tamaño Actual: %d - Tamaño a Ampliar: %d", pid, amountOfBytesAllocated, bytes - amountOfBytesAllocated);
+    }
+    else if (bytes < amountOfBytesAllocated) // Hay que liberar espacio en memoria del usuario
+    {
+        freeMemory(amountOfBytesAllocated - bytes, info->pageTable, info->amountOfPages, info->internalFragmentation);
+        log_info(getLogger(), "Reducción de proceso - PID: %d - Tamaño Actual: %d - Tamaño a Reducir: %d", pid, amountOfBytesAllocated, amountOfBytesAllocated - bytes);
+    }
+    else // Entra en este else cuando bytes == amountOfBytesAllocated
+    {
+        log_info(getLogger(), "No cambia el tamaño del proceso - PID: %d - Tamaño Actual: %d - Tamaño a Ampliar/Reducir: %d", pid, amountOfBytesAllocated, 0);
+    }
+}
+
+
 int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation)
 {
     ///////////// CASOS DE CORTE /////////////
@@ -76,7 +123,7 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
     
 
     // Obtengo la cantidad de paginas que deberian reservarse.
-    int amountOfNewPages = getAmountOfPagesAllocated(bytes);
+    int amountOfNewPages = getAmountOfPagesAllocated(getMemoryConfig()->TAM_PAGINA, bytes);
 
 
     /////// A partir de aca solo un hilo puede reservar o liberar la memoria, para que no haya inconsistencias poniendo como libres u ocupados los frames ///////
@@ -119,7 +166,7 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
 
 
     // Obtengo la nueva fragmentacion interna de la ultima pagina
-    *internalFragmentation = getInternalFragmentation(bytes);
+    *internalFragmentation = getInternalFragmentation(getMemoryConfig()->TAM_PAGINA, bytes);
 
 
     return amountOfNewPages;
@@ -140,7 +187,7 @@ int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const inter
     }
 
     // Obtengo la cantidad de bytes que hay reservados en la ultima pagina.
-    int amountOfBytesInTheLastPage = getAmountOfBytesInTheLastPage(*internalFragmentation);
+    int amountOfBytesInTheLastPage = getAmountOfBytesInTheLastPage(getMemoryConfig()->TAM_PAGINA, *internalFragmentation);
 
     // Compruebo si la cantidad de bytes que quiero liberar es posible liberarlos solamente de la ultima pagina.
     // Si es asi, los libero de la ultima pagina solamente.
@@ -161,7 +208,8 @@ int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const inter
 
 
     // Obtengo la cantidad de paginas que debo liberar.
-    int amountOfPagesToFree = floor(bytes / getMemoryConfig()->TAM_PAGINA) + 1;
+    //int amountOfPagesToFree = floor(bytes / getMemoryConfig()->TAM_PAGINA) + 1;
+    int amountOfPagesToFree = getAmountOfPagesToFree(getMemoryConfig()->TAM_PAGINA, bytes);
 
 
     // Indice con el que recorrer el final del array de paginas.
@@ -200,32 +248,6 @@ int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const inter
 
 
 
-int getInternalFragmentation(int bytesAllocated)
-{
-    int sizePag = getMemoryConfig()->TAM_PAGINA;
-    return (  sizePag - (  bytesAllocated % sizePag  )  ) % sizePag;
-}
-
-int getAmountOfBytesInTheLastPage(int internalFragmentation)
-{
-    return getMemoryConfig()->TAM_PAGINA - internalFragmentation;
-}
-
-int getAmountOfBytesAllocated(int amountOfPages, int internalFragmentation)
-{
-    return amountOfPages * getMemoryConfig()->TAM_PAGINA - internalFragmentation;
-}
-
-int getAmountOfPagesAllocated(int bytesAllocated)
-{
-    return ceil(bytesAllocated / getMemoryConfig()->TAM_PAGINA);
-}
-
-int getAmountOfPagesToFree(int bytesToFree)
-{
-    return floor(bytesToFree / getMemoryConfig()->TAM_PAGINA) + 1;
-}
-
 
 int allocNextFrameFree()
 {
@@ -254,29 +276,41 @@ void freeFrame(int frame)
 
 
 
-void* readBytes(int physicalAddress, int size)
+void* readBytes(int pid, int physicalAddress, int size)
 {
+    memoryDelay();
+
     void* data = malloc(size);
     
     memcpy(data, memoryUser + physicalAddress, size);
+
+    log_info(getLogger(), "Acceso a espacio de usuario - PID: %d - Accion: LEER - Direccion fisica: %d - Tamaño: %d", pid, physicalAddress, size);
 
     return data;
 }
 
 
-void writeBytes(void* data, int physicalAddress, int size)
+void writeBytes(int pid, void* data, int physicalAddress, int size)
 {
+    memoryDelay();
+
     memcpy(memoryUser + physicalAddress, data, size);
+
+    log_info(getLogger(), "Acceso a espacio de usuario - PID: %d - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño: %d", pid, physicalAddress, size);
 }
 
 
 int getFrame(int PID, int page)
 {
+    memoryDelay();
+
     processInfo* info;
     sem_wait(&semAuxPID);
     auxPID = PID;
     info = list_find_mutex(processesList, closurePIDsAreEqual);
     sem_post(&semAuxPID);
+
+    log_info("Acceso a Tabla de Páginas - PID: %d - Pagina: %d - Marco: %d", PID, page, info->pageTable[page]);
 
     return info->pageTable[page];
 }

@@ -39,6 +39,13 @@ typedef enum
 	// ENVIADOS DESDE CPU
 	CPU_GIVE_ME_NEXT_INSTRUCTION,
 	CPU_GET_FRAME,
+	CPU_RESIZE_MEMORY,
+	CPU_SEND_CONTEXT_FOR_END_QUANTUM,
+	CPU_SEND_CONTEXT_FOR_END_PROCESS,
+	CPU_SEND_CONTEXT_FOR_WAIT,
+	CPU_SEND_CONTEXT_FOR_IO_GENERIC,
+	CPU_SEND_CONTEXT_FOR_IO_STDIN,
+	CPU_SEND_CONTEXT_FOR_IO_STDOUT,
 
 	// ENVIADOS DESDE MEMORIA
 	MEMORY_NEXT_INSTRUCTION,
@@ -72,7 +79,6 @@ typedef enum
 
 typedef struct
 {
-	uint32_t PC; // Program Counter, indica la próxima instrucción a ejecutar una vez completado un ciclo de ejecucion
 	uint8_t AX; // Registro Numérico de propósito general
 	uint8_t BX; // Registro Numérico de propósito general
 	uint8_t CX; // Registro Numérico de propósito general
@@ -131,6 +137,14 @@ typedef struct
 
 typedef struct
 {
+	int pid;
+	int bytes;
+} requestResizeMemoryInfo;
+
+
+typedef struct
+{
+	int pid;
 	int physicalAddress;
 	int size;
 } requestReadMemoryInfo;
@@ -138,6 +152,7 @@ typedef struct
 
 typedef struct
 {
+	int pid;
 	void* data;
 	int physicalAddress;
 	int size;
@@ -169,6 +184,12 @@ typedef struct
 	int tamPagina;
 } memoryTamPagina;
 
+
+typedef struct
+{
+	int physicalAddress;
+	int size;
+} physicalAddressInfo;
 
 
 #endif

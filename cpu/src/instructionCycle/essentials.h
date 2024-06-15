@@ -227,8 +227,37 @@ extern int PID;
 uint32_t getPC();
 
 
+/// @brief Asigna el valor del Program Counter, el cual indica la proxima instruccion a ejecutar una vez completado un ciclo de ejecucion
+/// @return Asigna el valor del Program Counter
+void setPC(uint32_t pc);
+
+
 /// @brief Incrementa el Program Counter en 1 (hace PC++)
 void incrementPC();
+
+
+uint8_t getAX();
+uint8_t getBX();
+uint8_t getCX();
+uint8_t getDX();
+uint32_t getEAX();
+uint32_t getEBX();
+uint32_t getECX();
+uint32_t getEDX();
+uint32_t getSI();
+uint32_t getDI();
+
+void setAX(uint8_t ax);
+void setBX(uint8_t bx);
+void setCX(uint8_t cx);
+void setDX(uint8_t dx);
+void setEAX(uint32_t eax);
+void setEBX(uint32_t ebx);
+void setECX(uint32_t ecx);
+void setEDX(uint32_t edx);
+void setDI(uint32_t di);
+void setSI(uint32_t si);
+
 
 
 /// @brief Settea al PID del proceso actual el valor especificado
@@ -248,7 +277,9 @@ int getCurrentPID();
 
 extern sem_t semaphoreWaitInstruction;
 
+extern sem_t semCheckInterrupt;
 
+extern sem_t semContinueInstructionCycle;
 
 
 

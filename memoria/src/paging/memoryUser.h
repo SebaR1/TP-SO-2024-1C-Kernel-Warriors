@@ -38,6 +38,23 @@ bool isFrameBusy(int frame);
 
 
 
+
+
+
+/// @brief Closure para fijarse si un pid es igual a otro. Se va a usar como closure para buscar en una lista
+/// @param processInfo 
+bool closureFindPID(processInfo* processInfo);
+
+
+/// @brief Hace un resize a la memoria de un usuario. Llama a las funciones allocMemory y freeMemory
+/// @param pid El process ID al cual aumentarle o reducirle la cantidad de memoria reservada
+/// @param bytes La cantidad de bytes totales que debe tener la memoria del usuario actualmente
+void resizeMemory(int pid, int bytes);
+
+
+
+
+
 /// @brief Reserva la cantidad determinada de bytes en la memoria de usuario si no se produce un Out Of Memory. Si se intenta reservar 0 bytes,
 /// La funcion retorna 0 y no hace nada mas.
 /// @param bytes Cantidad de bytes a reservar (no se le tiene que pasar el numero total de bytes reservados por el proceso, solo la cantidad que se quiere expandir).
@@ -75,42 +92,6 @@ int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const inter
 
 
 
-/// @brief Retorna la cantidad de bytes que representan la fragmentacion interna de la ultima pagina de la memoria de usuario.
-/// @param bytesAllocated La cantidad de bytes reservados por un proceso.
-/// @return Retorna la fragmentacion interna.
-int getInternalFragmentation(int bytesAllocated);
-
-
-
-/// @brief Retorna la cantidad de bytes que estan reservados en la ultima pagina.
-/// @param internalFragmentation La fragmentacion interna que ocurre en la ultima pagina.
-/// @return Retorna la cantidad de byte reservados en la ultima pagina.
-int getAmountOfBytesInTheLastPage(int internalFragmentation);
-
-
-/// @brief Retorna la cantidad de bytes que están reservados en base a la cantidad de paginas y la fragmentacion interna
-/// @param amountOfPages Cantidad de paginas reservadas
-/// @param internalFragmentation Cantidad de bytes que representan la fragmentacion interna que quedó (o quedaría) en la ultima pagina
-/// /// (es decir, la cantidad de bytes que faltan para completar la ultima pagina).
-/// @return Retorna la cantidad de bytes reservados.
-int getAmountOfBytesAllocated(int amountOfPages, int internalFragmentation);
-
-
-
-/// @brief Retorna la cantidad de paginas que se necesitan (o que fueron ya reservadas) para reservar la cantidad de bytes especificados.
-/// @param bytesAllocated La cantidad de bytes.
-/// @return Retorna la cantidad de paginas que se necesitan.
-int getAmountOfPagesAllocated(int bytesAllocated);
-
-
-
-/// @brief Retorna la cantidad de paginas que ya no se necesitan para liberar la cantidad de bytes especificados.
-/// Se considera que los bytes reservados por la ultima pagina son 0 bytes (es decir, como minimo retornaria 1 la funcion, ya que como minimo se liberaria 1 pagina).
-/// @param bytesAllocated La cantidad de bytes.
-/// @return Retorna la cantidad de paginas que ya no se necesitan.
-int getAmountOfPagesToFree(int bytesToFree);
-
-
 
 /// @brief Ocupa un frame que esté libre en la memoria de usuario
 /// @return Retorna el indice del frame que se ocurpó
@@ -125,20 +106,22 @@ void freeFrame(int frame);
 
 
 /// @brief Lee de la memoria de usuario la cantidad de bytes especificada a partir de la direccion fisica especificada.
+/// @param pid Process ID del proceso que quiere leer
 /// @param physicalAddress La direccion fisica a partir de la cual leer
 /// @param size La cantidad de bytes a leer
 /// @return Retorna un puntero hacia una copia de los datos leidos.
 /// @warning Quien llama a esta funcion debe liberar la memoria del puntero retornado.
-void* readBytes(int physicalAddress, int size);
+void* readBytes(int pid, int physicalAddress, int size);
 
 
 
 
 /// @brief Escribe en la memoria de usuario la data especificada, con su cantidad de bytes especificados, a partir de la direccion fisica especificada
+/// @param pid Process ID del proceso que quiere escribir
 /// @param data Los datos a escribir
 /// @param physicalAddress La direccion fisica a partir de la cual escribir
 /// @param size La cantidad de bytes a escribir
-void writeBytes(void* data, int physicalAddress, int size);
+void writeBytes(int pid, void* data, int physicalAddress, int size);
 
 
 

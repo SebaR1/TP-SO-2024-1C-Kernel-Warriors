@@ -4,7 +4,13 @@
 
 int PID;
 
+
+
 sem_t semaphoreWaitInstruction;
+
+sem_t semCheckInterrupt;
+
+sem_t semContinueInstructionCycle;
 
 
 

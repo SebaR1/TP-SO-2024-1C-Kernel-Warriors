@@ -5,6 +5,8 @@
 #include "fetch.h"
 #include "decode.h"
 #include "execute.h"
+#include "checkInterrupt.h"
+#include "essentials.h"
 
 
 /// @brief Ejecuta un ciclo de instruccion completo (fetch, decode y execute)

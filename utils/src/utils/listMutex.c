@@ -66,6 +66,19 @@ bool list_remove_element_mutex(listMutex_t *list, void* element)
 }
 
 
+
+
+bool list_is_empty_mutex(listMutex_t* list)
+{
+	pthread_mutex_lock(&(list->mutex));
+	bool isEmpty = list_is_empty(list->list);
+	pthread_mutex_unlock(&(list->mutex));
+	return isEmpty;
+}
+
+
+
+
 void destroyListMutex(listMutex_t* list)
 {
    	pthread_mutex_lock(&(list->mutex)); 

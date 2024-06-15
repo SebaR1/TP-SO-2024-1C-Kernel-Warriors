@@ -53,6 +53,14 @@ void* list_remove_by_condition_mutex(listMutex_t *list, bool(*condition)(void*))
 
 
 
+/// @brief Retorna true si la lista mutex está vacía, y false si no lo está
+/// @param list La lista mutex
+/// @return Retorna true si la lista mutex está vacía, y false si no lo está
+bool list_is_empty_mutex(listMutex_t* list);
+
+
+
+
 /// @brief Destruye una lista y su mutex sin liberar los elementos contenidos en los nodos
 /// @param list La lista.
 void destroyListMutex(listMutex_t* list);

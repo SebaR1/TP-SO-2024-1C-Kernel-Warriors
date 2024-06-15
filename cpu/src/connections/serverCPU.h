@@ -65,7 +65,16 @@ void memoryTamPaginaRecive(int* socketClient);
 void memoryGetFrame(int* socketClient);
 
 
+// Recibe una interrupcion de fin de quantum del Kernel
+void kernelInterruptEndQuantum(int* socketClient);
 
 
+// Recibe una interrupcion de fin de proceso por el Kernel
+void kernelInterruptEndProcess(int* socketClient);
+
+
+/// @brief Recibe un contexto (tipicamente del Kernel) y lo asigna al contexto oficial de la CPU
+/// @param socketClient El socket del cliente
+void receiveContext(int* socketClient);
 
 #endif

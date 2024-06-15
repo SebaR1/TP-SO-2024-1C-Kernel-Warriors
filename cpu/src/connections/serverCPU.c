@@ -6,6 +6,7 @@
 #include "instructionCycle/fetch.h"
 #include "MMU/MMU.h"
 #include "MMU/TLB.h"
+#include "instructionCycle/checkInterrupt.h"
 
 int numberOfKernelClientsForDispatch = 0;
 int numberOfKernelClientsForInterrupt = 0;
@@ -163,6 +164,10 @@ void serverCPUDispatchForKernel(int *socketClient)
             operationPackageFromKernel(listPackage);
             break;
 
+        case KERNEL_SEND_CONTEXT:
+
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -206,6 +211,14 @@ void serverCPUInterruptForKernel(int *socketClient)
             t_list *listPackage = getPackage(*socketClient);
             log_info(getLogger(), "Paquete obtenido con exito del modulo kernel en Interrupt");
             operationPackageFromKernel(listPackage);
+            break;
+
+        case KERNEL_SEND_INTERRUPT_QUANTUM_END:
+            kernelInterruptEndQuantum(socketClient);
+            break;
+
+        case KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS:
+            kernelInterruptEndProcess(socketClient);
             break;
 
         case DO_NOTHING:
@@ -322,6 +335,103 @@ void memoryGetFrame(int* socketClient)
 
     list_destroy_and_destroy_elements(listPackage, free);
 }
+
+
+
+void kernelInterruptEndQuantum(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    int pid;
+    pid = *((int*)list_get(listPackage, 0));
+
+
+    sem_wait(&semCheckInterrupt);
+
+    interruptionInfo* info = malloc(sizeof(interruptionInfo));
+    info->pid = pid;
+    info->type = END_QUANTUM_TYPE;
+    addInterruption(info);
+
+    sem_post(&semCheckInterrupt);
+
+
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
+
+void kernelInterruptEndProcess(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    int pid;
+    pid = *((int*)list_get(listPackage, 0));
+
+
+    sem_wait(&semCheckInterrupt);
+
+    interruptionInfo* info = malloc(sizeof(interruptionInfo));
+    info->pid = pid;
+    info->type = END_PROCESS_TYPE;
+    addInterruption(info);
+
+    sem_post(&semCheckInterrupt);
+
+
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
+
+void receiveContext(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    contextProcess contextProcess;
+    
+    // Recibe todo el contexto del proceso ejecutando de CPU
+    contextProcess.pc = *(uint32_t *)list_get(listPackage, 0);
+    contextProcess.registersCpu.AX = *(uint8_t *)list_get(listPackage, 1);
+    contextProcess.registersCpu.BX = *(uint8_t *)list_get(listPackage, 2);
+    contextProcess.registersCpu.CX = *(uint8_t *)list_get(listPackage, 3);
+    contextProcess.registersCpu.DX = *(uint8_t *)list_get(listPackage, 4);
+    contextProcess.registersCpu.EAX = *(uint32_t *)list_get(listPackage, 5);
+    contextProcess.registersCpu.EBX = *(uint32_t *)list_get(listPackage, 6);
+    contextProcess.registersCpu.ECX = *(uint32_t *)list_get(listPackage, 7);
+    contextProcess.registersCpu.EDX = *(uint32_t *)list_get(listPackage, 8);
+    contextProcess.registersCpu.SI = *(uint32_t *)list_get(listPackage, 10);
+    contextProcess.registersCpu.DI = *(uint32_t *)list_get(listPackage, 9);
+
+    int pid = *(uint32_t *)list_get(listPackage, 10);
+
+    setPC(contextProcess.pc);
+    setAX(contextProcess.registersCpu.AX);
+    setBX(contextProcess.registersCpu.BX);
+    setCX(contextProcess.registersCpu.CX);
+    setDX(contextProcess.registersCpu.DX);
+    setEAX(contextProcess.registersCpu.EAX);
+    setEBX(contextProcess.registersCpu.EBX);
+    setECX(contextProcess.registersCpu.ECX);
+    setEDX(contextProcess.registersCpu.EDX);
+    setSI(contextProcess.registersCpu.DI);
+    setDI(contextProcess.registersCpu.SI);
+
+
+    setCurrentPID(pid);
+
+    sem_post(&semContinueInstructionCycle);
+
+
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
+
+
 
 void finishAllServersSignal()
 {

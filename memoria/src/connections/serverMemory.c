@@ -200,6 +200,10 @@ void serverMemoryForCPU(int* socketClient)
             cpuWantsNextInstruction(socketClient);
             break;
 
+        case CPU_RESIZE_MEMORY:
+            requestResizeMemory(socketClient);
+            break;
+
         case READ_MEMORY:
             requestReadMemory(socketClient);
             break;
@@ -360,6 +364,24 @@ void receiveEndProcessFromKernel(int* socketClient)
 }
 
 
+void requestResizeMemory(int* socketClient)
+{
+    t_list* listPackage = getPackage(*socketClient);
+
+    requestResizeMemoryInfo request;
+
+
+    request.pid = *((int*)list_get(listPackage, 0));
+    request.bytes = *((int*)list_get(listPackage, 1));
+
+    // Hago el resize de la memoria del pid directamente, sin crear otro hilo, ya que el mismo socket va a necesitar terminar este resize antes de poder hacer
+    // otra peticion.
+    resizeMemory(request.pid, request.bytes);
+
+
+    list_destroy_and_destroy_elements(listPackage, free);
+}
+
 
 void requestReadMemory(int* socketClient)
 {
@@ -367,12 +389,13 @@ void requestReadMemory(int* socketClient)
 
     requestReadMemoryInfo request;
 
-    request.physicalAddress = *((int*)list_get(listPackage, 0));
-    request.size = *((int*)list_get(listPackage, 1));
+    request.pid = *((int*)list_get(listPackage, 0));
+    request.physicalAddress = *((int*)list_get(listPackage, 1));
+    request.size = *((int*)list_get(listPackage, 2));
 
     // Leo de la memoria directamente, sin crear otro hilo, ya que el mismo socket va a necesitar terminar esta lectura antes de poder hacer
     // otra peticion de lectura o escritura.
-    void* data = readBytes(request.physicalAddress, request.size);
+    void* data = readBytes(request.pid, request.physicalAddress, request.size);
 
     sendData(socketClient, data, request.size);
 
@@ -389,13 +412,14 @@ void requestWriteMemory(int* socketClient)
 
     requestWriteMemoryInfo request;
 
-    request.data = list_get(listPackage, 0);
-    request.physicalAddress = *((int*)list_get(listPackage, 1));
-    request.size = *((int*)list_get(listPackage, 2));
+    request.pid = *((int*)list_get(listPackage, 0));
+    request.data = list_get(listPackage, 1);
+    request.physicalAddress = *((int*)list_get(listPackage, 2));
+    request.size = *((int*)list_get(listPackage, 3));
 
     // Escribo en la memoria directamente, sin crear otro hilo, ya que el mismo socket va a necesitar terminar esta escritura antes de poder hacer
     // otra peticion de lectura o escritura.
-    writeBytes(request.data, request.physicalAddress, request.size);
+    writeBytes(request.pid, request.data, request.physicalAddress, request.size);
 
     sendConfirmation(*socketClient);
 

@@ -23,7 +23,10 @@ void requestFrame(int pid, int page);
 
 
 
-
+/// @brief Envia el contexto actualizado del proceso al Kernel
+/// @param opCode El codigo de operacion por el que se va a enviar el contexto. Es el motivo de enviar el contexto.
+/// @param pid Process ID
+void sendContextToKernel(operationCode opCode, int pid);
 
 
 
