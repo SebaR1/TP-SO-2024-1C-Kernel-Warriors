@@ -90,8 +90,8 @@ void serverKernelForMemory(int *socketClient)
             operationPackageFromIO(listPackage);
             break;
 
-        case MEMORY_OK:
-            sem_post(&semMemoryOk);
+        case MEMORY_SEND_RESPONSE_FOR_NEW_PROCESS:
+            memorySendResponseForNewProcess(socketClient);
             break;
 
         case DO_NOTHING:
@@ -141,11 +141,11 @@ void serverKernelForIO(int *socketClient)
         case DO_NOTHING:
             break;
 
-        case IO_SEND_INTERFACE: // Mock si llegara una interfaz de I/O.
+        case IO_SEND_INTERFACE: 
             ioSendInterface(socketClient);
             break;
 
-        case IO_OK: // MOcK si llegara una finalizacion de una operacion de una interfaz de I/O.
+        case IO_OK: 
             ioSendEndOperation(socketClient);
             break;
 
@@ -231,6 +231,15 @@ void serverKernelForCPU(int *socketClient)
     sem_post(&semaphoreForIO);
 }
 
+void memorySendResponseForNewProcess(int *socketClientMemory)
+{
+    t_list *listPackage = getPackage(*socketClientMemory);
+
+    flagMemoryResponse = *(bool*)list_remove(listPackage, 0);
+
+    sem_post(&semMemoryOk);
+}
+
 void operationPackageFromIO(t_list *package)
 {
     list_iterate(package, (void*)listIterator);
@@ -271,37 +280,46 @@ void ioSendEndOperation(int *socketClientIO)
     sem_wait(&semPausePlanning);
     sem_post(&semPausePlanning);
 
-    list_remove_element_mutex(pcbBlockList, processBlockToReady); // Remuevo el proceso de la pcbBlockList.
+    if(!interfaceFound->flagKillProcess){ // Este flag es por si se tiro un finalizar_proceso mientras el proceso estaba en una interfaz realizando una operacion. Caso MUY particular.
 
-    // No sé si es necesario esto porque si llegara a usar otra interfaz se sobreasignaria la asignacion que tenia anteriormente, pero para evitar bugs -_-. Y que quede claro que no se tienen que volver a usar los valores anteriores.
-    processBlockToReady->params->param1 = NULL;
-    processBlockToReady->params->param2 = NULL;
-    processBlockToReady->params->param3 = NULL;
-    processBlockToReady->params->param4 = NULL;
+        list_remove_element_mutex(pcbBlockList, processBlockToReady); // Remuevo el proceso de la pcbBlockList.
 
-    if(algorithm != VRR){ //ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
+        // No sé si es necesario esto porque si llegara a usar otra interfaz se sobreasignaria la asignacion que tenia anteriormente, pero para evitar bugs -_-. Y que quede claro que no se tienen que volver a usar los valores anteriores.
+        processBlockToReady->params->param1 = NULL;
+        processBlockToReady->params->param2 = NULL;
+        processBlockToReady->params->param3 = NULL;
+        processBlockToReady->params->param4 = NULL;
 
-        sem_wait(&semPausePlanning);
-        sem_post(&semPausePlanning);
 
-        list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion.
+        if(algorithm != VRR){ //ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
 
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
+            list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion.
 
-        sem_post(&semReady);
+            processBlockToReady->state = PCB_READY;
+
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
+
+            sem_post(&semReady);
+
+        } else {
+
+            list_push(pcbReadyPriorityList, processBlockToReady); // Pasa a pcbReadyPriorityList porque es casi seguro que no se va a dar la casualidad de que haya entrado a block justo en el tiempo que se termino el Quantum.
+
+            processBlockToReady->state = PCB_READY_PLUS;
+
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY_PLUS", processBlockToReady->pid);
+
+            sem_post(&semReady);
+
+        }
 
     } else {
-        
-        sem_wait(&semPausePlanning);
-        sem_post(&semPausePlanning);
 
-        list_push(pcbReadyPriorityList, processBlockToReady); // Pasa a pcbReadyPriorityList porque es casi seguro que no se va a dar la casualidad de que haya entrado a block justo en el tiempo que se termino el Quantum.
-
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY_PLUS", processBlockToReady->pid);
-
-        sem_post(&semReady);
+        sem_post(&semKillProcessInInterface);
 
     }
+
+    
 
     interfaceFound->isBusy = false;
     interfaceFound->processAssign = NULL;

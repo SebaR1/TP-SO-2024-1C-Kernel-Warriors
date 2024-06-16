@@ -91,10 +91,19 @@ void addPcbToNew(char* path)
 
     sem_wait(&semMemoryOk); // Esperan a que la memoria del ok de que el proceso se creo correctamente
 
-    list_push(pcbNewList, process); 
-    //Log obligatorio
-    log_info(getLogger(), "Se crea el proceso %d en NEW", process->pid);
-    sem_post(&semNew);
+    if(flagMemoryResponse)
+    {
+        list_push(pcbNewList, process); 
+        //Log obligatorio
+        log_info(getLogger(), "Se crea el proceso %d en NEW", process->pid);
+        sem_post(&semNew);
+    } else {
+
+        log_info(getLogger(), "El proceso no se pudo abrir en memoria.");
+
+    }
+
+    
 }
 
 void destroyProcess(pcb_t *process)
@@ -121,17 +130,8 @@ void destroyProcess(pcb_t *process)
     free(process);
 }
 
-int pidToFind;
-
-bool compare_pid(void *data) 
-{
-    pcb_t *pcb = (pcb_t *)data;
-    return pcb->pid == pidToFind;
-}
-
 void killProcess(uint32_t pid)
-{
-    
+{    
     pcb_t* processFound = foundStatePcb(pid);
 
     if(processFound == NULL){
@@ -167,11 +167,40 @@ void killProcess(uint32_t pid)
         sem_post(&semMultiProcessing);        
         break;
 
+    case PCB_BLOCK:
+
+        if(processFound->isInInterface) // Esto es para el caso que se finalice un proceso y justo este operando algo en una interfaz, tiene que esperar hasta que termine para matarlo.
+        { 
+            interface_t* interface = foundInterfaceByProcessPidAssign(processFound->pid);
+
+            if(interface == NULL) log_error(getLogger(), "Este error no deberia pasar nunca.");
+
+            interface->flagKillProcess = true;
+
+            sem_wait(&semKillProcessInInterface);
+
+            list_remove_element_mutex(pcbExecList, processFound);
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_EXIT", processFound->pid);
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
+            list_push(pcbExitList, processFound);
+            sem_post(&semExit);
+
+        }
+        break;
+
     default:
         //Nada
         break;
     }
 
+}
+
+int pidToFind;
+
+bool compare_pid(void *data) 
+{
+    pcb_t *pcb = (pcb_t *)data;
+    return pcb->pid == pidToFind;
 }
 
 pcb_t* foundStatePcb(uint32_t pid)

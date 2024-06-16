@@ -21,6 +21,13 @@ extern bool _finishAllServersSignal;
 
 void finishAllServersSignal();
 
+
+// Espera en un loop a los clientes y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)
+void receiveClientIteration(int socketServer);
+
+/////////////////////////////////////IO///////////////////////////////////////////////////
+
+
 // Hilo que funciona como servidor para recibir paquetes de un cliente especificado por parametro, y realizar determinadas operaciones en base al paquete recibido
 void serverKernelForIO(int* socketClient);
 
@@ -29,14 +36,19 @@ void serverKernelForIO(int* socketClient);
 void operationPackageFromIO(t_list* package);
 
 
-// Espera en un loop a los clientes y les crea su hilo para recibir paquetes correspondiente (si es que no se llego al maximo de clientes)
-void receiveClientIteration(int socketServer);
+//////////////////////////////////////MEMORIA///////////////////////////////////////////
 
+
+void serverKernelForMemory(int *socketCLient);
+
+
+void memorySendResponseForNewProcess(int *socketClientMemory);
+
+
+//////////////////////////////////////CPU///////////////////////////////////////////////
 
 // Hilo que funciona como servidor para recibir paquetes de un cliente especificado por parametro, y realizar determinadas operaciones en base al paquete recibido
 void serverKernelForCPU(int *socketClient);
-
-void serverKernelForMemory(int *socketCLient);
 
 
 // Recibe la opCode de que el proceso termino y lo manda a PcbExitList.
@@ -52,13 +64,18 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch);
 
 void cpuSendSignalofProcess(int *socketClientCPUDispatch);
 
+
 void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch);
+
 
 void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch);
 
+
 void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch);
 
+
 void ioSendInterface(int *socketClientIO);
+
 
 void ioSendEndOperation(int *socketClientIO);
 

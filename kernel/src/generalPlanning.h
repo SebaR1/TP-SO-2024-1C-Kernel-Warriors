@@ -39,6 +39,7 @@ typedef struct
 	t_registers *registersCpu;
 	listMutex_t *resources;
 	pcbState_t state;
+	bool isInInterface;
 } pcb_t;
 
 // Estructura de un recurso en Kernel. 
@@ -53,6 +54,7 @@ typedef struct
 // Estructura de una interfaz en Kernel.
 typedef struct 
 {
+	bool flagKillProcess;
 	char* name;
 	interfaceType interfaceType;
 	bool isBusy;
@@ -101,6 +103,10 @@ extern sem_t semAddPid;
 extern sem_t semMemoryOk;
 
 extern sem_t semPausePlanning;
+
+extern sem_t semKillProcessInInterface;
+
+extern bool flagMemoryResponse;
 
 extern int pid;
 

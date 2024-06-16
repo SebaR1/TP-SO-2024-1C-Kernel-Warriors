@@ -30,6 +30,26 @@ interface_t *foundInterface(char* nameRequestInterface)
     return interfaceFound;
 }
 
+int auxPid;
+
+bool comparePidAssignInInterface(void *data)
+{
+    interface_t *interface = (interface_t *)data;
+    return interface->processAssign->pid == auxPid;
+}
+
+interface_t *foundInterfaceByProcessPidAssign(uint32_t pid)
+{
+    auxPid = pid;
+
+    interface_t *interfaceFound = (interface_t*)list_find_mutex(interfacesList, comparePidAssignInInterface);
+
+    if (interfaceFound == NULL) return NULL;
+
+    return interfaceFound;
+}
+
+
 void destroyInterfaces()
 {
     int interfacesSize = list_mutex_size(interfacesList);

@@ -23,6 +23,7 @@ int main()
     sem_init(&semMultiProgramming, 0 , getKernelConfig()->GRADO_MULTIPROGRAMACION);
     sem_init(&semPausePlanning, 0, 1);
     sem_init(&semMemoryOk, 0, 0);
+    sem_init(&semKillProcessInInterface, 0, 0);
 
     defineAlgorithm();
 

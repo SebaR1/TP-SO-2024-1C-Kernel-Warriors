@@ -26,6 +26,10 @@ sem_t semMemoryOk;
 
 sem_t semPausePlanning;
 
+sem_t semKillProcessInInterface;
+
+bool flagMemoryResponse;
+
 int pid;
 
 t_algorithm algorithm;

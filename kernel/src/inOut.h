@@ -12,6 +12,11 @@ bool compareNameInterface(void *data);
 // Busca la interfaz solicitada por CPU.
 interface_t *foundInterface(char* nameRequestInterface);
 
+bool comparePidAssignInInterface(void *data);
+
+interface_t *foundInterfaceByProcessPidAssign(uint32_t pid);
+
+
 // Destruye las interfaces.
 void destroyInterfaces();
 
