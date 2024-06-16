@@ -425,7 +425,6 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
                 processExec->params->param1 = string_itoa(timeOfOperation); // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
             }
         }
@@ -492,7 +491,6 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
                 processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
                 processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
 
@@ -561,7 +559,6 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params = malloc(sizeof(paramsKernelForIO)); // Se pide un espacio en memoria para guardar los parametros que va a necesitar despues que la interfaz este libre.
                 processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
                 processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
 

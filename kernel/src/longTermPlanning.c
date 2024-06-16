@@ -80,6 +80,7 @@ pcb_t* createProcess()
     process->registersCpu->ECX = 0;
     process->registersCpu->EDX = 0;
     process->registersCpu->SI = 0;
+    process->params = malloc(sizeof(paramsKernelForIO));
     return process;
 };
 
@@ -100,6 +101,7 @@ void addPcbToNew(char* path)
     } else {
 
         log_info(getLogger(), "El proceso no se pudo abrir en memoria.");
+        destroyProcess(process);
 
     }
 
@@ -113,7 +115,7 @@ void destroyProcess(pcb_t *process)
         resource_t* resourceToFree = list_pop(process->resources); // Popea el recurso asignado
         addInstanceResource(resourceToFree);
         
-        if(list_mutex_size(resourceToFree->blockList) > 0){ // Se fija si el tiene procesos bloqueados que esperen este recurso.
+        if(list_mutex_size(resourceToFree->blockList) > 0){ // Se fija si tiene procesos bloqueados que esperen este recurso.
         pcb_t* processBlockToReady = list_pop(resourceToFree->blockList);
         processBlockToReady->state = PCB_READY;
         list_push(pcbReadyList, processBlockToReady);
