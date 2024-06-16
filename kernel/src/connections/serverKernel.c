@@ -141,23 +141,23 @@ void serverKernelForCPU(int *socketClient)
             cpuSendInterruptQ(socketClient);
             break;
 
-        case KERNEL_SEND_PROCESS_PATH: // Mock si llegara un WAIT de algun recurso. 
+        case CPU_SEND_CONTEXT_FOR_WAIT: 
             cpuSendWaitOfProcess(socketClient);
             break;
 
-        case CPU_GIVE_ME_NEXT_INSTRUCTION: // Mock si llegara un SIGNAL de algun recurso. 
+        case CPU_SEND_CONTEXT_FOR_SIGNAL: 
             cpuSendSignalofProcess(socketClient);
             break;
 
-        case CPU_GET_FRAME: // Mock si llegara una operacion IO_GEN_SLEEP.
+        case CPU_SEND_CONTEXT_FOR_IO_GENERIC: 
             cpuSendRequestForIOGenSleep(socketClient);
             break;
 
-        case MEMORY_SEND_DATA: // Mock si llegara una operacion de IO_STDIN_READ.
+        case CPU_SEND_CONTEXT_FOR_IO_STDIN:
             cpuSendRequestForIOStdinRead(socketClient);
             break;
 
-        case MEMORY_SEND_FRAME: // Mock si llegara una operacion de IO_STDOUT_WRITE.
+        case CPU_SEND_CONTEXT_FOR_IO_STDOUT:
             cpuSendRequestForIOStdoutWrite(socketClient);
             break;
 
