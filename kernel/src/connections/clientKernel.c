@@ -106,7 +106,7 @@ void sendProcessPathToMemory(pcb_t *process, char* path)
     kernelPathProcess.path = path;
 
     addToPackage(package, &(kernelPathProcess.pid), sizeof(uint32_t));
-    addToPackage(package, &(kernelPathProcess.path), string_length(kernelPathProcess.path)+1); // +1 por el nulo 
+    addToPackage(package, (kernelPathProcess.path), string_length(kernelPathProcess.path)+1); // +1 por el nulo 
 
     sendPackage(package, socketClientMemory); //Envio el paquete a memoria
 
