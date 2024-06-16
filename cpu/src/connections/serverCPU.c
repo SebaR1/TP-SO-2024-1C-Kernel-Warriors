@@ -271,6 +271,10 @@ void serverCPUForMemory(int *socketClient)
             memoryGetFrame(socketClient);
             break;
 
+        case MEMORY_SEND_DATA:
+            
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -430,6 +434,28 @@ void receiveContext(int* socketClient)
     list_destroy_and_destroy_elements(listPackage, free);
 }
 
+void memoryReceiveData(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    dataReceivedFromMemory = list_get(listPackage, 0);
+
+    sem_post(&semWaitDataFromMemory);
+
+    list_destroy(listPackage);
+}
+
+
+void memoryReceiveConfirmation(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    sem_post(&semWaitConfirmationFromMemory);
+
+    list_destroy(listPackage);
+}
 
 
 

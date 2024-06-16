@@ -131,6 +131,17 @@ void _SET1(uint8_t* reg, uint32_t value);
 void _SET4(uint32_t* reg, uint32_t value);
 
 
+void _MOV_IN11(uint8_t* data, uint8_t* direction);
+void _MOV_IN14(uint8_t* data, uint32_t* direction);
+void _MOV_IN41(uint32_t* data, uint8_t* direction);
+void _MOV_IN44(uint32_t* data, uint32_t* direction);
+
+
+void _MOV_OUT11(uint8_t* direction, uint8_t* data);
+void _MOV_OUT14(uint8_t* direction, uint32_t* data);
+void _MOV_OUT41(uint32_t* direction, uint8_t* data);
+void _MOV_OUT44(uint32_t* direction, uint32_t* data);
+
 void _SUM11(uint8_t* destination, uint8_t* origin);
 void _SUM14(uint8_t* destination, uint32_t* origin);
 void _SUM41(uint32_t* destination, uint8_t* origin);
@@ -162,6 +173,22 @@ void _JNZ4(uint32_t* reg, uint32_t instruction);
 // Si el registro de type es de 8 bytes (Como EAX por ejemplo), almacena en outREgister4bytes la direccion de memoria del registro pedido en type.
 // Retorna REGISTER_1_BYTE si el registro es de 1 byte, o REGISTER_4_BYTES si el registro es de 4 bytes
 registerTypeByBytes _typeToRegister(registerType type, uint8_t* outRegister1byte, uint32_t* outRegister4bytes);
+
+
+
+/// @brief Lee la cantidad size de bytes de la memoria del usuario, a partir de la direccion fisica, y pone la informacion en data
+/// @param data Donde se copiará la informacion
+/// @param direction La direccion fisica
+/// @param size La cantidad de bytes a leer de la memoria de usuario (deberia ser igual al sizeof(data))
+void readFromMemory(void* data, int direction, int size);
+
+
+
+/// @brief Escribe la cantidad size de bytes de la memoria del usuario, a partir de la direccion fisica, y espera la confirmacion de la memoria
+/// @param data La data a escribir en la memoria de usuario
+/// @param direction La direccion fisica
+/// @param size La cantidad de bytes a escribir de la memoria de usuario (deberia ser igual al sizeof(data))
+void writeToMemory(void* data, int direction, int size);
 
 
 

@@ -37,6 +37,48 @@ void requestFrame(int pid, int page)
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 }
 
+
+void sendReadMemory(int pid, int physicalAddress, int size)
+{
+    // Envio la operacion y la info para pedirle el frame que necesito a la Memoria
+    t_package* package = createPackage(READ_MEMORY);
+
+    requestReadMemoryInfo readInfo;
+    readInfo.pid = pid;
+    readInfo.physicalAddress = physicalAddress;
+    readInfo.size = size;
+
+    addToPackage(package, &(readInfo.pid), sizeof(int)); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, &(readInfo.physicalAddress), sizeof(int)); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, &(readInfo.size), sizeof(int)); // Agrego el Process ID al paquete para enviar
+
+    sendPackage(package, socketMemory); // Envio el Program Counter
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+}
+
+void sendWriteMemory(int pid, void* data, int physicalAddress, int size)
+{
+    // Envio la operacion y la info para pedirle el frame que necesito a la Memoria
+    t_package* package = createPackage(WRITE_MEMORY);
+
+    requestWriteMemoryInfo writeInfo;
+    writeInfo.pid = pid;
+    writeInfo.data = data;
+    writeInfo.physicalAddress = physicalAddress;
+    writeInfo.size = size;
+
+    addToPackage(package, &(writeInfo.pid), sizeof(int)); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, &(writeInfo.data), size); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, &(writeInfo.physicalAddress), sizeof(int)); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, &(writeInfo.size), sizeof(int)); // Agrego el Process ID al paquete para enviar
+
+    sendPackage(package, socketMemory); // Envio el Program Counter
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+}
+
+
 void sendContextToKernel(operationCode opCode, int pid)
 {
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion

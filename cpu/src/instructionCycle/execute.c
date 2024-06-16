@@ -1,4 +1,6 @@
 #include "execute.h"
+#include "MMU/MMU.h"
+#include "connections/clientCPU.h"
 
 uint32_t PC = 0; // Program Counter, indica la próxima instrucción a ejecutar una vez completado un ciclo de ejecucion
 uint8_t AX = 0; // Registro Numérico de propósito general
@@ -200,7 +202,62 @@ void _SET4(uint32_t* reg, uint32_t value)
 
 void MOV_IN(registerType data, registerType direction)
 {
-    
+    uint8_t* data1bytes;
+    uint32_t* data4bytes;
+    uint8_t* direction1bytes;
+    uint32_t* direction4bytes;
+
+
+    switch (_typeToRegister(data, data1bytes, data4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // 1 bytes
+        switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // 1 bytes y 1 bytes
+            _MOV_IN11(data1bytes, direction1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // 1 bytes y 4 bytes
+            _MOV_IN14(data1bytes, direction4bytes);
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // 4 bytes
+        switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // 4 bytes y 1 bytes
+            _MOV_IN41(data4bytes, direction1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // 4 bytes y 4 bytes
+            _MOV_IN44(data4bytes, direction4bytes);
+            break;
+        }
+
+        break;
+    }
+}
+
+void _MOV_IN11(uint8_t* data, uint8_t* direction)
+{
+    readFromMemory((void*)data, *direction, 1);
+}
+
+void _MOV_IN14(uint8_t* data, uint32_t* direction)
+{
+    readFromMemory((void*)data, *direction, 1);
+}
+
+void _MOV_IN41(uint32_t* data, uint8_t* direction)
+{
+    readFromMemory((void*)data, *direction, 4);
+}
+
+void _MOV_IN44(uint32_t* data, uint32_t* direction)
+{
+    readFromMemory((void*)data, *direction, 4);
 }
 
 
@@ -210,9 +267,64 @@ void MOV_IN(registerType data, registerType direction)
 
 void MOV_OUT(registerType direction, registerType data)
 {
+    uint8_t* direction1bytes;
+    uint32_t* direction4bytes;
+    uint8_t* data1bytes;
+    uint32_t* data4bytes;
 
+
+    switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // 1 bytes
+        switch (_typeToRegister(data, data1bytes, data4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // 1 bytes y 1 bytes
+            _MOV_OUT11(direction1bytes, data1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // 1 bytes y 4 bytes
+            _MOV_OUT14(direction1bytes, data4bytes);
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // 4 bytes
+        switch (_typeToRegister(data, data1bytes, data4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // 4 bytes y 1 bytes
+            _MOV_OUT41(direction4bytes, data1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // 4 bytes y 4 bytes
+            _MOV_OUT44(direction4bytes, data4bytes);
+            break;
+        }
+
+        break;
+    }
 }
 
+
+void _MOV_OUT11(uint8_t* direction, uint8_t* data)
+{
+    writeToMemory((void*)data, *direction, 1);
+}
+
+void _MOV_OUT14(uint8_t* direction, uint32_t* data)
+{
+    writeToMemory((void*)data, *direction, 4);
+}
+
+void _MOV_OUT41(uint32_t* direction, uint8_t* data)
+{
+    writeToMemory((void*)data, *direction, 1);
+}
+
+void _MOV_OUT44(uint32_t* direction, uint32_t* data)
+{
+    writeToMemory((void*)data, *direction, 4);
+}
 
 
 ///////////////////////// INSTRUCCION SUM /////////////////////////
@@ -633,3 +745,39 @@ void setECX(uint32_t ecx) { ECX = ecx; }
 void setEDX(uint32_t edx) { EDX = edx; }
 void setDI(uint32_t di) { DI = di; }
 void setSI(uint32_t si) { SI = si; }
+
+
+
+
+void* dataReceivedFromMemory;
+
+void readFromMemory(void* data, int direction, int size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, info);
+
+    int offset = 0;
+    for (int i = 0; i < amountOfPhysicalAddresses; i++)
+    {
+        sendReadMemory(getCurrentPID(), info[i].physicalAddress, info[i].size);
+        sem_wait(&semWaitDataFromMemory);
+        memcpy(data + offset, dataReceivedFromMemory, info[i].size);
+        offset += info[i].size;
+        free(dataReceivedFromMemory);
+    }
+}
+
+
+void writeToMemory(void* data, int direction, int size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, info);
+
+    int offset = 0;
+    for (int i = 0; i < amountOfPhysicalAddresses; i++)
+    {
+        sendWriteMemory(getCurrentPID(), data + offset, info[i].physicalAddress, info[i].size);
+        offset += info[i].size;
+        sem_wait(&semWaitConfirmationFromMemory);
+    }
+}

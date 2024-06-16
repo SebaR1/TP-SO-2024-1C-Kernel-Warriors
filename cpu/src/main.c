@@ -24,6 +24,8 @@ int main()
     sem_init(&semaphoreWaitInstruction, 0, 0);
     sem_init(&semContinueInstructionCycle, 0, 0);
     sem_init(&semCheckInterrupt, 0, 1);
+    sem_init(&semWaitDataFromMemory, 0, 0);
+    sem_init(&semWaitConfirmationFromMemory, 0, 0);
     sem_init(&semaphoreFinishModule, 0, 0);
 
     initTLB();

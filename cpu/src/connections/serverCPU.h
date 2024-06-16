@@ -45,6 +45,8 @@ void receiveClientIterationInterrupt(int socketServer);
 
 
 
+
+
 /////////////////// FUNCIONES AUXILIARES ///////////////////
 
 
@@ -76,5 +78,16 @@ void kernelInterruptEndProcess(int* socketClient);
 /// @brief Recibe un contexto (tipicamente del Kernel) y lo asigna al contexto oficial de la CPU
 /// @param socketClient El socket del cliente
 void receiveContext(int* socketClient);
+
+
+/// @brief Recibe una informacion data de lectura de memoria
+/// @param socketClient El socket del cliente
+void memoryReceiveData(int* socketClient);
+
+
+/// @brief Recibe una confirmacion de que se escribió correctamente en la memoria
+/// @param socketClient El socket del cliente
+void memoryReceiveConfirmation(int* socketClient);
+
 
 #endif

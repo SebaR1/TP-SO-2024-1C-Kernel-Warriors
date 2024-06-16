@@ -215,6 +215,7 @@ typedef struct
 
 extern int PID;
 
+extern void* dataReceivedFromMemory;
 
 
 
@@ -281,6 +282,9 @@ extern sem_t semCheckInterrupt;
 
 extern sem_t semContinueInstructionCycle;
 
+extern sem_t semWaitDataFromMemory;
+
+extern sem_t semWaitConfirmationFromMemory;
 
 
 #endif

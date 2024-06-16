@@ -12,6 +12,11 @@ sem_t semCheckInterrupt;
 
 sem_t semContinueInstructionCycle;
 
+sem_t semWaitDataFromMemory;
+
+sem_t semWaitConfirmationFromMemory;
+
+
 
 
 

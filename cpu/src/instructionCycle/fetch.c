@@ -1,6 +1,7 @@
 #include "fetch.h"
 #include "utils/client/utils.h"
 #include "connections/clientCPU.h"
+#include "utilsCPU/logger.h"
 
 
 instructionString* currentInstructionString;
@@ -11,6 +12,8 @@ instructionString* getNextInstruction(int PID, uint32_t PC)
 
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
     sendPCToMemory(PID, PC);
+
+    log_info(getLogger(), "Fetch instrucción - PID: %d - FETCH - Program Counter: %d", PID, PC);
 
     incrementPC();
 

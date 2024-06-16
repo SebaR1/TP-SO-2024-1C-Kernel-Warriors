@@ -45,6 +45,7 @@ void getPageAndOffset(int logicalAddress, pageAndOffset* outPageAndOffset);
 /// @param logicalAddress // La direccion logica
 /// @param size El tamaño total a leer o escribir
 /// @param outPhysicalAddressesInfo // Retorna un array, donde cada elemento tiene la informacion en qué direccion fisica leer o escribir y cuantos bytes en cada una.
+/// Hace un malloc.
 /// @return Retorna el tamaño del array retornado (la cantidad de elementos)
 int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddressInfo* outPhysicalAddressesInfo);
 
