@@ -5,7 +5,7 @@
 
 
 
-void sendTamPagina(int* socketClient, int tamPagina)
+void sendTamPagina(int socketClient, int tamPagina)
 {
     // Envio el tamaño de pagina a la CPU.
     t_package* package = createPackage(MEMORY_TAM_PAGINA);
@@ -21,7 +21,7 @@ void sendTamPagina(int* socketClient, int tamPagina)
 }
 
 
-void sendInstructionToCpu(int* socketClient, cpuGiveMeNextInstruction* params)
+void sendInstructionToCpu(int socketClient, cpuGiveMeNextInstruction* params)
 {
     // Envio el string con la instruccion.
     t_package* package = createPackage(MEMORY_NEXT_INSTRUCTION);
@@ -38,7 +38,7 @@ void sendInstructionToCpu(int* socketClient, cpuGiveMeNextInstruction* params)
 
 
 
-void sendData(int* socketClient, void* data, int size)
+void sendData(int socketClient, void* data, int size)
 {
     t_package* package = createPackage(MEMORY_SEND_DATA);
 
@@ -48,24 +48,24 @@ void sendData(int* socketClient, void* data, int size)
 
     addToPackage(package, info.data, info.size); // Agrego la data al paquete
 
-    sendPackage(package, *socketClient); // Envio la data
+    sendPackage(package, socketClient); // Envio la data
 
     destroyPackage(package);
 }
 
 
 
-void sendConfirmation(int* socketClient)
+void sendConfirmation(int socketClient)
 {
     t_package* package = createPackage(MEMORY_OK);
 
-    sendPackage(package, *socketClient); // Envio la confirmacion
+    sendPackage(package, socketClient); // Envio la confirmacion
 
     destroyPackage(package);
 }
 
 
-void sendFrame(int* socketClient, int frame)
+void sendFrame(int socketClient, int frame)
 {
     // Retardo de la operacion
     memoryDelay();
@@ -78,7 +78,7 @@ void sendFrame(int* socketClient, int frame)
 
     addToPackage(package, &(info.frame), sizeof(int)); // Agrego la data al paquete
 
-    sendPackage(package, *socketClient); // Envio la data
+    sendPackage(package, socketClient); // Envio la data
 
     destroyPackage(package);
 }

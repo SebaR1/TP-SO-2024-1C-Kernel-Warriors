@@ -320,7 +320,7 @@ void cpuWantsNextInstruction(int* socketClient)
 
     // Le envio la instruccion directamente en el mismo hilo porque solo puedo enviar las instrucciones una por una,
     // entonces no va a pasar que me pida otra instruccion el mismo socket cuando ni siquiera le mandé la que me pidió anres la CPU.
-    sendInstructionToCpu(socketClient, &nextInstructionRequest);
+    sendInstructionToCpu(*socketClient, &nextInstructionRequest);
 
     list_destroy_and_destroy_elements(listPackage, free);
 }
@@ -397,7 +397,7 @@ void requestReadMemory(int* socketClient)
     // otra peticion de lectura o escritura.
     void* data = readBytes(request.pid, request.physicalAddress, request.size);
 
-    sendData(socketClient, data, request.size);
+    sendData(*socketClient, data, request.size);
 
     free(data);
 

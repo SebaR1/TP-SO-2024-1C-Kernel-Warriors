@@ -15,14 +15,15 @@ void runInstructionCycle()
         instructionString* newInstructionString = getNextInstruction(getCurrentPID(), getPC());
 
         // Fase decode, descifro qué me pide la instrucción (la cual llegó en forma de string)
-        void* instructionParams;
+        void** instructionParams = malloc(sizeof(void*));
         instructionType type = decodeInstruction(newInstructionString->string, instructionParams);
 
         // Ejecuto la instruccion
-        executeInstruction(type, instructionParams);
+        executeInstruction(type, *instructionParams);
 
 
         // Libero la memoria que usé
+        free(*instructionParams);
         free(instructionParams);
         free(newInstructionString->string);
         free(newInstructionString);

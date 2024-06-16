@@ -16,7 +16,7 @@
 /// @param outParams Debe ser un puntero a NULL o a basura (es decir, no se debe haber reservado memoria al pasar por parametro este puntero). Se crea la estructura correspondiente usando malloc y se almacenan sus parametros segun lo que viene en la instruccion instruction. Se retorna esa estructura (ES NECESARIO LIBERAR MEMORIA)
 /// @warning ES NECESARIO LIBERAR LA MEMORIA DEL outParams CON FREE SI SE USA ESTA FUNCIÓN, ASI COMO TAMBIEN LAS VARIABLES INTERNAS DE LA ESTRUCTURA QUE HAYAN RESERVADO MEMORIA CON MALLOC (como los strings (char*) por ejemplo)
 /// @return Retorna el tipo de instruccion
-instructionType decodeInstruction(char* instruction, void* outParams);
+instructionType decodeInstruction(char* instruction, void** outParams);
 
 
 /// @brief Convierte un registro en forma de string (como por ejemplo "AX") en su tipo de registro correspondiente
@@ -30,7 +30,7 @@ registerType _stringRegisterToType(char* regString);
 
 //////////////////// FUNCIONES AUXILIARES PARA OBTENER LA INFORMACION NECESARIA DE UNA INSTRUCCION A PARTIR DE SU STRING ////////////////////
 
-instructionType SET_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType SET_GET_INFO(char** instructionSplitted, void** outParams);
 
 instructionType MOV_IN_GET_INFO(char** instructionSplitted, void* outParams);
 

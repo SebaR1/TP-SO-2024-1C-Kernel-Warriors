@@ -4,7 +4,7 @@
 
 
 
-instructionType decodeInstruction(char* instruction, void* outParams)
+instructionType decodeInstruction(char* instruction, void** outParams)
 {
     instructionType type;
 
@@ -44,30 +44,30 @@ instructionType decodeInstruction(char* instruction, void* outParams)
 
 registerType _stringRegisterToType(char* regString)
 {
-    if (regString == PC_STRING) return PC_TYPE;
-    else if (regString == AX_STRING) return AX_TYPE;
-    else if (regString == BX_STRING) return BX_TYPE;
-    else if (regString == CX_STRING) return CX_TYPE;
-    else if (regString == DX_STRING) return DX_TYPE;
-    else if (regString == EAX_STRING) return EAX_TYPE;
-    else if (regString == EBX_STRING) return EBX_TYPE;
-    else if (regString == ECX_STRING) return ECX_TYPE;
-    else if (regString == EDX_STRING) return EDX_TYPE;
-    else if (regString == SI_STRING) return SI_TYPE;
-    else if (regString == DI_STRING) return DI_TYPE;
+    if (strcmp(regString, PC_STRING) == 0) return PC_TYPE;
+    else if (strcmp(regString, AX_STRING) == 0) return AX_TYPE;
+    else if (strcmp(regString, BX_STRING) == 0) return BX_TYPE;
+    else if (strcmp(regString, CX_STRING) == 0) return CX_TYPE;
+    else if (strcmp(regString, DX_STRING) == 0) return DX_TYPE;
+    else if (strcmp(regString, EAX_STRING) == 0) return EAX_TYPE;
+    else if (strcmp(regString, EBX_STRING) == 0) return EBX_TYPE;
+    else if (strcmp(regString, ECX_STRING) == 0) return ECX_TYPE;
+    else if (strcmp(regString, EDX_STRING) == 0) return EDX_TYPE;
+    else if (strcmp(regString, SI_STRING) == 0) return SI_TYPE;
+    else if (strcmp(regString, DI_STRING) == 0) return DI_TYPE;
 }
 
 
 
 
 
-instructionType SET_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType SET_GET_INFO(char** instructionSplitted, void** outParams)
 {
     SET_STRUCT* params = malloc(sizeof(SET_STRUCT));
     params->reg = _stringRegisterToType(instructionSplitted[1]);
     params->value = atoi(instructionSplitted[2]);
 
-    outParams = params;
+    *outParams = params;
     return SET_TYPE;
 }
 
