@@ -19,6 +19,7 @@ void executeIOStdoutWrite()
     log_info(getLogger(), "PID: %d - Operacion: IO_STDOUT_WRITE", (int)interfaceData.currentOperation.pid);
     sendIOReadRequestToMemory();
     
+    //Se espera a recibir el contenido de la memoria
     sem_wait(&semaphoreForStdout);
 
     log_info(getLogger(), "%s", resultsForStdout.resultsForWrite);

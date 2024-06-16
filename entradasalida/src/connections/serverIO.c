@@ -45,6 +45,7 @@ void serverIOForKernel(int *socketClient)
     }
 
     free(socketClient);
+    // Si termina el ciclo de escucha de servidor para el Kernel, se habilita que continúe el hilo main y termine el programa
     sem_post(&semaphoreForModule);
 }
 
@@ -73,6 +74,7 @@ void serverIOForMemory(int *socketClient)
 
             case MEMORY_OK:
                 log_info(getLogger(), "Recibida confirmacion desde la memoria.");
+                // Una vez recibida la confirmación de la memoria, se habilita a que se confirme al Kernel que se completó la operación
                 sem_post(&semaphoreForStdin);
                 break;
 
@@ -88,6 +90,7 @@ void serverIOForMemory(int *socketClient)
     }
 
     free(socketClient);
+    // Si termina el ciclo de escucha de servidor para la Memoria, se habilita que continúe el hilo main y termine el programa
     sem_post(&semaphoreForModule);
 }
 
@@ -116,7 +119,6 @@ void sendResultsFromIOStdinReadToKernel()
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
     params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
     params->registerSize = *((uint32_t*)list_get(listPackage, 2));
-    resultsForStdin.resultsFromRead = malloc(sizeof(char) * params->registerSize + 1); // + 1 para agregarle el '\0'
     resultsForStdin.resultsForMemory = malloc(sizeof(char) * params->registerSize);
 
     log_info(getLogger(), "Solicitud de operacion STDIN_READ recibida desde el Kernel.");
@@ -152,6 +154,7 @@ void receiveDataFromMemory()
 
     log_info(getLogger(), "Contenido solicitado a la memoria recibido.");
 
+    // Una vez recibido el contenido de la memoria, se habilita a que se imprima en pantalla en otro hilo
     sem_post(&semaphoreForStdout);
 
     list_destroy(listPackage);

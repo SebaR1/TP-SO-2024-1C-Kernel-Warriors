@@ -6,6 +6,7 @@ void executeIOStdinReadAndSendResults()
 
     sendResultsFromStdinToMemory();
 
+    // Se espera a recibir confirmación de la memoria de que salió todo bien
     sem_wait(&semaphoreForStdin);
 
     sendIOStdinReadResultsToKernel();
@@ -24,7 +25,7 @@ void executeIOStdinRead()
 {   
     log_info(getLogger(), "PID: %d - Operacion: IO_STDIN_READ", (int)interfaceData.currentOperation.pid);
 
-    scanf(" %s", resultsForStdin.resultsFromRead);
+    resultsForStdin.resultsFromRead = readline("> ");
 
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
     memmove(resultsForStdin.resultsForMemory, resultsForStdin.resultsFromRead, params->registerSize);

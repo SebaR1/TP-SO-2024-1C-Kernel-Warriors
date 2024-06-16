@@ -18,9 +18,7 @@ int main(int argc, char* argv[])
     else
     {   
         // Esta variante pide el nombre cuando no se lo ingresa como parámetro del main, es para pruebas, luego se eliminará
-        char *name = malloc(sizeof(char) * 6);
-        printf("Nombre: ");
-        scanf(" %s", name);
+        char *name = readline("Nombre de la interfaz: ");
         createInterface(name);
         free(name);
     }
@@ -44,6 +42,7 @@ int main(int argc, char* argv[])
     sendInterfaceToKernel();
     log_info(getLogger(), "Tipo y nombre de la interfaz enviado al Kernel.");
     
+    // Se espera en el main a que los hilos de servidor terminen (que cualquiera de los dos termine)
     sem_wait(&semaphoreForModule);
 
     destroyPackage(initialPackageForKernel);

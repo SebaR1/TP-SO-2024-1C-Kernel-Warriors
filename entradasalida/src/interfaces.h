@@ -14,6 +14,7 @@
 #include <commons/string.h>
 #include <commons/collections/list.h>
 #include <semaphore.h>
+#include <readline/readline.h>
 typedef enum
 {   
     IO_NULL,
