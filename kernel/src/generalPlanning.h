@@ -98,6 +98,8 @@ extern sem_t semMultiProgramming;
 extern sem_t semMultiProcessing;
 extern sem_t semAddPid;
 
+extern sem_t semMemoryOk;
+
 extern sem_t semPausePlanning;
 
 extern int pid;

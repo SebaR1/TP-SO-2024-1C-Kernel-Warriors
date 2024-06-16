@@ -91,6 +91,7 @@ void serverKernelForMemory(int *socketClient)
             break;
 
         case MEMORY_OK:
+            sem_post(&semMemoryOk);
             break;
 
         case DO_NOTHING:

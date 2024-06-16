@@ -89,6 +89,8 @@ void addPcbToNew(char* path)
     pcb_t *process = createProcess();
     sendProcessPathToMemory(process, path);
 
+    sem_wait(&semMemoryOk); // Esperan a que la memoria del ok de que el proceso se creo correctamente
+
     list_push(pcbNewList, process); 
     //Log obligatorio
     log_info(getLogger(), "Se crea el proceso %d en NEW", process->pid);
