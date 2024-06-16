@@ -16,6 +16,7 @@ typedef struct
     char* PATH_BASE_DIALFS;
     int BLOCK_SIZE;
     int BLOCK_COUNT;
+    int RETRASO_COMPACTACION;
 } ioConfig;
 
 

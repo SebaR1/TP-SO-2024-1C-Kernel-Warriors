@@ -36,6 +36,8 @@ void _getIOData()
     getIOConfig()->BLOCK_SIZE = config_get_int_value(_configFile, "BLOCK_SIZE");
 
     getIOConfig()->BLOCK_COUNT = config_get_int_value(_configFile, "BLOCK_COUNT");
+
+    getIOConfig()->RETRASO_COMPACTACION = config_get_int_value(_configFile, "RETRASO_COMPACTACION");
 }
 
 void initIOConfig(char* path)
