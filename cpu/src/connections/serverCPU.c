@@ -165,7 +165,7 @@ void serverCPUDispatchForKernel(int *socketClient)
             break;
 
         case KERNEL_SEND_CONTEXT:
-
+            receiveContext(socketClient);
             break;
 
         case DO_NOTHING:
@@ -219,10 +219,6 @@ void serverCPUInterruptForKernel(int *socketClient)
 
         case KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS:
             kernelInterruptEndProcess(socketClient);
-            break;
-
-        case KERNEL_SEND_CONTEXT:
-            receiveContext(socketClient);
             break;
 
         case DO_NOTHING:
