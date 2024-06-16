@@ -14,6 +14,8 @@ void readyState()
         //Log Obligatorio
         log_info(getLogger(), listPids, getKernelConfig()->ALGORITMO_PLANIFICACION);
         free(listPids);
+
+        sleep(1);
     
         sem_post(&semExec);
     }

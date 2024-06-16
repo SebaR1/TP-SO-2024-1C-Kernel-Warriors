@@ -36,6 +36,8 @@ void receiveClientIteration(int socketServer);
 // Hilo que funciona como servidor para recibir paquetes de un cliente especificado por parametro, y realizar determinadas operaciones en base al paquete recibido
 void serverKernelForCPU(int *socketClient);
 
+void serverKernelForMemory(int *socketCLient);
+
 
 // Recibe la opCode de que el proceso termino y lo manda a PcbExitList.
 void cpuSendExitProcess(int *socketClientCPUDispatch);

@@ -67,6 +67,54 @@ void receiveClientIteration(int socketServer)
     }
 }
 
+
+void serverKernelForMemory(int *socketClient)
+{
+
+    bool exitLoop = false;
+    while (!exitLoop || _finishAllServersSignal)
+    {
+        // Recibir el codigo de operacion y hacer la operacion recibida.
+        operationCode opCode = getOperation(*socketClient);
+        if (_finishAllServersSignal)
+        {
+            break;
+        }
+
+        switch (opCode)
+        {
+        case PACKAGE_FROM_IO:
+            log_info(getLogger(), "Obteniendo paquete por parte del modulo IO");
+            t_list *listPackage = getPackage(*socketClient);
+            log_info(getLogger(), "Paquete obtenido con exito del modulo IO");
+            operationPackageFromIO(listPackage);
+            break;
+
+        case MEMORY_OK:
+            break;
+
+        case DO_NOTHING:
+            break;
+
+        case ERROR:
+            log_error(getLogger(), ERROR_CASE_MESSAGE);
+            exitLoop = true;
+            break;
+
+        default:
+            log_error(getLogger(), DEFAULT_CASE_MESSAGE);
+            break;
+        }
+    }
+
+    free(socketClient);
+
+    sem_wait(&semaphoreForIO);
+    numberOfIOClients--;
+    sem_post(&semaphoreForIO);
+}
+
+
 void serverKernelForIO(int *socketClient)
 {
 

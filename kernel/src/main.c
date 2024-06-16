@@ -77,6 +77,7 @@ int main()
 
     // Con el socket de CPUDispatch abro un server para escucharlo.
     initServerForASocket(socketClientCPUDispatch, serverKernelForCPU);
+    initServerForASocket(socketClientMemory, serverKernelForMemory);
 
     // Inicio consola de Kernel. Si termina la consola termina todo el programa.
     pthread_t kernelConsoleThread;
