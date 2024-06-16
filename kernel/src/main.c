@@ -129,6 +129,7 @@ int main()
     log_info(getLogger(), "Paquete enviado con exito.");
 
 
+
     log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
     int socketClientMemory = createConection(getLogger(), getKernelConfig()->IP_MEMORIA, getKernelConfig()->PUERTO_MEMORIA);
     sendPackage(initialPackageToMemory, socketClientMemory);
