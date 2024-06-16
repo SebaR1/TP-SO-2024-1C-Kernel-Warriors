@@ -221,6 +221,10 @@ void serverCPUInterruptForKernel(int *socketClient)
             kernelInterruptEndProcess(socketClient);
             break;
 
+        case KERNEL_SEND_CONTEXT:
+            receiveContext(socketClient);
+            break;
+
         case DO_NOTHING:
             break;
 
