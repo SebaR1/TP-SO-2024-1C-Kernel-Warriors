@@ -133,11 +133,11 @@ void serverKernelForCPU(int *socketClient)
         switch (opCode)
         {
 
-        case KERNEL_SEND_INTERRUPT_CONSOLE_END_PROCESS: // Mock si llegara una señal de CPU si el proceso termino y pasa a exit
+        case CPU_SEND_CONTEXT_FOR_END_PROCESS: 
             cpuSendExitProcess(socketClient);
             break;
 
-        case KERNEL_SEND_INTERRUPT_QUANTUM_END: // Mock si llegara una señal de respuesta de CPU por una interrupcion de quantum de kernel
+        case CPU_SEND_CONTEXT_FOR_END_QUANTUM: 
             cpuSendInterruptQ(socketClient);
             break;
 
