@@ -3,6 +3,7 @@
 #include "paging/memoryUser.h"
 #include "utilsMemory/delay.h"
 #include "utils/mathMemory.h"
+#include "utilsMemory/logger.h"
 
 
 
@@ -73,7 +74,7 @@ void loadProcessByPathWithParams(void* params)
 
     loadProcessByPath(processPath->pid, processPath->path);
 
-    log_info("Creación de Tabla de Páginas - PID: %d - Tamaño: %d", processPath->pid, 0);
+    log_info(getLogger(),"Creación de Tabla de Páginas - PID: %d - Tamaño: %d", processPath->pid, 0);
 
     free(processPath->path);
     free(processPath);
