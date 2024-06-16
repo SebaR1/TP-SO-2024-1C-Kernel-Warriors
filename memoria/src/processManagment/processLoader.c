@@ -74,7 +74,7 @@ void loadProcessByPathWithParams(void* params)
 
     loadProcessByPath(processPath->pid, processPath->path);
 
-    log_info(getLogger(),"Creación de Tabla de Páginas - PID: %d - Tamaño: %d", processPath->pid, 0);
+    log_info(getLogger(), "Creación de Tabla de Páginas - PID: %d - Tamaño: %d", processPath->pid, 0);
 
     free(processPath->path);
     free(processPath);
@@ -98,7 +98,7 @@ void destroyProcess(int PID)
 
     free(info);
 
-    log_info("Destrucción de Tabla de Páginas - PID: %d - Tamaño: %d", PID, amountOfPagesFree);
+    log_info(getLogger(), "Destrucción de Tabla de Páginas - PID: %d - Tamaño: %d", PID, amountOfPagesFree);
 }
 
 

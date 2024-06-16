@@ -15,7 +15,7 @@ void readyState()
         log_info(getLogger(), listPids, getKernelConfig()->ALGORITMO_PLANIFICACION);
         free(listPids);
 
-        sleep(90); // Solucion temporal, en la entrega final será mejorado
+        sleep(30); // Solucion temporal, en la entrega final será mejorado
     
         sem_post(&semExec);
     }
