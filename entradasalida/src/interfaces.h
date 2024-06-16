@@ -70,6 +70,7 @@ typedef struct
 typedef struct
 {
     char *resultsFromRead;
+    char *resultsForMemory;
 } t_resultsForStdin;
 
 typedef struct

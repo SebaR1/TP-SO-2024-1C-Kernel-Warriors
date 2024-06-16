@@ -21,5 +21,5 @@ void executeIOStdoutWrite()
     
     sem_wait(&semaphoreForStdout);
 
-    printf("%s", resultsForStdout.resultsForWrite);
+    log_info(getLogger(), "%s", resultsForStdout.resultsForWrite);
 }

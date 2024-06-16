@@ -39,6 +39,7 @@ void createInterface(char *name)
         case STDIN:
         interfaceData.currentOperation.params = malloc(sizeof(t_paramsForStdinInterface));
         resultsForStdin.resultsFromRead = NULL;
+        resultsForStdin.resultsForMemory = NULL;
         log_info(getLogger(), "Creada interfaz de tipo STDIN, con nombre \"%s\"", interfaceData.name);
         break;
 

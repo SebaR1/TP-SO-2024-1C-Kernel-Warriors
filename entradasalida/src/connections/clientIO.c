@@ -19,7 +19,7 @@ void sendIOGenSleepResultsToKernel()
 
     sendPackage(package, socketKernel);
 
-    log_info(getLogger(), "Rresultados de la operacion IO_GEN_SLEEP enviados al Kernel.");
+    log_info(getLogger(), "Resultados de la operacion IO_GEN_SLEEP enviados al Kernel.");
     
     destroyPackage(package);
 }
@@ -33,7 +33,7 @@ void sendIOStdinReadResultsToKernel()
 
     sendPackage(package, socketKernel);
 
-    log_info(getLogger(), "Rresultados de la operacion STDIN_READ enviados al Kernel.");
+    log_info(getLogger(), "Resultados de la operacion STDIN_READ enviados al Kernel.");
     
     destroyPackage(package);
 }
@@ -45,7 +45,7 @@ void sendIOStdoutWriteResultsToKernel()
 
     sendPackage(package, socketKernel);
 
-    log_info(getLogger(), "Rresultados de la operacion STDOUT_WRITE enviados al Kernel.");
+    log_info(getLogger(), "Resultados de la operacion STDOUT_WRITE enviados al Kernel.");
     
     destroyPackage(package);
 }
@@ -57,7 +57,7 @@ void sendResultsFromStdinToMemory()
 
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
 
-    addToPackage(package, resultsForStdin.resultsFromRead, string_length(resultsForStdin.resultsFromRead) + 1);
+    addToPackage(package, resultsForStdin.resultsForMemory, params->registerSize);
     addToPackage(package, &params->registerDirection, sizeof(uint32_t));
     addToPackage(package, &params->registerSize, sizeof(uint32_t));
 

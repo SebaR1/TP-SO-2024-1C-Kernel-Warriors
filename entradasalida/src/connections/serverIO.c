@@ -116,6 +116,8 @@ void sendResultsFromIOStdinReadToKernel()
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
     params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
     params->registerSize = *((uint32_t*)list_get(listPackage, 2));
+    resultsForStdin.resultsFromRead = malloc(sizeof(char) * params->registerSize + 1); // + 1 para agregarle el '\0'
+    resultsForStdin.resultsForMemory = malloc(sizeof(char) * params->registerSize);
 
     log_info(getLogger(), "Solicitud de operacion STDIN_READ recibida desde el Kernel.");
 
@@ -133,6 +135,7 @@ void sendResultsFromIOStdoutWriteToKernel()
     t_paramsForStdoutInterface *params = (t_paramsForStdoutInterface*)interfaceData.currentOperation.params;
     params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
     params->registerSize = *((uint32_t*)list_get(listPackage, 2));
+    resultsForStdout.resultsForWrite = malloc(sizeof(char) * params->registerSize + 1); // + 1 para imprimir la cadena con el '\0'
 
     log_info(getLogger(), "Solicitud de operacion STDOUT_WRITE recibida desde el Kernel.");
 
