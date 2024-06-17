@@ -57,7 +57,7 @@ void sendData(int socketClient, void* data, int size)
 
 void sendConfirmation(int socketClient)
 {
-    t_package* package = createPackage(MEMORY_OK);
+    t_package* package = createPackage(MEMORY_WRITE_OK);
 
     sendPackage(package, socketClient); // Envio la confirmacion
 

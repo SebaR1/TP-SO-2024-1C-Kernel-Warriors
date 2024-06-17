@@ -72,7 +72,7 @@ void serverIOForMemory(int *socketClient)
                 receiveDataFromMemory();
                 break;
 
-            case MEMORY_OK:
+            case MEMORY_WRITE_OK:
                 log_info(getLogger(), "Recibida confirmacion desde la memoria.");
                 // Una vez recibida la confirmación de la memoria, se habilita a que se confirme al Kernel que se completó la operación
                 sem_post(&semaphoreForStdin);
