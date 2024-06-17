@@ -10,7 +10,7 @@ listMutex_t* interruptionsList;
 
 void initInterrupts()
 {
-    interruptionsList = list_create();
+    interruptionsList = initListMutex();
 }
 
 
@@ -26,7 +26,7 @@ void checkInterrupts()
 
     interruptionInfo* info;
 
-    while (list_is_empty_mutex(interruptionsList))
+    while (!list_is_empty_mutex(interruptionsList))
     {
         info = (interruptionInfo*)list_pop(interruptionsList);
 

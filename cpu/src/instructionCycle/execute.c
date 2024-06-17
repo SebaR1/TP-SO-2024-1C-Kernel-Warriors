@@ -169,20 +169,23 @@ void executeInstruction(instructionType type, void* paramsGeneric)
 
 void SET(registerType registerType, uint32_t value)
 {
-    uint8_t* reg1bytes;
-    uint32_t* reg4bytes;
+    uint8_t** reg1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** reg4bytes = malloc(sizeof(uint32_t**));
 
 
     switch (_typeToRegister(registerType, reg1bytes, reg4bytes))
     {
     case REGISTER_1_BYTE:
-        _SET1(reg1bytes, value);
+        _SET1(*reg1bytes, value);
         break;
 
     case REGISTER_4_BYTES:
-        _SET4(reg4bytes, value);
+        _SET4(*reg4bytes, value);
         break;
     }
+
+    free(reg1bytes);
+    free(reg4bytes);
 }
 
 void _SET1(uint8_t* reg, uint32_t value)
@@ -202,10 +205,10 @@ void _SET4(uint32_t* reg, uint32_t value)
 
 void MOV_IN(registerType data, registerType direction)
 {
-    uint8_t* data1bytes;
-    uint32_t* data4bytes;
-    uint8_t* direction1bytes;
-    uint32_t* direction4bytes;
+    uint8_t** data1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** data4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** direction4bytes = malloc(sizeof(uint32_t**));
 
 
     switch (_typeToRegister(data, data1bytes, data4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
@@ -214,11 +217,11 @@ void MOV_IN(registerType data, registerType direction)
         switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // 1 bytes y 1 bytes
-            _MOV_IN11(data1bytes, direction1bytes);
+            _MOV_IN11(*data1bytes, *direction1bytes);
             break;
         
         case REGISTER_4_BYTES: // 1 bytes y 4 bytes
-            _MOV_IN14(data1bytes, direction4bytes);
+            _MOV_IN14(*data1bytes, *direction4bytes);
             break;
         }
 
@@ -228,16 +231,21 @@ void MOV_IN(registerType data, registerType direction)
         switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // 4 bytes y 1 bytes
-            _MOV_IN41(data4bytes, direction1bytes);
+            _MOV_IN41(*data4bytes, *direction1bytes);
             break;
         
         case REGISTER_4_BYTES: // 4 bytes y 4 bytes
-            _MOV_IN44(data4bytes, direction4bytes);
+            _MOV_IN44(*data4bytes, *direction4bytes);
             break;
         }
 
         break;
     }
+
+    free(data1bytes);
+    free(data4bytes);
+    free(direction1bytes);
+    free(direction4bytes);
 }
 
 void _MOV_IN11(uint8_t* data, uint8_t* direction)
@@ -267,10 +275,10 @@ void _MOV_IN44(uint32_t* data, uint32_t* direction)
 
 void MOV_OUT(registerType direction, registerType data)
 {
-    uint8_t* direction1bytes;
-    uint32_t* direction4bytes;
-    uint8_t* data1bytes;
-    uint32_t* data4bytes;
+    uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** data1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** direction4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** data4bytes = malloc(sizeof(uint32_t**));
 
 
     switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
@@ -279,11 +287,11 @@ void MOV_OUT(registerType direction, registerType data)
         switch (_typeToRegister(data, data1bytes, data4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // 1 bytes y 1 bytes
-            _MOV_OUT11(direction1bytes, data1bytes);
+            _MOV_OUT11(*direction1bytes, *data1bytes);
             break;
         
         case REGISTER_4_BYTES: // 1 bytes y 4 bytes
-            _MOV_OUT14(direction1bytes, data4bytes);
+            _MOV_OUT14(*direction1bytes, *data4bytes);
             break;
         }
 
@@ -293,16 +301,21 @@ void MOV_OUT(registerType direction, registerType data)
         switch (_typeToRegister(data, data1bytes, data4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // 4 bytes y 1 bytes
-            _MOV_OUT41(direction4bytes, data1bytes);
+            _MOV_OUT41(*direction4bytes, *data1bytes);
             break;
         
         case REGISTER_4_BYTES: // 4 bytes y 4 bytes
-            _MOV_OUT44(direction4bytes, data4bytes);
+            _MOV_OUT44(*direction4bytes, *data4bytes);
             break;
         }
 
         break;
     }
+
+    free(direction1bytes);
+    free(direction4bytes);
+    free(data1bytes);
+    free(data4bytes);
 }
 
 
@@ -332,10 +345,10 @@ void _MOV_OUT44(uint32_t* direction, uint32_t* data)
 
 void SUM(registerType destination, registerType origin)
 {
-    uint8_t* destination1bytes;
-    uint8_t* origin1bytes;
-    uint32_t* destination4bytes;
-    uint32_t* origin4bytes;
+    uint8_t** destination1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** origin1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** destination4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** origin4bytes = malloc(sizeof(uint32_t**));
 
 
     switch (_typeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
@@ -344,11 +357,11 @@ void SUM(registerType destination, registerType origin)
         switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
-            _SUM11(destination1bytes, origin1bytes);
+            _SUM11(*destination1bytes, *origin1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
-            _SUM14(destination1bytes, origin4bytes);
+            _SUM14(*destination1bytes, *origin4bytes);
             break;
         }
 
@@ -358,16 +371,21 @@ void SUM(registerType destination, registerType origin)
         switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
-            _SUM41(destination4bytes, origin1bytes);
+            _SUM41(*destination4bytes, *origin1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
-            _SUM44(destination4bytes, origin4bytes);
+            _SUM44(*destination4bytes, *origin4bytes);
             break;
         }
 
         break;
     }
+
+    free(origin1bytes);
+    free(origin4bytes);
+    free(destination1bytes);
+    free(destination4bytes);
 }
 
 void _SUM11(uint8_t* destination, uint8_t* origin)
@@ -397,10 +415,10 @@ void _SUM44(uint32_t* destination, uint32_t* origin)
 
 void SUB(registerType destination, registerType origin)
 {
-    uint8_t* destination1bytes;
-    uint8_t* origin1bytes;
-    uint32_t* destination4bytes;
-    uint32_t* origin4bytes;
+    uint8_t** destination1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** origin1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** destination4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** origin4bytes = malloc(sizeof(uint32_t**));
 
 
     switch (_typeToRegister(destination, destination1bytes, destination4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
@@ -409,11 +427,11 @@ void SUB(registerType destination, registerType origin)
         switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
-            _SUB11(destination1bytes, origin1bytes);
+            _SUB11(*destination1bytes, *origin1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
-            _SUB14(destination1bytes, origin4bytes);
+            _SUB14(*destination1bytes, *origin4bytes);
             break;
         }
 
@@ -423,16 +441,21 @@ void SUB(registerType destination, registerType origin)
         switch (_typeToRegister(origin, origin1bytes, origin4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
-            _SUB41(destination4bytes, origin1bytes);
+            _SUB41(*destination4bytes, *origin1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
-            _SUB44(destination4bytes, origin4bytes);
+            _SUB44(*destination4bytes, *origin4bytes);
             break;
         }
 
         break;
     }
+
+    free(destination1bytes);
+    free(destination4bytes);
+    free(origin1bytes);
+    free(origin4bytes);
 }
 
 void _SUB11(uint8_t* destination, uint8_t* origin)
@@ -463,20 +486,23 @@ void _SUB44(uint32_t* destination, uint32_t* origin)
 
 void JNZ(registerType reg, uint32_t instruction)
 {
-    uint8_t* reg1bytes;
-    uint32_t* reg4bytes;
+    uint8_t** reg1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** reg4bytes = malloc(sizeof(uint32_t**));
 
 
     switch (_typeToRegister(reg, reg1bytes, reg4bytes))
     {
     case REGISTER_1_BYTE:
-        _JNZ1(reg1bytes, instruction);
+        _JNZ1(*reg1bytes, instruction);
         break;
 
     case REGISTER_4_BYTES:
-        _JNZ4(reg4bytes, instruction);
+        _JNZ4(*reg4bytes, instruction);
         break;
     }
+
+    free(reg1bytes);
+    free(reg4bytes);
 }
 
 void _JNZ1(uint8_t* reg, uint32_t instruction)
@@ -637,66 +663,66 @@ void EXIT()
 
 ///////////////////////// FUNCIONES AUXILIARES GENERALES /////////////////////////
 
-registerTypeByBytes _typeToRegister(registerType type, uint8_t* outRegister1byte, uint32_t* outRegister4bytes)
+registerTypeByBytes _typeToRegister(registerType type, uint8_t** outRegister1byte, uint32_t** outRegister4bytes)
 {
     registerTypeByBytes typeByBytes;
-    outRegister1byte = NULL;
-    outRegister4bytes = NULL;
+    *outRegister1byte = NULL;
+    *outRegister4bytes = NULL;
 
     switch (type)
     {
     case PC_TYPE:
         typeByBytes = REGISTER_4_BYTES;
-        outRegister4bytes = &PC;
+        *outRegister4bytes = &PC;
 
     case AX_TYPE:
         typeByBytes = REGISTER_1_BYTE;
-        outRegister1byte = &AX;
+        *outRegister1byte = &AX;
         break;
 
     case BX_TYPE:
         typeByBytes = REGISTER_1_BYTE;
-        outRegister1byte = &BX;
+        *outRegister1byte = &BX;
         break;
 
     case CX_TYPE:
         typeByBytes = REGISTER_1_BYTE;
-        outRegister1byte = &CX;
+        *outRegister1byte = &CX;
         break;
 
     case DX_TYPE:
         typeByBytes = REGISTER_1_BYTE;
-        outRegister1byte = &DX;
+        *outRegister1byte = &DX;
         break;
 
     case EAX_TYPE:
         typeByBytes = REGISTER_4_BYTES;
-        outRegister4bytes = &EAX;
+        *outRegister4bytes = &EAX;
         break;
 
     case EBX_TYPE:
         typeByBytes = REGISTER_4_BYTES;
-        outRegister4bytes = &EBX;
+        *outRegister4bytes = &EBX;
         break;
 
     case ECX_TYPE:
         typeByBytes = REGISTER_4_BYTES;
-        outRegister4bytes = &ECX;
+        *outRegister4bytes = &ECX;
         break;
 
     case EDX_TYPE:
         typeByBytes = REGISTER_4_BYTES;
-        outRegister4bytes = &EDX;
+        *outRegister4bytes = &EDX;
         break;
 
     case SI_TYPE:
         typeByBytes = REGISTER_4_BYTES;
-        outRegister4bytes = &SI;
+        *outRegister4bytes = &SI;
         break;
 
     case DI_TYPE:
         typeByBytes = REGISTER_4_BYTES;
-        outRegister4bytes = &DI;
+        *outRegister4bytes = &DI;
         break;
     }
 

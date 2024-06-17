@@ -32,41 +32,41 @@ registerType _stringRegisterToType(char* regString);
 
 instructionType SET_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType MOV_IN_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType MOV_IN_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType MOV_OUT_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType MOV_OUT_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType SUM_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType SUM_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType SUB_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType SUB_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType JNZ_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType JNZ_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType RESIZE_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType RESIZE_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType COPY_STRING_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType COPY_STRING_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType WAIT_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType WAIT_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType SIGNAL_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType SIGNAL_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_GEN_SLEEP_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_GEN_SLEEP_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_STDIN_READ_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_STDIN_READ_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_STDOUT_WRITE_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_STDOUT_WRITE_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_FS_CREATE_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_FS_CREATE_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_FS_DELETE_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_FS_DELETE_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_FS_TRUNCATE_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_FS_TRUNCATE_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType IO_FS_READ_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType IO_FS_READ_GET_INFO(char** instructionSplitted, void** outParams);
 
-instructionType EXIT_GET_INFO(char** instructionSplitted, void* outParams);
+instructionType EXIT_GET_INFO(char** instructionSplitted, void** outParams);
 
 
 

@@ -71,156 +71,156 @@ instructionType SET_GET_INFO(char** instructionSplitted, void** outParams)
     return SET_TYPE;
 }
 
-instructionType MOV_IN_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType MOV_IN_GET_INFO(char** instructionSplitted, void** outParams)
 {
     MOV_IN_STRUCT* params = malloc(sizeof(MOV_IN_STRUCT));
     params->data = _stringRegisterToType(instructionSplitted[1]);
     params->direction = _stringRegisterToType(instructionSplitted[2]);
 
-    outParams = params;
+    *outParams = params;
     return MOV_IN_TYPE;
 }
 
-instructionType MOV_OUT_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType MOV_OUT_GET_INFO(char** instructionSplitted, void** outParams)
 {
     MOV_OUT_STRUCT* params = malloc(sizeof(MOV_OUT_STRUCT));
     params->direction = _stringRegisterToType(instructionSplitted[1]);
     params->data = _stringRegisterToType(instructionSplitted[2]);
 
-    outParams = params;
+    *outParams = params;
     return MOV_OUT_TYPE;
 }
 
-instructionType SUM_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType SUM_GET_INFO(char** instructionSplitted, void** outParams)
 {
     SUM_STRUCT* params = malloc(sizeof(SUM_STRUCT));
     params->destination = _stringRegisterToType(instructionSplitted[1]);
     params->origin = _stringRegisterToType(instructionSplitted[2]);
 
-    outParams = params;
+    *outParams = params;
     return SUM_TYPE;
 }
 
-instructionType SUB_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType SUB_GET_INFO(char** instructionSplitted, void** outParams)
 {
     SUB_STRUCT* params = malloc(sizeof(SUB_STRUCT));
     params->destination = _stringRegisterToType(instructionSplitted[1]);
     params->origin = _stringRegisterToType(instructionSplitted[2]);
 
-    outParams = params;
+    *outParams = params;
     return SUB_TYPE;
 }
 
-instructionType JNZ_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType JNZ_GET_INFO(char** instructionSplitted, void** outParams)
 {
     JNZ_STRUCT* params = malloc(sizeof(JNZ_STRUCT));
     params->reg = _stringRegisterToType(instructionSplitted[1]);
     params->instruction = atoi(instructionSplitted[2]);
 
-    outParams = params;
+    *outParams = params;
     return JNZ_TYPE;
 }
 
-instructionType RESIZE_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType RESIZE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     RESIZE_STRUCT* params = malloc(sizeof(RESIZE_STRUCT));
     params->size = atoi(instructionSplitted[1]);
 
-    outParams = params;
+    *outParams = params;
     return RESIZE_TYPE;
 }
 
-instructionType COPY_STRING_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType COPY_STRING_GET_INFO(char** instructionSplitted, void** outParams)
 {
     COPY_STRING_STRUCT* params = malloc(sizeof(COPY_STRING_STRUCT));
     params->size = atoi(instructionSplitted[1]);
 
-    outParams = params;
+    *outParams = params;
     return COPY_STRING_TYPE;
 }
 
-instructionType WAIT_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType WAIT_GET_INFO(char** instructionSplitted, void** outParams)
 {
     WAIT_STRUCT* params = malloc(sizeof(WAIT_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
 
-    outParams = params;
+    *outParams = params;
     return WAIT_TYPE;
 }
 
-instructionType SIGNAL_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType SIGNAL_GET_INFO(char** instructionSplitted, void** outParams)
 {
     SIGNAL_STRUCT* params = malloc(sizeof(SIGNAL_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
 
-    outParams = params;
+    *outParams = params;
     return SIGNAL_TYPE;
 }
 
-instructionType IO_GEN_SLEEP_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_GEN_SLEEP_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_GEN_SLEEP_STRUCT* params = malloc(sizeof(IO_GEN_SLEEP_STRUCT));
     params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->workUnits = atoi(instructionSplitted[2]);
 
-    outParams = params;
+    *outParams = params;
     return IO_GEN_SLEEP_TYPE;
 }
 
-instructionType IO_STDIN_READ_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_STDIN_READ_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_STDIN_READ_STRUCT* params = malloc(sizeof(IO_STDIN_READ_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->direction = _stringRegisterToType(instructionSplitted[2]);
     params->size = _stringRegisterToType(instructionSplitted[3]);
 
-    outParams = params;
+    *outParams = params;
     return IO_STDIN_READ_TYPE;
 }
 
-instructionType IO_STDOUT_WRITE_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_STDOUT_WRITE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_STDOUT_WRITE_STRUCT* params = malloc(sizeof(IO_STDOUT_WRITE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->direction = _stringRegisterToType(instructionSplitted[2]);
     params->size = _stringRegisterToType(instructionSplitted[3]);
 
-    outParams = params;
+    *outParams = params;
     return IO_STDOUT_WRITE_TYPE;
 }
 
-instructionType IO_FS_CREATE_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_FS_CREATE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_CREATE_STRUCT* params = malloc(sizeof(IO_FS_CREATE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
 
-    outParams = params;
+    *outParams = params;
     return IO_FS_CREATE_TYPE;
 }
 
-instructionType IO_FS_DELETE_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_FS_DELETE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_DELETE_STRUCT* params = malloc(sizeof(IO_FS_DELETE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
 
-    outParams = params;
+    *outParams = params;
     return IO_FS_DELETE_TYPE;
 }
 
-instructionType IO_FS_TRUNCATE_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_FS_TRUNCATE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_TRUNCATE_STRUCT* params = malloc(sizeof(IO_FS_TRUNCATE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->size = _stringRegisterToType(instructionSplitted[3]);
 
-    outParams = params;
+    *outParams = params;
     return IO_FS_TRUNCATE_TYPE;
 }
 
-instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_WRITE_STRUCT* params = malloc(sizeof(IO_FS_WRITE_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
@@ -229,11 +229,11 @@ instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void* outParams
     params->size = _stringRegisterToType(instructionSplitted[4]);
     params->pointer = _stringRegisterToType(instructionSplitted[5]);
 
-    outParams = params;
+    *outParams = params;
     return IO_FS_WRITE_TYPE;
 }
 
-instructionType IO_FS_READ_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType IO_FS_READ_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_READ_STRUCT* params = malloc(sizeof(IO_FS_READ_STRUCT));
     params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
@@ -242,11 +242,11 @@ instructionType IO_FS_READ_GET_INFO(char** instructionSplitted, void* outParams)
     params->size = _stringRegisterToType(instructionSplitted[4]);
     params->pointer = _stringRegisterToType(instructionSplitted[5]);
 
-    outParams = params;
+    *outParams = params;
     return IO_FS_READ_TYPE;
 }
 
-instructionType EXIT_GET_INFO(char** instructionSplitted, void* outParams)
+instructionType EXIT_GET_INFO(char** instructionSplitted, void** outParams)
 {
     return EXIT_TYPE;
 }
