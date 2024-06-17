@@ -1,6 +1,11 @@
 #include "logger.h"
+#include <stdint.h>
 
 t_log* _logger;
+
+
+
+///////////////////// FUNCIONES AUXILIARES DE LOGS /////////////////////
 
 
 void initLogger(char* file, char* processName, bool isActiveConsole, t_log_level level)
@@ -16,4 +21,56 @@ t_log* getLogger()
 void destroyLogger()
 {
     log_destroy(_logger);
+}
+
+
+
+
+
+///////////////////// LOGS ESPECIFICOS /////////////////////
+
+
+void logFetchInstruction(int pid, uint32_t pc)
+{
+    log_info(getLogger(), "Fetch Instrucción: PID: %d - FETCH - Program Counter: %d", pid, pc);
+}
+
+void logExecutingInstruction(int pid, char* instruction)
+{
+    log_info(getLogger(), "Ejecutando Instrucción: PID: %d - Ejecutando: %s", pid, instruction);
+}
+
+void logTLBHit(int pid, int page)
+{
+    log_info(getLogger(), "TLB Hit: PID: %d - TLB HIT - Pagina: %d", pid, page);
+}
+
+void logTLBMiss(int pid, int page)
+{
+    log_info(getLogger(), "TLB Miss: PID: %d - TLB MISS - Pagina: %d", pid, page);
+}
+
+void logGetFrame(int pid, int page, int frame)
+{
+    log_info(getLogger(), "Obtener Marco: PID: %d - OBTENER MARCO - Página: %d - Marco: %d", pid, page, frame);
+}
+
+void logReadMemoryUint(int pid, int physicalAddress, uint32_t value)
+{
+    log_info(getLogger(), "Lectura Memoria: PID: %d - Acción: LEER - Dirección Física: %d - Valor: %u", pid, physicalAddress, value);
+}
+
+void logReadMemoryString(int pid, int physicalAddress, char* value)
+{
+    log_info(getLogger(), "Lectura Memoria: PID: %d - Acción: LEER - Dirección Física: %d - Valor: %s", pid, physicalAddress, value);
+}
+
+void logWriteMemoryUint(int pid, int physicalAddress, uint32_t value)
+{
+    log_info(getLogger(), "Escritura Memoria: PID: %d - Acción: ESCRIBIR - Dirección Física: %d - Valor: %u", pid, physicalAddress, value);
+}
+
+void logWriteMemoryString(int pid, int physicalAddress, char* value)
+{
+    log_info(getLogger(), "Escritura Memoria: PID: %d - Acción: ESCRIBIR - Dirección Física: %d - Valor: %s", pid, physicalAddress, value);
 }

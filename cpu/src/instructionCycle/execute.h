@@ -15,6 +15,13 @@ typedef enum
 } registerTypeByBytes;
 
 
+typedef enum
+{
+    MEMORY_UINT8_TYPE,
+    MEMORY_UINT32_TYPE,
+    MEMORY_STRING_TYPE,
+} readWriteMemoryType;
+
 
 
 void executeInstruction(instructionType type, void* paramsGeneric);
@@ -180,7 +187,8 @@ registerTypeByBytes _typeToRegister(registerType type, uint8_t** outRegister1byt
 /// @param data Donde se copiará la informacion
 /// @param direction La direccion fisica
 /// @param size La cantidad de bytes a leer de la memoria de usuario (deberia ser igual al sizeof(data))
-void readFromMemory(void* data, int direction, int size);
+/// @param type El tipo de dato que se lee
+void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryType type);
 
 
 
@@ -188,7 +196,8 @@ void readFromMemory(void* data, int direction, int size);
 /// @param data La data a escribir en la memoria de usuario
 /// @param direction La direccion fisica
 /// @param size La cantidad de bytes a escribir de la memoria de usuario (deberia ser igual al sizeof(data))
-void writeToMemory(void* data, int direction, int size);
+/// @param type El tipo de dato que se escribe
+void writeToMemory(void* data, uint32_t direction, int size, readWriteMemoryType type);
 
 
 

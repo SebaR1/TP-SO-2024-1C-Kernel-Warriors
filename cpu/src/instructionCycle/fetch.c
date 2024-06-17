@@ -13,7 +13,7 @@ instructionString* getNextInstruction(int PID, uint32_t PC)
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
     sendPCToMemory(PID, PC);
 
-    log_info(getLogger(), "Fetch instrucción - PID: %d - FETCH - Program Counter: %d", PID, PC);
+    logFetchInstruction(PID, PC);
 
     incrementPC();
 

@@ -1,6 +1,7 @@
 #include "TLB.h"
 #include "utilsCPU/config.h"
 #include "connections/clientCPU.h"
+#include "utilsCPU/logger.h"
 #include <commons/collections/node.h>
 
 
@@ -111,11 +112,11 @@ int getFrame(int pid, int page)
     switch (result)
     {
     case TLB_HIT:
-        // Hacer el log del TLB_HIT
+        logTLBHit(pid, page);
         break;
     
     case TLB_MISS:
-        // Hacer el log del TLB_MISS
+        logTLBMiss(pid, page);
         break;
     }
 
@@ -151,6 +152,8 @@ TLBResult getFrameFIFO(int pid, int page, int* frame)
         TLBFIFO[fifoCounter].frame = *frame;
 
         fifoCounter = (fifoCounter + 1) % getCPUConfig()->CANTIDAD_ENTRADAS_TLB;
+
+        logGetFrame(pid, page, *frame);
     }
 
     return result;

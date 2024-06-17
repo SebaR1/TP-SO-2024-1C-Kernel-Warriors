@@ -1,6 +1,7 @@
 #include "execute.h"
 #include "MMU/MMU.h"
 #include "connections/clientCPU.h"
+#include "utilsCPU/logger.h"
 
 uint32_t PC = 0; // Program Counter, indica la próxima instrucción a ejecutar una vez completado un ciclo de ejecucion
 uint8_t AX = 0; // Registro Numérico de propósito general
@@ -250,22 +251,22 @@ void MOV_IN(registerType data, registerType direction)
 
 void _MOV_IN11(uint8_t* data, uint8_t* direction)
 {
-    readFromMemory((void*)data, *direction, 1);
+    readFromMemory((void*)data, *direction, 1, MEMORY_UINT8_TYPE);
 }
 
 void _MOV_IN14(uint8_t* data, uint32_t* direction)
 {
-    readFromMemory((void*)data, *direction, 1);
+    readFromMemory((void*)data, *direction, 1, MEMORY_UINT8_TYPE);
 }
 
 void _MOV_IN41(uint32_t* data, uint8_t* direction)
 {
-    readFromMemory((void*)data, *direction, 4);
+    readFromMemory((void*)data, *direction, 4, MEMORY_UINT32_TYPE);
 }
 
 void _MOV_IN44(uint32_t* data, uint32_t* direction)
 {
-    readFromMemory((void*)data, *direction, 4);
+    readFromMemory((void*)data, *direction, 4, MEMORY_UINT32_TYPE);
 }
 
 
@@ -321,22 +322,22 @@ void MOV_OUT(registerType direction, registerType data)
 
 void _MOV_OUT11(uint8_t* direction, uint8_t* data)
 {
-    writeToMemory((void*)data, *direction, 1);
+    writeToMemory((void*)data, *direction, 1, MEMORY_UINT8_TYPE);
 }
 
 void _MOV_OUT14(uint8_t* direction, uint32_t* data)
 {
-    writeToMemory((void*)data, *direction, 4);
+    writeToMemory((void*)data, *direction, 4, MEMORY_UINT32_TYPE);
 }
 
 void _MOV_OUT41(uint32_t* direction, uint8_t* data)
 {
-    writeToMemory((void*)data, *direction, 1);
+    writeToMemory((void*)data, *direction, 1, MEMORY_UINT8_TYPE);
 }
 
 void _MOV_OUT44(uint32_t* direction, uint32_t* data)
 {
-    writeToMemory((void*)data, *direction, 4);
+    writeToMemory((void*)data, *direction, 4, MEMORY_UINT32_TYPE);
 }
 
 
@@ -650,7 +651,7 @@ void IO_FS_READ(char* resource, char* fileName, registerType direction, register
 
 void EXIT()
 {
-
+    sendContextToKernel(CPU_SEND_CONTEXT_FOR_END_PROCESS, getCurrentPID());
 }
 
 
@@ -777,7 +778,7 @@ void setSI(uint32_t si) { SI = si; }
 
 void* dataReceivedFromMemory;
 
-void readFromMemory(void* data, int direction, int size)
+void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryType type)
 {
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, info);
@@ -791,10 +792,30 @@ void readFromMemory(void* data, int direction, int size)
         offset += info[i].size;
         free(dataReceivedFromMemory);
     }
+
+
+    ////// Solo para logs este switch
+    switch (type)
+    {
+    case MEMORY_UINT8_TYPE:
+        logReadMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint8_t*)data));
+        break;
+
+    case MEMORY_UINT32_TYPE:
+        logReadMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint32_t*)data));
+        break;
+
+    case MEMORY_STRING_TYPE:
+        logReadMemoryString(getCurrentPID(), info[0].physicalAddress, (char*)data);
+        break;
+    }
+
+
+    free(info);
 }
 
 
-void writeToMemory(void* data, int direction, int size)
+void writeToMemory(void* data, uint32_t direction, int size, readWriteMemoryType type)
 {
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, info);
@@ -806,4 +827,25 @@ void writeToMemory(void* data, int direction, int size)
         offset += info[i].size;
         sem_wait(&semWaitConfirmationFromMemory);
     }
+
+
+
+    ////// Solo para logs este switch
+    switch (type)
+    {
+    case MEMORY_UINT8_TYPE:
+        logWriteMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint8_t*)data));
+        break;
+
+    case MEMORY_UINT32_TYPE:
+        logWriteMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint32_t*)data));
+        break;
+
+    case MEMORY_STRING_TYPE:
+        logWriteMemoryString(getCurrentPID(), info[0].physicalAddress, (char*)data);
+        break;
+    }
+
+
+    free(info);
 }

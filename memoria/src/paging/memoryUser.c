@@ -89,16 +89,16 @@ void resizeMemory(int pid, int bytes)
     if (bytes > amountOfBytesAllocated) // Hay que reservar más espacio en memoria del usuario
     {
         allocMemory(bytes - amountOfBytesAllocated, info->pageTable, info->amountOfPages, info->internalFragmentation);
-        log_info(getLogger(), "Ampliación de proceso - PID: %d - Tamaño Actual: %d - Tamaño a Ampliar: %d", pid, amountOfBytesAllocated, bytes - amountOfBytesAllocated);
+        logProcessSizeExpansion(pid, amountOfBytesAllocated, bytes - amountOfBytesAllocated);
     }
     else if (bytes < amountOfBytesAllocated) // Hay que liberar espacio en memoria del usuario
     {
         freeMemory(amountOfBytesAllocated - bytes, info->pageTable, info->amountOfPages, info->internalFragmentation);
-        log_info(getLogger(), "Reducción de proceso - PID: %d - Tamaño Actual: %d - Tamaño a Reducir: %d", pid, amountOfBytesAllocated, amountOfBytesAllocated - bytes);
+        logProcessSizeReduction(pid, amountOfBytesAllocated, amountOfBytesAllocated - bytes);
     }
     else // Entra en este else cuando bytes == amountOfBytesAllocated
     {
-        log_info(getLogger(), "No cambia el tamaño del proceso - PID: %d - Tamaño Actual: %d - Tamaño a Ampliar/Reducir: %d", pid, amountOfBytesAllocated, 0);
+        logProcessSizeNotChange(pid, amountOfBytesAllocated);
     }
 }
 
@@ -284,7 +284,7 @@ void* readBytes(int pid, int physicalAddress, int size)
     
     memcpy(data, memoryUser + physicalAddress, size);
 
-    log_info(getLogger(), "Acceso a espacio de usuario - PID: %d - Accion: LEER - Direccion fisica: %d - Tamaño: %d", pid, physicalAddress, size);
+    logReadBytes(pid, physicalAddress, size);
 
     return data;
 }
@@ -296,7 +296,7 @@ void writeBytes(int pid, void* data, int physicalAddress, int size)
 
     memcpy(memoryUser + physicalAddress, data, size);
 
-    log_info(getLogger(), "Acceso a espacio de usuario - PID: %d - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño: %d", pid, physicalAddress, size);
+    logWriteBytes(pid, physicalAddress, size);
 }
 
 
@@ -310,7 +310,7 @@ int getFrame(int PID, int page)
     info = list_find_mutex(processesList, closurePIDsAreEqual);
     sem_post(&semAuxPID);
 
-    log_info("Acceso a Tabla de Páginas - PID: %d - Pagina: %d - Marco: %d", PID, page, info->pageTable[page]);
+    logPageTableAccess(PID, page, info->pageTable[page]);
 
     return info->pageTable[page];
 }

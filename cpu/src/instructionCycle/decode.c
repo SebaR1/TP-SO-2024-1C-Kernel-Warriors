@@ -1,11 +1,14 @@
 #include "decode.h"
 #include <commons/string.h>
 #include <string.h>
+#include "utilsCPU/logger.h"
 
 
 
 instructionType decodeInstruction(char* instruction, void** outParams)
 {
+    logExecutingInstruction(getCurrentPID(), instruction);
+
     instructionType type;
 
     // Divido la instruccion por cada palabra escrita

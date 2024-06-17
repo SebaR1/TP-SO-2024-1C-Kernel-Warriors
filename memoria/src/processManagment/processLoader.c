@@ -79,11 +79,11 @@ void loadProcessByPathWithParams(void* params)
 
     if (result)
     {
-        log_info(getLogger(), "Creación de Tabla de Páginas - PID: %d - Tamaño: %d", processPath->pid, 0);
+        logCreateProcess(processPath->pid, 0);
     }
     else
     {
-        log_info(getLogger(), "No se pudo abrir el archivo \"%s\".", processPath->path);
+        logCreateProcessError(processPath->path);
     }
 
     sendProcessCreatedResult(socketKernel, result);
@@ -110,7 +110,7 @@ void destroyProcess(int PID)
 
     free(info);
 
-    log_info(getLogger(), "Destrucción de Tabla de Páginas - PID: %d - Tamaño: %d", PID, amountOfPagesFree);
+    logDestroyProcess(PID, amountOfPagesFree);
 }
 
 
