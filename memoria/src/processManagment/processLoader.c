@@ -4,6 +4,8 @@
 #include "utilsMemory/delay.h"
 #include "utils/mathMemory.h"
 #include "utilsMemory/logger.h"
+#include "connections/clientMemory.h"
+#include "connections/serverMemory.h"
 
 
 
@@ -13,20 +15,21 @@ void initProcessesList()
 }
 
 
-void loadProcessByPath(int PID, char* pseudocodePath)
+bool loadProcessByPath(int PID, char* pseudocodePath)
 {
     FILE* pseudocodeFile = fopen(pseudocodePath, "r");
 
     if (pseudocodeFile == NULL)
     {
-        exit(EXIT_FAILURE);
+        return false;
     }
 
 
     loadProcessByFile(PID, pseudocodeFile);
 
-
     fclose(pseudocodeFile);
+
+    return true;
 }
 
 
@@ -72,9 +75,18 @@ void loadProcessByPathWithParams(void* params)
 
     kernelPathProcess* processPath = (kernelPathProcess*)params;
 
-    loadProcessByPath(processPath->pid, processPath->path);
+    bool result = loadProcessByPath(processPath->pid, processPath->path);
 
-    log_info(getLogger(), "Creación de Tabla de Páginas - PID: %d - Tamaño: %d", processPath->pid, 0);
+    if (result)
+    {
+        log_info(getLogger(), "Creación de Tabla de Páginas - PID: %d - Tamaño: %d", processPath->pid, 0);
+    }
+    else
+    {
+        log_info(getLogger(), "No se pudo abrir el archivo \"%s\".", processPath->path);
+    }
+
+    sendProcessCreatedResult(socketKernel, result);
 
     free(processPath->path);
     free(processPath);

@@ -15,7 +15,8 @@ void initProcessesList();
 /// en la lista de pseudocodigos de procesos.
 /// @param PID Process ID, necesario para identificar al proceso.
 /// @param pseudocodePath El path donde se encuentra el archivo de pseudocodigo cargado en disco.
-void loadProcessByPath(int PID, char* pseudocodePath);
+/// @return Retorna true si el proceso pudo crearse correctamente, sino false.
+bool loadProcessByPath(int PID, char* pseudocodePath);
 
 
 

@@ -17,6 +17,9 @@ sem_t semaphoreForKernel;
 sem_t semaphoreForCPU;
 sem_t semaphoreForIO;
 
+int socketKernel;
+int socketCPU;
+
 bool _finishAllServersSignal = false;
 
 
@@ -124,6 +127,8 @@ void receiveClientIteration(int socketServer)
 
 void serverMemoryForKernel(int* socketClient)
 {
+    socketKernel = *socketClient;
+
     bool exitLoop = false;
     while (!exitLoop || _finishAllServersSignal)
     {
@@ -177,6 +182,8 @@ void serverMemoryForKernel(int* socketClient)
 
 void serverMemoryForCPU(int* socketClient)
 {
+    socketCPU = *socketClient;
+
     bool exitLoop = false;
     while (!exitLoop || _finishAllServersSignal)
     {
@@ -421,7 +428,7 @@ void requestWriteMemory(int* socketClient)
     // otra peticion de lectura o escritura.
     writeBytes(request.pid, request.data, request.physicalAddress, request.size);
 
-    sendConfirmation(*socketClient);
+    sendWriteConfirmation(*socketClient);
 
     list_destroy_and_destroy_elements(listPackage, free);
 }

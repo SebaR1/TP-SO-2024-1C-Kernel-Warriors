@@ -14,9 +14,16 @@ void sendInstructionToCpu(int socketClient, cpuGiveMeNextInstruction* params);
 void sendData(int socketClient, void* data, int size);
 
 
-/// @brief Envia un codigo de operacion de confirmacion al socket esepcificado
+/// @brief Envia un codigo de operacion de confirmacion de escritura al socket esepcificado
 /// @param socketClient El socket a quien mandarle la confirmacion
-void sendConfirmation(int socketClient);
+void sendWriteConfirmation(int socketClient);
+
+
+/// @brief Envia un codigo de operacion de confirmacion de la creacion de un nuevo proceso al socket especificado.
+/// Si se pudo crear el proceso correctamente, envia true, sino false.
+/// @param socketClient El socket del cliente
+/// @param result El resultado. Debe ser true si se creó bien el proceso, sino false.
+void sendProcessCreatedResult(int socketClient, bool result);
 
 
 /// @brief Le envia un frame a quien lo pida (tipicamente la CPU)

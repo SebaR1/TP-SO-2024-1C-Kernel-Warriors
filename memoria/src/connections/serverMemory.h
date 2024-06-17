@@ -16,6 +16,9 @@ extern sem_t semaphoreForKernel;
 extern sem_t semaphoreForCPU;
 extern sem_t semaphoreForIO;
 
+extern int socketKernel;
+extern int socketCPU;
+
 extern bool _finishAllServersSignal;
 
 

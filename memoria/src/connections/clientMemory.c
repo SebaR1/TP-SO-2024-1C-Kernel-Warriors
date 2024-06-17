@@ -55,9 +55,21 @@ void sendData(int socketClient, void* data, int size)
 
 
 
-void sendConfirmation(int socketClient)
+void sendWriteConfirmation(int socketClient)
 {
     t_package* package = createPackage(MEMORY_WRITE_OK);
+
+    sendPackage(package, socketClient); // Envio la confirmacion
+
+    destroyPackage(package);
+}
+
+
+void sendProcessCreatedResult(int socketClient, bool result)
+{
+    t_package* package = createPackage(MEMORY_SEND_RESPONSE_FOR_NEW_PROCESS);
+
+    addToPackage(package, &result, sizeof(bool)); // Agrego la info al paquete
 
     sendPackage(package, socketClient); // Envio la confirmacion
 
