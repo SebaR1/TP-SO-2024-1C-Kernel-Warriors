@@ -242,6 +242,8 @@ void memorySendResponseForNewProcess(int *socketClientMemory)
     flagMemoryResponse = *(bool*)list_remove(listPackage, 0);
 
     sem_post(&semMemoryOk);
+
+    list_destroy(listPackage);
 }
 
 void operationPackageFromIO(t_list *package)

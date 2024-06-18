@@ -5,6 +5,7 @@ interface_t *createInterface(char* nameInterface, interfaceType typeInterface)
     interface_t *newInterface = malloc(sizeof(interface_t));
     newInterface->name = nameInterface;
     newInterface->interfaceType = typeInterface;
+    newInterface->flagKillProcess = false;
     newInterface->isBusy = false;
     newInterface->blockList = initListMutex();
 

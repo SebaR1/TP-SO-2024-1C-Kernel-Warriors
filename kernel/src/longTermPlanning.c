@@ -95,8 +95,6 @@ void addPcbToNew(char* path)
 
     sem_wait(&semMemoryOk); // Esperan a que la memoria de el ok de que el proceso se creo correctamente
 
-    flagMemoryResponse = true;
-
     if(flagMemoryResponse)
     {
         list_push(pcbNewList, process); 
@@ -217,6 +215,8 @@ void killProcess(uint32_t pid)
             interface->flagKillProcess = true;
 
             sem_wait(&semKillProcessInInterface);
+
+            interface->flagKillProcess = false;
 
             list_remove_element_mutex(pcbBlockList, processFound);
 
