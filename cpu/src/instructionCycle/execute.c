@@ -651,7 +651,7 @@ void IO_FS_READ(char* resource, char* fileName, registerType direction, register
 
 void EXIT()
 {
-    sendContextToKernel(CPU_SEND_CONTEXT_FOR_END_PROCESS, getCurrentPID());
+    sendContextToKernel(CPU_SEND_CONTEXT_FOR_EXIT, getCurrentPID());
 }
 
 
