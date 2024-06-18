@@ -28,6 +28,8 @@ sem_t semPausePlanning;
 
 sem_t semKillProcessInInterface;
 
+sem_t semKillProcessExec;
+
 bool flagMemoryResponse;
 
 int pid;

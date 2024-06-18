@@ -90,7 +90,7 @@ void attendInstruction(char* instruction)
         //Implementacion para MULTIPROGRAMACION
     }
     else if(string_equals_ignore_case(consoleCommand[0], "PROCESO_ESTADO")){
-        //Implementacion para PROCESO_ESTADO
+        showProcessByState();
     }
 
      string_array_destroy(consoleCommand);
@@ -105,4 +105,45 @@ void executeScript(char* path)
         exit(EXIT_FAILURE);
 
     }
+}
+
+void showProcessByState()
+{
+    char* listProcessNew =  _listProcess(pcbNewList->list);
+    char* listProcessReady =  _listProcess(pcbReadyList->list);
+    char* listProcessExec =  _listProcess(pcbExecList->list);
+    char* listProcessBlock =  _listProcess(pcbBlockList->list);
+    char* listProcessExit = _listProcess(pcbExitList->list);
+
+    log_info(getLogger(), listProcessNew, "PCB_NEW");
+    log_info(getLogger(), listProcessReady, "PCB_READY");
+    log_info(getLogger(), listProcessExec, "PCB_EXEC");
+    log_info(getLogger(), listProcessBlock, "PCB_BLOCK");
+    log_info(getLogger(), listProcessExit, "PCB_EXIT");
+
+    free(listProcessNew);
+    free(listProcessReady);
+    free(listProcessExec);
+    free(listProcessBlock);
+    free(listProcessExit);
+}
+
+char* _listProcess(t_list *list)
+{
+    char* pids = string_new();
+    string_append(&pids, "Estado %s");// Ready %s: [");
+    string_append(&pids, " : [");
+
+    for (int i = 0; i < list_size(list); i++)
+    {
+        pcb_t *process = list_get(list, i);
+        char *pid = string_from_format("%d", process->pid);
+        string_append(&pids, " ");
+        string_append(&pids, pid);
+
+        free(pid);
+    }
+    string_append(&pids, " ]");
+
+    return pids;
 }

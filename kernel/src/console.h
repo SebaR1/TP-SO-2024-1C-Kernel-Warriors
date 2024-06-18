@@ -20,5 +20,8 @@ void attendInstruction(char* instruction);
 
 void executeScript(char* path);
 
+void showProcessByState();
+
+char* _listProcess(t_list *list);
 
 #endif

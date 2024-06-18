@@ -182,8 +182,12 @@ void serverKernelForCPU(int *socketClient)
         switch (opCode)
         {
 
-        case CPU_SEND_CONTEXT_FOR_END_PROCESS: 
+        case CPU_SEND_CONTEXT_FOR_EXIT: 
             cpuSendExitProcess(socketClient);
+            break;
+
+        case CPU_SEND_CONTEXT_FOR_END_PROCESS:
+            cpuSendInterruptKillProcess(socketClient);
             break;
 
         case CPU_SEND_CONTEXT_FOR_END_QUANTUM: 
@@ -282,14 +286,12 @@ void ioSendEndOperation(int *socketClientIO)
 
     if(!interfaceFound->flagKillProcess){ // Este flag es por si se tiro un finalizar_proceso mientras el proceso estaba en una interfaz realizando una operacion. Caso MUY particular.
 
+        interfaceFound->isBusy = false;
+        interfaceFound->processAssign = NULL;
+
+        processBlockToReady->isInInterface = false;
+
         list_remove_element_mutex(pcbBlockList, processBlockToReady); // Remuevo el proceso de la pcbBlockList.
-
-        // No sé si es necesario esto porque si llegara a usar otra interfaz se sobreasignaria la asignacion que tenia anteriormente, pero para evitar bugs -_-. Y que quede claro que no se tienen que volver a usar los valores anteriores.
-        processBlockToReady->params->param1 = NULL;
-        processBlockToReady->params->param2 = NULL;
-        processBlockToReady->params->param3 = NULL;
-        processBlockToReady->params->param4 = NULL;
-
 
         if(algorithm != VRR){ //ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
 
@@ -321,15 +323,14 @@ void ioSendEndOperation(int *socketClientIO)
 
     
 
-    interfaceFound->isBusy = false;
-    interfaceFound->processAssign = NULL;
-
 
     if(!list_mutex_is_empty(interfaceFound->blockList)){ // Se fija si la interfaz tiene algun otro proceso en espera. 
         pcb_t* processBlocked = list_pop(interfaceFound->blockList);
 
         interfaceFound->processAssign = processBlocked;
         interfaceFound->isBusy = true;
+        
+        processBlocked->isInInterface = true;
 
         switch (interfaceFound->interfaceType)
         {
@@ -411,6 +412,8 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
             log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
+            processExec->state = PCB_BLOCK;
+
             // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
             if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
 
@@ -420,6 +423,9 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
                 sendIOGenSleepOperationToIO(interfaceFound, timeOfOperation);
                 
             } else {
@@ -478,6 +484,8 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
             log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
+            processExec->state = PCB_BLOCK;
+
             // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
             if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
 
@@ -486,6 +494,9 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
                 sendIOStdinReadOperationToIO(interfaceFound, registerDirection, registerSize);
                 
             } else {
@@ -546,6 +557,8 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
             log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
+            processExec->state = PCB_BLOCK;
+
             // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
             if(algorithm == VRR) temporal_stop(processExec->quantumForVRR);
             
@@ -554,6 +567,9 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
                 sendIOStdoutWriteOperationToIO(interfaceFound, registerDirection, registerSize);
                 
             } else {
@@ -587,8 +603,9 @@ void cpuSendExitProcess(int *socketClientCPUDispatch)
     // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
     pcb_t *processExecToExit = assignContextToPcb(contextProcess);
 
-
     log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExecToExit->pid);
+
+    processExecToExit->state = PCB_EXIT;
 
     sem_wait(&semPausePlanning);
     sem_post(&semPausePlanning);
@@ -601,6 +618,24 @@ void cpuSendExitProcess(int *socketClientCPUDispatch)
 
     sem_post(&semExit);
     sem_post(&semMultiProcessing);
+}
+
+void cpuSendInterruptKillProcess(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado en Exec.
+    pcb_t *processExecToExit = assignContextToPcb(contextProcess);
+
+    processExecToExit->state = PCB_EXEC; //Esto solo para que no me tire el warning.
+
+    sem_post(&semKillProcessExec);
+
+    list_destroy(listPackage);
+
 }
 
 void cpuSendInterruptQ(int *socketClientCPUDispatch)

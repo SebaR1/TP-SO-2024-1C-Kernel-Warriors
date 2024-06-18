@@ -106,6 +106,8 @@ extern sem_t semPausePlanning;
 
 extern sem_t semKillProcessInInterface;
 
+extern sem_t semKillProcessExec;
+
 extern bool flagMemoryResponse;
 
 extern int pid;

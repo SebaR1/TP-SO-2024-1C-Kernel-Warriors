@@ -29,14 +29,16 @@ void newState()
 void exitState()
 {
     while(1){
+
         sem_wait(&semExit);
+        pcb_t *process = list_pop(pcbExitList);
+
+        pcbState_t prevState = process->state;
+
+        process->state = PCB_EXIT;
 
         sem_wait(&semPausePlanning);
         sem_post(&semPausePlanning);
-
-        pcb_t *process = list_pop(pcbExitList);
-        pcbState_t prevState = process->state;
-        process->state = PCB_EXIT;
 
         // Pido a memoria que libere todo lo asociado al proceso.
         sendEndProcessToMemory(process);
@@ -69,6 +71,7 @@ pcb_t* createProcess()
     sem_post(&semAddPid);
     process->pc = 0;
     process->state = PCB_NEW;
+    process->isInInterface = false;
     process->resources = initListMutex();
     process->registersCpu = malloc(sizeof(t_registers));
     process->registersCpu->AX = 0;
@@ -90,7 +93,9 @@ void addPcbToNew(char* path)
     pcb_t *process = createProcess();
     sendProcessPathToMemory(process, path);
 
-    sem_wait(&semMemoryOk); // Esperan a que la memoria del ok de que el proceso se creo correctamente
+    sem_wait(&semMemoryOk); // Esperan a que la memoria de el ok de que el proceso se creo correctamente
+
+    flagMemoryResponse = true;
 
     if(flagMemoryResponse)
     {
@@ -145,26 +150,58 @@ void killProcess(uint32_t pid)
     {
     case PCB_NEW:
         list_remove_element_mutex(pcbNewList, processFound);
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_EXIT", processFound->pid);
-        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
+
+        processFound->state = PCB_EXIT;
         list_push(pcbExitList, processFound);
+
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_EXIT", processFound->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        processFound->state = PCB_NEW; // Este cambio devuelta es para que en exitState() pueda saber que era un proceso que no afectaba al grado de multiprogramacion.
+        
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         sem_post(&semExit);
         break;
     
     case PCB_READY:
         list_remove_element_mutex(pcbReadyList, processFound);
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXIT", processFound->pid);
-        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
+
+        char* listPids = _listPids(pcbReadyList->list);
+        //Log Obligatorio
+        log_info(getLogger(), listPids, getKernelConfig()->ALGORITMO_PLANIFICACION);
+        free(listPids);
+
+
+        processFound->state = PCB_EXIT; 
         list_push(pcbExitList, processFound);
+
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXIT", processFound->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
+
         sem_post(&semExit);
         break;
 
     case PCB_EXEC:
-        list_remove_element_mutex(pcbExecList, processFound);
-        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processFound->pid);
-        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
-        list_push(pcbExitList, processFound);
         sendInterruptForConsoleEndProcess(processFound);
+
+        sem_wait(&semKillProcessExec);
+
+        processFound->state = PCB_EXIT;
+        list_push(pcbExitList, processFound);
+
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processFound->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
+
         sem_post(&semExit);
         sem_post(&semMultiProcessing);        
         break;
@@ -181,17 +218,38 @@ void killProcess(uint32_t pid)
 
             sem_wait(&semKillProcessInInterface);
 
-            list_remove_element_mutex(pcbExecList, processFound);
+            list_remove_element_mutex(pcbBlockList, processFound);
+
+            processFound->state = PCB_EXIT;
+
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_EXIT", processFound->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
+            list_push(pcbExitList, processFound);
+            sem_post(&semExit);
+        } else {
+
+            list_remove_element_mutex(pcbBlockList, processFound);
+
+            processFound->state = PCB_EXIT;
+
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_EXIT", processFound->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
             log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
             list_push(pcbExitList, processFound);
             sem_post(&semExit);
 
-        }
+        } 
         break;
 
     default:
-        //Nada
+        log_error(getLogger(), "Este error no deberia pasar nunca.");
         break;
     }
 

@@ -53,7 +53,7 @@ void execState()
                 pcbToExec = list_pop(pcbReadyPriorityList);
                 list_push(pcbExecList, pcbToExec);
                 pcbToExec->state = PCB_EXEC;
-                log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
+                log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY_PLUS - Estado Actual: PCB_EXEC", pcbToExec->pid);
                 flagAuxVRR = true;
             }
         }

@@ -55,6 +55,9 @@ void serverKernelForCPU(int *socketClient);
 void cpuSendExitProcess(int *socketClientCPUDispatch);
 
 
+void cpuSendInterruptKillProcess(int *socketClientCPUDispatch);
+
+
 // Recibe el contexto del proceso que paso por la interrupcion del Quantum y manda al proceso a PcbReadyList.
 void cpuSendInterruptQ(int *socketClientCPUDispatch);
 
