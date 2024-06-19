@@ -15,7 +15,8 @@ void runInstructionCycle()
         instructionString* newInstructionString = getNextInstruction(getCurrentPID(), getPC());
 
         // Fase decode, descifro qué me pide la instrucción (la cual llegó en forma de string)
-        void** instructionParams = malloc(sizeof(void*));
+        void** instructionParams = malloc(sizeof(void**));
+        *instructionParams = NULL;
         instructionType type = decodeInstruction(newInstructionString->string, instructionParams);
 
         // Ejecuto la instruccion
@@ -23,7 +24,10 @@ void runInstructionCycle()
 
 
         // Libero la memoria que usé
-        free(*instructionParams);
+        if (*instructionParams != NULL)
+        {
+            free(*instructionParams);
+        }
         free(instructionParams);
         free(newInstructionString->string);
         free(newInstructionString);

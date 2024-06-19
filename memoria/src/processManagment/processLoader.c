@@ -50,9 +50,10 @@ void loadProcessByFile(int PID, FILE* pseudocodeFile)
     length = ftell(pseudocodeFile);
     fseek(pseudocodeFile, 0, SEEK_SET);
 
-    buffer = malloc(length);
+    buffer = malloc(length + 1);
     
     fread(buffer, 1, length, pseudocodeFile);
+    buffer[length] = '\0';
 
 
     // Separo las instrucciones del buffer y lo asigno a la informacion de la estructura del pseudocodigo.

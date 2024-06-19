@@ -421,8 +421,8 @@ void receiveContext(int* socketClient)
     setEBX(contextProcess.registersCpu.EBX);
     setECX(contextProcess.registersCpu.ECX);
     setEDX(contextProcess.registersCpu.EDX);
-    setSI(contextProcess.registersCpu.DI);
-    setDI(contextProcess.registersCpu.SI);
+    setSI(contextProcess.registersCpu.SI);
+    setDI(contextProcess.registersCpu.DI);
 
 
     setCurrentPID(pid);
