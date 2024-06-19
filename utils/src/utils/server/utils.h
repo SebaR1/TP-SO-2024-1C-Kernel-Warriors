@@ -11,6 +11,7 @@
 #include<assert.h>
 #include<netdb.h>
 #include "utils/utilsGeneral.h"
+#include "utils/debugMode.h"
 
 
 // Structu para llenar con los valores correspondientes y enviarlo como parametro a la funcion waitClientsLoop

@@ -7,6 +7,8 @@
 #include "MMU/TLB.h"
 #include "instructionCycle/instructionCycle.h"
 #include "finish.h"
+#include "cpuDebug.h"
+#include "utilsCPU/debugUtils.h"
 
 
 
@@ -17,6 +19,16 @@ int main()
 
     // Obtengo la configuracion general.
     initCPUConfig("CPU.config");
+
+
+
+    #ifdef DEBUG_CPU
+
+    logPreInitialMessageDebug();
+
+    #endif
+
+
 
     // Reservo memoria para mi sepaforo y lo inicializo
     sem_init(&semaphoreForKernelDispatch, 0, 1);
@@ -51,10 +63,14 @@ int main()
 
 
     t_package* initialPackage = createPackage(CPU_MODULE);
+    #ifdef DEBUG_CPU
     log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
+    #endif
     int socketClientMemory = createConection(getLogger(), getCPUConfig()->IP_MEMORIA, getCPUConfig()->PUERTO_MEMORIA);
     sendPackage(initialPackage, socketClientMemory);
+    #ifdef DEBUG_CPU
     log_info(getLogger(), "Paquete enviado con exito.");
+    #endif
     initServerForASocket(socketClientMemory, serverCPUForMemory);
 
 
@@ -66,9 +82,21 @@ int main()
     pthread_detach(runInstructionCycleThread);
 
 
-    // Espero para ver si me llegan mensajes.
-    // Esta linea es unicamente para testeo para el primer checkpoint, para saber que efectivamente funcionan las conexiones. Sera eliminada luego
-    //sleep(60);
+
+    #ifdef DEBUG_CPU
+
+    pthread_t printRegistersThread;
+    pthread_create(&printRegistersThread, NULL, (void*)printRegisters, NULL);
+    pthread_join(printRegistersThread, NULL);
+
+    logInitialMessageDebug();
+
+    #else
+
+    logInitialMessageRealese();
+
+    #endif
+
 
     // Espero a que me manden la señal de que tengo que terminar finalizar este modulo
     sem_wait(&semaphoreFinishModule);

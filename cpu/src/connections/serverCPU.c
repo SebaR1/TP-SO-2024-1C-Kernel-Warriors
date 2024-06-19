@@ -23,12 +23,6 @@ int socketKernelInterrupt;
 
 
 
-// Funcion auxiliar que se ejecuta en cada iteracion de una lista para loggear su valor. Usada para el primer checkpoint.
-void listIterator(char *element)
-{
-    log_info(getLogger(), "%s", element);
-}
-
 void receiveClientIterationDispatch(int socketServer)
 {
     if (_finishAllServersSignal)
@@ -61,7 +55,7 @@ void receiveClientIterationDispatch(int socketServer)
             break;
         }
 
-        log_info(getLogger(), "Se conecto un modulo Kernel en el dispatch");
+        log_info(getLogger(), "Se conectó un módulo Kernel en el Dispatch");
 
         initServerForASocket(socketClient, serverCPUDispatchForKernel);
 
@@ -117,7 +111,7 @@ void receiveClientIterationInterrupt(int socketServer)
             break;
         }
 
-        log_info(getLogger(), "Se conecto un modulo Kernel en el Interrupt");
+        log_info(getLogger(), "Se conectó un módulo Kernel en el Interrupt");
 
         initServerForASocket(socketClient, serverCPUInterruptForKernel);
 
@@ -157,13 +151,6 @@ void serverCPUDispatchForKernel(int *socketClient)
 
         switch (opCode)
         {
-        case PACKAGE_FROM_KERNEL:
-            log_info(getLogger(), "Obteniendo paquete por parte del modulo kernel en Dispatch");
-            t_list *listPackage = getPackage(*socketClient);
-            log_info(getLogger(), "Paquete obtenido con exito del modulo kernel en Dispatch");
-            operationPackageFromKernel(listPackage);
-            break;
-
         case KERNEL_SEND_CONTEXT:
             receiveContext(socketClient);
             break;
@@ -206,13 +193,6 @@ void serverCPUInterruptForKernel(int *socketClient)
 
         switch (opCode)
         {
-        case PACKAGE_FROM_KERNEL:
-            log_info(getLogger(), "Obteniendo paquete por parte del modulo kernel en Interrput");
-            t_list *listPackage = getPackage(*socketClient);
-            log_info(getLogger(), "Paquete obtenido con exito del modulo kernel en Interrupt");
-            operationPackageFromKernel(listPackage);
-            break;
-
         case KERNEL_SEND_INTERRUPT_QUANTUM_END:
             kernelInterruptEndQuantum(socketClient);
             break;
@@ -293,10 +273,7 @@ void serverCPUForMemory(int *socketClient)
     free(socketClient);
 }
 
-void operationPackageFromKernel(t_list *package)
-{
-    list_iterate(package, (void*)listIterator);
-}
+
 
 void memoryNextInstruction(int* socketClient)
 {

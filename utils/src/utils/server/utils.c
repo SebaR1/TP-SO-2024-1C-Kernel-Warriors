@@ -4,7 +4,9 @@
 
 int initServer(t_log* logger, char* port)
 {
+	#ifdef DEBUG_UTILS
 	log_info(logger, "Iniciando el servidor");
+	#endif
 
 	struct addrinfo hints,*servinfo;
 
@@ -48,14 +50,19 @@ int initServer(t_log* logger, char* port)
 
 	freeaddrinfo(servinfo);
 
+	#ifdef DEBUG_UTILS
 	log_info(logger, "Servidor iniciado con exito");
+	#endif
 
 	return socketServer;
 }
 
 int waitClient(t_log* logger, int socketServer)
 {
+	#ifdef DEBUG_UTILS
 	log_info(logger, "Esperando a cliente");
+	#endif
+
 	// Aceptamos un nuevo cliente
     int socketClient = accept(socketServer, NULL, NULL); // Retorna -1 si hubo un error.
     if (socketClient == -1)
@@ -64,7 +71,10 @@ int waitClient(t_log* logger, int socketServer)
         return -1;
     }
 
+	#ifdef DEBUG_UTILS
     log_info(logger, "Se conecto un cliente!");
+	#endif
+
     return socketClient;
 }
 

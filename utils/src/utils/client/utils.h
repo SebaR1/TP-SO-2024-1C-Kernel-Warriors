@@ -14,6 +14,7 @@
 #include<sys/socket.h>
 #include<netdb.h>
 #include<string.h>
+#include "utils/debugMode.h"
 
 
 // Estructura usada para contener info importante para un buffer.

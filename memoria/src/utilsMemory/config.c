@@ -4,6 +4,7 @@
 #include "utils/config.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "memoryDebug.h"
 
 
 
@@ -32,7 +33,9 @@ void _getMemoryData()
 
 void initMemoryConfig(char* path)
 {
+    #ifdef DEBUG_MEMORY
     log_info(getLogger(), "Obteniendo los datos del archivo de configuracion");
+    #endif
 
     _configFile = config_create(path);
 
@@ -40,18 +43,24 @@ void initMemoryConfig(char* path)
 
     _getMemoryData();
 
+    #ifdef DEBUG_MEMORY
     log_info(getLogger(), "Datos obtenidos con exito");
+    #endif
 }
 
 // Posible riesgo de memory leak o de Segmentation Fault en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak o un Segmentation Fault en los testeos
 void freeMemoryConfig()
 {
+    #ifdef DEBUG_MEMORY
     log_info(getLogger(), "Liberando la memoria usada para el archivo de configuracion");
+    #endif
 
     config_destroy(_configFile);
     free(getMemoryConfig());
 
+    #ifdef DEBUG_MEMORY
     log_info(getLogger(), "Memoria liberada con exito");
+    #endif
 }
 
 

@@ -8,6 +8,9 @@
 #include "finish.h"
 #include "processManagment/processLoader.h"
 #include "paging/memoryUser.h"
+#include "memoryDebug.h"
+
+
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +19,14 @@ int main(int argc, char *argv[])
 
     // Obtengo la configuracion general.
     initMemoryConfig("memoria.config");
+
+
+
+    #ifdef DEBUG_MEMORY
+
+    logPreInitialMessageDebug();
+
+    #endif
 
 
     // Reservo memoria para los semaforos y lo inicializo
@@ -41,6 +52,21 @@ int main(int argc, char *argv[])
     pthread_t waitClientsLoopThread;
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
     pthread_detach(waitClientsLoopThread);
+
+
+
+
+    #ifdef DEBUG_MEMORY
+
+    logInitialMessageDebug();
+
+    #else
+
+    logInitialMessageRealese();
+
+    #endif
+
+
 
     // Espero a que me manden la señal de que tengo que terminar finalizar este modulo
     sem_wait(&semaphoreFinishModule);

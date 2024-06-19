@@ -3,10 +3,11 @@
 
 
 #include <commons/log.h>
+#include "memoryDebug.h"
 
 
 
-///////////////////// FUNCIONES AUXILIARES DE LOGS /////////////////////
+///////////////////// FUNCIONES PARA MANEJO DE LOGS /////////////////////
 
 
 // Inicializa el logger
@@ -44,6 +45,40 @@ void logWriteBytes(int pid, int physicalAddress, int size);
 
 
 
+
+////////////////////// LOGS AUXILIARES GENERALES //////////////////////
+
+
+
+#ifndef LINE_SEPARATOR
+#define LINE_SEPARATOR "----------------------------------------------------"
+#endif
+
+
+void logLineSeparator();
+
+
+
+
+////////////////////// LOGS ESPECIFICOS PARA EL DEBUG O REALESE //////////////////////
+
+
+#ifdef DEBUG_MEMORY // PARA EL DEBUG
+
+
+void logPreInitialMessageDebug();
+
+void logInitialMessageDebug();
+
+
+#else // PARA EL REALESE
+
+
+void logInitialMessageRealese();
+
+
+
+#endif
 
 
 

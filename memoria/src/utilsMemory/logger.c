@@ -4,7 +4,7 @@ t_log* _logger;
 
 
 
-///////////////////// FUNCIONES AUXILIARES DE LOGS /////////////////////
+///////////////////// FUNCIONES PARA MANEJO DE LOGS /////////////////////
 
 
 void initLogger(char* file, char* processName, bool isActiveConsole, t_log_level level)
@@ -71,3 +71,47 @@ void logWriteBytes(int pid, int physicalAddress, int size)
 {
     log_info(getLogger(), "Acceso a espacio de usuario - PID: %d - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño: %d", pid, physicalAddress, size);
 }
+
+
+
+
+////////////////////// LOGS AUXILIARES GENERALES //////////////////////
+
+
+
+void logLineSeparator()
+{
+    log_info(getLogger(), LINE_SEPARATOR);
+}
+
+
+
+////////////////////// LOGS ESPECIFICOS PARA EL DEBUG O REALESE //////////////////////
+
+
+#ifdef DEBUG_MEMORY
+
+
+void logPreInitialMessageDebug()
+{
+    log_info(getLogger(), "INICIANDO EL MODULO MEMORIA EN MODO DEBUG");
+}
+
+void logInitialMessageDebug()
+{
+    log_info(getLogger(), "INICIADO EL MODULO MEMORIA EN MODO DEBUG");
+}
+
+
+#else
+
+
+void logInitialMessageRealese()
+{
+    logLineSeparator();
+    log_info(getLogger(), "INICIADO EL MODULO MEMORIA");
+    logLineSeparator();
+}
+
+
+#endif

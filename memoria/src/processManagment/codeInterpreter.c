@@ -1,4 +1,5 @@
 #include "codeInterpreter.h"
+#include "utilsMemory/delay.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,6 +10,8 @@
 
 char* getInstruction(int PID, int PC)
 {
+    memoryDelay();
+
     processInfo* currentPseudocode = getLastProcess();
 
     if (currentPseudocode == NULL || currentPseudocode->PID != PID)

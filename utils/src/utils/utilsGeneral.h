@@ -11,10 +11,11 @@
 #include <netdb.h>
 #include <commons/temporal.h>
 #include "listMutex.h"
+#include "utils/debugMode.h"
 
 
-#define DEFAULT_CASE_MESSAGE "Un cliente me envio una operacion no valida o desconocida."
-#define ERROR_CASE_MESSAGE "Un cliente se desconecto."
+#define DEFAULT_CASE_MESSAGE "Un cliente me envió una operación no válida o desconocida."
+#define ERROR_CASE_MESSAGE "Un cliente se desconectó."
 
 // Estructura usada para saber de que tipo es el paquete que envia un cliente.
 typedef enum

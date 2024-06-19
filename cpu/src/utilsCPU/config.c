@@ -46,7 +46,9 @@ ALGORITMO_TLB_TYPE getTLBAlgorithm(char* ALGORITMO_TLB)
 
 void initCPUConfig(char* path)
 {
+    #ifdef DEBUG_CPU
     log_info(getLogger(), "Obteniendo los datos del archivo de configuracion");
+    #endif
 
     _configFile = config_create(path);
 
@@ -54,18 +56,24 @@ void initCPUConfig(char* path)
 
     _getCPUData();
 
+    #ifdef DEBUG_CPU
     log_info(getLogger(), "Datos obtenidos con exito");
+    #endif
 }
 
 // Posible riesgo de memory leak o de Segmentation Fault en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak o un Segmentation Fault en los testeos
 void freeCPUConfig()
 {
+    #ifdef DEBUG_CPU
     log_info(getLogger(), "Liberando la memoria usada para el archivo de configuracion");
+    #endif
 
     config_destroy(_configFile);
     free(getCPUConfig());
 
+    #ifdef DEBUG_CPU
     log_info(getLogger(), "Memoria liberada con exito");
+    #endif
 }
 
 

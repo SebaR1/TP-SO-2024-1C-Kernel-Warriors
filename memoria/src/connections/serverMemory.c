@@ -23,12 +23,6 @@ int socketCPU;
 bool _finishAllServersSignal = false;
 
 
-// Funcion auxiliar que se ejecuta en cada iteracion de una lista para loggear su valor. Usada para el primer checkpoint.
-void listIterator(char* element)
-{
-    log_info(getLogger(), "%s", element);
-}
-
 
 void receiveClientIteration(int socketServer)
 {
@@ -62,7 +56,7 @@ void receiveClientIteration(int socketServer)
             break;
         }
 
-        log_info(getLogger(), "Se conecto un modulo Kernel");
+        log_info(getLogger(), "Se conectó el módulo Kernel");
 
         initServerForASocket(socketClient, serverMemoryForKernel);
 
@@ -80,7 +74,7 @@ void receiveClientIteration(int socketServer)
             break;
         }
 
-        log_info(getLogger(), "Se conecto un modulo CPU");
+        log_info(getLogger(), "Se conectó un módulo CPU");
 
         sendTamPagina(&socketClient, getMemoryConfig()->TAM_PAGINA);
 
@@ -100,7 +94,7 @@ void receiveClientIteration(int socketServer)
             break;
         }
 
-        log_info(getLogger(), "Se conecto un modulo IO");
+        log_info(getLogger(), "Se conectó un módulo IO");
 
         initServerForASocket(socketClient, serverMemoryForIO);
 
@@ -141,14 +135,6 @@ void serverMemoryForKernel(int* socketClient)
 
         switch (opCode)
         {
-        case PACKAGE_FROM_KERNEL:
-            log_info(getLogger(), "Obteniendo paquete por parte del modulo Kernel");
-            t_list *listPackage = getPackage(*socketClient);
-            log_info(getLogger(), "Paquete obtenido con exito del modulo Kernel");
-            operationPackageFromKernel(listPackage);
-            break;
-
-
         case KERNEL_SEND_PROCESS_PATH:
             receiveNewProcessFromKernel(socketClient);
             break;
@@ -196,13 +182,6 @@ void serverMemoryForCPU(int* socketClient)
 
         switch (opCode)
         {
-        case PACKAGE_FROM_CPU:
-            log_info(getLogger(), "Obteniendo paquete por parte del modulo CPU");
-            t_list *listPackage = getPackage(*socketClient);
-            log_info(getLogger(), "Paquete obtenido con exito del modulo CPU");
-            operationPackageFromCPU(listPackage);
-            break;
-
         case CPU_GIVE_ME_NEXT_INSTRUCTION:
             cpuWantsNextInstruction(socketClient);
             break;
@@ -258,14 +237,6 @@ void serverMemoryForIO(int* socketClient)
 
         switch (opCode)
         {
-        case PACKAGE_FROM_IO:
-            log_info(getLogger(), "Obteniendo paquete por parte del modulo IO");
-            t_list *listPackage = getPackage(*socketClient);
-            log_info(getLogger(), "Paquete obtenido con exito del modulo IO");
-            operationPackageFromIO(listPackage);
-            break;
-
-
         case READ_MEMORY:
             requestReadMemory(socketClient);
             break;
@@ -295,24 +266,6 @@ void serverMemoryForIO(int* socketClient)
     sem_post(&semaphoreForIO);
 }
 
-
-void operationPackageFromKernel(t_list* package)
-{
-    list_iterate(package, (void*)listIterator);
-}
-
-
-void operationPackageFromCPU(t_list* package)
-{
-    list_iterate(package, (void*)listIterator);
-}
-
-
-
-void operationPackageFromIO(t_list* package)
-{
-    list_iterate(package, (void*)listIterator);
-}
 
 
 void cpuWantsNextInstruction(int* socketClient)
