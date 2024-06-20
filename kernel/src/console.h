@@ -24,4 +24,6 @@ void showProcessByState();
 
 char* _listProcess(t_list *list);
 
+void changeMultiprogramming(int *newMultiprogramming);
+
 #endif

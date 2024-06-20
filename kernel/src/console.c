@@ -1,12 +1,18 @@
 #include "console.h"
 
+
+
 //Habilita una consola y valida las instrucciones
 void readKernelConsole(){
     log_info(getLogger(), "Consola iniciada\n");
     char* read;
     read = readline("");
 
-    while(!string_is_empty(read)){
+    while(1){
+        if(string_equals_ignore_case(read, "SALIR")){
+            log_info(getLogger(), "Apagando el sistema");
+            break;
+        }
         if(!_isAnInstruction(read)){
             log_error(getLogger(), "Comando de consola no recognized");
             free(read);
@@ -19,6 +25,7 @@ void readKernelConsole(){
     } //Para terminar la consola se pone algo vacio
     free(read);
 }
+
 
 //Valida si hay alguna instruccion con lo ingresado
 bool _isAnInstruction(char* instruction){
@@ -57,7 +64,7 @@ bool _isAnInstruction(char* instruction){
     else if(string_equals_ignore_case(consoleCommand[0], "PROCESO_ESTADO")){
             return true;
     }
-    
+
     string_array_destroy(consoleCommand);
     return false;
 }
@@ -70,13 +77,22 @@ void attendInstruction(char* instruction)
     char** consoleCommand = string_split(instruction, " ");
 
     if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PROCESO")){
-        addPcbToNew(consoleCommand[1]);
+        pthread_t initProcessThread;
+        char* paramInitProcessThread = malloc(sizeof(string_length(consoleCommand[1] + 1)));
+        strcpy(paramInitProcessThread, consoleCommand[1]);
+        pthread_create(&initProcessThread, NULL, (void*)addPcbToNew, paramInitProcessThread);
+        pthread_detach(initProcessThread);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "FINALIZAR_PROCESO")){
-        killProcess(atoi(consoleCommand[1]));
+        pthread_t killProcessThread;
+        int *paramkillProcessThread = malloc(sizeof(int));
+        *paramkillProcessThread = atoi(consoleCommand[1]);
+        pthread_create(&killProcessThread, NULL, (void*)killProcess, paramkillProcessThread);
+        pthread_detach(killProcessThread);
+        //killProcess(atoi(consoleCommand[1]));
     }
     else if(string_equals_ignore_case(consoleCommand[0], "DETENER_PLANIFICACION")){
-        sem_wait(&semPausePlanning);
+        if (!flagAuxStopPlanning)sem_wait(&semPausePlanning);
         flagAuxStopPlanning = true;
     }
     else if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PLANIFICACION")){
@@ -84,16 +100,24 @@ void attendInstruction(char* instruction)
         flagAuxStopPlanning = false;
     }
     else if(string_equals_ignore_case(consoleCommand[0], "EJECUTAR_SCRIPT")){
-        executeScript(consoleCommand[1]);
+        pthread_t executeScriptThread;
+        char* paramExecuteScriptThread = malloc(sizeof(string_length(consoleCommand[1] + 1)));
+        strcpy(paramExecuteScriptThread, consoleCommand[1]);
+        pthread_create(&executeScriptThread, NULL, (void*)executeScript, consoleCommand[1]);
+        pthread_detach(executeScriptThread);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "MULTIPROGRAMACION")){
-        //Implementacion para MULTIPROGRAMACION
+        pthread_t changeMultiprogrammingThread;
+        int *paramChangeMultiprogrammingThread = malloc(sizeof(int));
+        *paramChangeMultiprogrammingThread = atoi(consoleCommand[1]);
+        pthread_create(&changeMultiprogrammingThread, NULL, (void*)changeMultiprogramming, paramChangeMultiprogrammingThread);
+        pthread_detach(changeMultiprogrammingThread);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "PROCESO_ESTADO")){
         showProcessByState();
     }
 
-     string_array_destroy(consoleCommand);
+    string_array_destroy(consoleCommand);
 }
 
 void executeScript(char* path)
@@ -105,6 +129,8 @@ void executeScript(char* path)
         exit(EXIT_FAILURE);
 
     }
+
+    free(path);
 }
 
 void showProcessByState()
@@ -146,4 +172,73 @@ char* _listProcess(t_list *list)
     string_append(&pids, " ]");
 
     return pids;
+}
+
+void changeMultiprogramming(int* paramChangeMultiprogrammingThread)
+{
+    int newMultiprogramming = *paramChangeMultiprogrammingThread;
+    int prevMultiprogramming = getKernelConfig()->GRADO_MULTIPROGRAMACION;
+    int difAux;
+    
+    if(newMultiprogramming <= 0){
+
+        log_error(getLogger(), "El grado de multiprogramacion debe ser mayor que 0 y tiene que ser un numero!");
+
+    } else {
+        if(list_mutex_is_empty(pcbBlockList) && list_mutex_is_empty(pcbExecList) && list_mutex_is_empty(pcbReadyList)){
+
+            if(newMultiprogramming > prevMultiprogramming){
+
+                difAux = newMultiprogramming - prevMultiprogramming;
+
+                while (difAux > 0){
+                    sem_post(&semMultiProgramming);
+                    difAux--;
+                }
+
+            } else if (prevMultiprogramming > newMultiprogramming){
+
+                difAux = prevMultiprogramming - newMultiprogramming;
+                
+                while (difAux > 0){
+                    sem_wait(&semMultiProgramming);
+                    difAux--;
+                }
+            }
+
+        } else {
+
+            if(newMultiprogramming > prevMultiprogramming){
+
+                difAux = newMultiprogramming - prevMultiprogramming;
+
+                while(difAux > 0){
+                    sem_post(&semMultiProgramming);
+                    difAux--; 
+                }
+
+            } else if (prevMultiprogramming > newMultiprogramming) {
+                //Tener cuidado despues de salir de este caso.
+
+                difAux = prevMultiprogramming - newMultiprogramming;
+
+                if(diffBetweenNewAndPrevMultiprogramming > 0){
+
+                    diffBetweenNewAndPrevMultiprogramming =+ difAux;
+
+                } else {
+
+                    diffBetweenNewAndPrevMultiprogramming = difAux;
+
+                }
+
+            }
+        }
+
+        getKernelConfig()->GRADO_MULTIPROGRAMACION = newMultiprogramming;
+        log_info(getLogger(), "Se cambio el grado de multiprogramacion a: %d", newMultiprogramming);
+
+    }
+
+    free(paramChangeMultiprogrammingThread);
 }

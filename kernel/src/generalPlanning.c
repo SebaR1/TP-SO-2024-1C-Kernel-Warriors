@@ -30,6 +30,10 @@ sem_t semKillProcessInInterface;
 
 sem_t semKillProcessExec;
 
+sem_t semExitProgram;
+
+pthread_mutex_t mutexSendProcessToMemory;
+
 bool flagMemoryResponse;
 
 int pid;
@@ -39,3 +43,7 @@ t_algorithm algorithm;
 int socketClientMemory;
 int socketClientCPUDispatch;
 int socketClientCPUInterrupt;
+
+pthread_mutex_t mutex2;
+
+int diffBetweenNewAndPrevMultiprogramming; 

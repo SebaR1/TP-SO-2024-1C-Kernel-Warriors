@@ -34,7 +34,7 @@ void destroyProcess(pcb_t *process);
 bool compare_pid(void *data);
 
 //Finaliza el proceso dependiendo en donde se encuentre.
-void killProcess(uint32_t pid);
+void killProcess(uint32_t *pid);
 
 //Encuentra el pcb y lo segun el pid y lo retorna.
 pcb_t* foundStatePcb(uint32_t pid);

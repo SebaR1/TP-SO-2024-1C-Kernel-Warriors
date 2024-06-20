@@ -76,14 +76,14 @@ void execState()
         case VRR:
             if(flagAuxVRR){ //Quiere decir que estaba en pcbReadyPriorityList, entonces me aseguro que tiene algo de quantum sobrante.
 
-                paramsQuantumVRRThread paramsQuantumVRR;
-                paramsQuantumVRR.process = pcbToExec;
-                paramsQuantumVRR.timeForQuantum = getKernelConfig()->QUANTUM - temporal_gettime(pcbToExec->quantumForVRR); // El tiempo del Quantum - el tiempo que estuve en exec. Ese es el tiempo que va a estar en exec por estar en pcbReadyPriorityList.
+                paramsQuantumVRRThread *paramsQuantumVRR = malloc(sizeof(paramsQuantumVRRThread));
+                paramsQuantumVRR->process = pcbToExec;
+                paramsQuantumVRR->timeForQuantum = getKernelConfig()->QUANTUM - temporal_gettime(pcbToExec->quantumForVRR); // El tiempo del Quantum - el tiempo que estuve en exec. Ese es el tiempo que va a estar en exec por estar en pcbReadyPriorityList.
 
                 sendContextToCPU(pcbToExec);
 
                 pthread_t QuantumInterruptThread;
-                pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterruptVRR, &paramsQuantumVRR);
+                pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterruptVRR, paramsQuantumVRR);
                 pthread_detach(QuantumInterruptThread);
 
             } else { // Como no hay nada en pcbReadyPriorityList, actua como RR pero ademas contando el tiempo.
@@ -171,6 +171,8 @@ void quantumControlInterruptVRR(paramsQuantumVRRThread* paramsQuantumVRRThread)
         // Enviar interrupción para desalojar el proceso
         sendInterruptForQuantumEnd(pcbToExec);
     }
+
+    free(paramsQuantumVRRThread);
 }
 
 void defineAlgorithm()

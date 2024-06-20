@@ -1,4 +1,5 @@
 #include "longTermPlanning.h"
+#include "pthread.h"
 
 
 //Hilo aparte que esta a la espera de que llegue la creacion de
@@ -41,14 +42,20 @@ void exitState()
         sem_post(&semPausePlanning);
 
         // Pido a memoria que libere todo lo asociado al proceso.
+        pthread_mutex_lock(&mutex2);
         sendEndProcessToMemory(process);
-
+        pthread_mutex_unlock(&mutex2);
         log_info(getLogger(), "Se borro el proceso con PID: %d", process->pid);
         destroyProcess(process);
 
-        if(prevState != PCB_NEW){ // Este if es porque se fija si estaba en NEW, porque en ese lugar no afectaba al grado de multiprogramacion
-        sem_post(&semMultiProgramming); //Manda un aviso que libera una parte del grado de multiprogramacion
+        if(prevState != PCB_NEW){
+            if(diffBetweenNewAndPrevMultiprogramming > 0){
+                diffBetweenNewAndPrevMultiprogramming --;
+            } else {
+                sem_post(&semMultiProgramming);
+            }
         }
+
     }
 }
 
@@ -87,13 +94,19 @@ pcb_t* createProcess()
     return process;
 };
 
+
+
 //Agrega el proceso a la lista de NEW
 void addPcbToNew(char* path)
 {
-    pcb_t *process = createProcess();
-    sendProcessPathToMemory(process, path);
 
+    pcb_t *process = createProcess();
+
+
+    pthread_mutex_lock(&mutexSendProcessToMemory);
+    sendProcessPathToMemory(process, path);
     sem_wait(&semMemoryOk); // Esperan a que la memoria de el ok de que el proceso se creo correctamente
+    pthread_mutex_unlock(&mutexSendProcessToMemory);
 
     if(flagMemoryResponse)
     {
@@ -107,8 +120,8 @@ void addPcbToNew(char* path)
         destroyProcess(process);
 
     }
-
     
+    free(path);
 }
 
 void destroyProcess(pcb_t *process)
@@ -135,8 +148,9 @@ void destroyProcess(pcb_t *process)
     free(process);
 }
 
-void killProcess(uint32_t pid)
+void killProcess(uint32_t *paramkillProcessThread)
 {    
+    uint32_t pid = *paramkillProcessThread;
     pcb_t* processFound = foundStatePcb(pid);
 
     if(processFound == NULL){
@@ -252,6 +266,8 @@ void killProcess(uint32_t pid)
         log_error(getLogger(), "Este error no deberia pasar nunca.");
         break;
     }
+
+    free(paramkillProcessThread);
 
 }
 

@@ -12,6 +12,10 @@ int main()
     // Inicializo todo.
     pid = 0;
 
+    diffBetweenNewAndPrevMultiprogramming = 0;
+
+    pthread_mutex_init(&mutexSendProcessToMemory, NULL);
+
     sem_init(&semNew, 0, 0);
     sem_init(&semReady, 0, 0);
     sem_init(&semExec, 0, 0);
@@ -24,6 +28,9 @@ int main()
     sem_init(&semPausePlanning, 0, 1);
     sem_init(&semMemoryOk, 0, 0);
     sem_init(&semKillProcessInInterface, 0, 0);
+    sem_init(&semExitProgram, 0, 0);
+
+    pthread_mutex_init(&mutex2, NULL);
 
     defineAlgorithm();
 
@@ -85,7 +92,6 @@ int main()
     pthread_t kernelConsoleThread;
     pthread_create(&kernelConsoleThread, NULL, (void*)readKernelConsole, NULL);
     pthread_join(kernelConsoleThread, NULL);
-
 
 ///////////////////////////////////////////////////////////
 
