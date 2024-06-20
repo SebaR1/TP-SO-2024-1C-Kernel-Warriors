@@ -90,6 +90,7 @@ pcb_t* createProcess()
     process->registersCpu->ECX = 0;
     process->registersCpu->EDX = 0;
     process->registersCpu->SI = 0;
+    process->registersCpu->DI = 0;
     process->params = malloc(sizeof(paramsKernelForIO));
     return process;
 };
@@ -102,6 +103,8 @@ void addPcbToNew(char* path)
 
     pcb_t *process = createProcess();
 
+    sem_wait(&semPausePlanning);
+    sem_post(&semPausePlanning);
 
     pthread_mutex_lock(&mutexSendProcessToMemory);
     sendProcessPathToMemory(process, path);

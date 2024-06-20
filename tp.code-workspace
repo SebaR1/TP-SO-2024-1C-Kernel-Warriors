@@ -13,7 +13,8 @@
 			"type_traits": "c",
 			"atomic": "c",
 			"string": "c",
-			"typeinfo": "c"
+			"typeinfo": "c",
+			"random": "c"
 		},
 		"C_Cpp.errorSquiggles": "disabled",
 	},
