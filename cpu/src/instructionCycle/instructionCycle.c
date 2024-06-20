@@ -28,7 +28,7 @@ void runInstructionCycle()
         executeInstruction(type, *instructionParams);
 
         #ifdef DEBUG_CPU
-        printRegisters(NULL);
+        printRegisters();
         #endif
 
 

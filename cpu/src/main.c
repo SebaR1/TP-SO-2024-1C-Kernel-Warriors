@@ -85,9 +85,9 @@ int main()
 
     #ifdef DEBUG_CPU
 
-    pthread_t printRegistersThread;
-    pthread_create(&printRegistersThread, NULL, (void*)printRegisters, NULL);
-    pthread_join(printRegistersThread, NULL);
+    pthread_t printRegistersThreadVar;
+    pthread_create(&printRegistersThreadVar, NULL, (void*)printRegistersThread, NULL);
+    pthread_join(printRegistersThreadVar, NULL);
 
     logInitialMessageDebug();
 

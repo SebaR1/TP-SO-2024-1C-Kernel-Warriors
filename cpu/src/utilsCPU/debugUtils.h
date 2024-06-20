@@ -12,7 +12,11 @@
 
 
 /// @brief Muestra todos los registros si se escribe en la consola "regs" o "registers"
-void printRegisters(void* ignore);
+void printRegisters();
+
+
+/// @brief Thread que muestra todos los registros si se escribe en la consola "regs" o "registers". Tambien da ayuda si se escribe "help" o "h"
+void printRegistersThread(void* ignore);
 
 #endif
 

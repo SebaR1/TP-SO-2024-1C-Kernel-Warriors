@@ -36,11 +36,11 @@ bool loadProcessByPath(int PID, char* pseudocodePath)
 
 void loadProcessByFile(int PID, FILE* pseudocodeFile)
 {
-    processInfo* newElement = malloc(sizeof(processInfo)); // No olvidarse de liberar la memoria antes de eliminar el nodo de la lista.
-    newElement->PID = PID;
-    newElement->pageTable = NULL;
+    processInfo* newProcess = malloc(sizeof(processInfo)); // No olvidarse de liberar la memoria antes de eliminar el nodo de la lista.
+    newProcess->PID = PID;
+    newProcess->pageTable = NULL;
 
-    // Obtener las instrucciones del archivo y ponerlas en el newElement->pseudocodeInstructions.
+    // Obtener las instrucciones del archivo y ponerlas en el newProcess->pseudocodeInstructions.
 
     char* buffer = 0;
     long length;
@@ -57,13 +57,17 @@ void loadProcessByFile(int PID, FILE* pseudocodeFile)
 
 
     // Separo las instrucciones del buffer y lo asigno a la informacion de la estructura del pseudocodigo.
-    newElement->pseudocodeInstructions = string_split(buffer, "\n");
+    newProcess->pseudocodeInstructions = string_split(buffer, "\n");
 
     // Libero la memoria del buffer.
     free(buffer);
 
+    newProcess->pageTable = NULL;
+    newProcess->amountOfPages = 0;
+    newProcess->internalFragmentation = 0;
+
     // Agrego la informacion del pseudocodigo del nuevo proceso en la lista.
-    list_push(processesList, newElement); 
+    list_push(processesList, newProcess); 
 }
 
 

@@ -11,7 +11,15 @@
 #include <commons/string.h>
 #include "logger.h"
 
-void printRegisters(void* ignore)
+
+void printRegisters()
+{
+    log_info(getLogger(), "PC = %d, AX = %d, BX = %d, CX = %d, DX = %d, EAX = %d, EBX = %d, ECX = %d, EDX = %d, SI = %d, DI = %d",
+                        getPC(), getAX(), getBX(), getCX(), getDX(), getEAX(), getEBX(), getECX(), getEDX(), getSI(), getDI());
+}
+
+
+void printRegistersThread(void* ignore)
 {
     char* command = readline("");
     while (true)
@@ -29,8 +37,7 @@ void printRegisters(void* ignore)
             || string_equals_ignore_case(command, "REGISTROS")
             || string_equals_ignore_case(command, "REGS"))
         {
-            log_info(getLogger(), "AX = %d, BX = %d, CX = %d, DX = %d, EAX = %d, EBX = %d, ECX = %d, EDX = %d, SI = %d, DI = %d",
-                                getAX(), getBX(), getCX(), getDX(), getEAX(), getEBX(), getECX(), getEDX(), getSI(), getDI());
+            printRegisters();
         }
 
         free(command);

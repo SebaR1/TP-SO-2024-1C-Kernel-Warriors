@@ -674,6 +674,7 @@ registerTypeByBytes _typeToRegister(registerType type, uint8_t** outRegister1byt
     case PC_TYPE:
         typeByBytes = REGISTER_4_BYTES;
         *outRegister4bytes = &PC;
+        break;
 
     case AX_TYPE:
         typeByBytes = REGISTER_1_BYTE;
