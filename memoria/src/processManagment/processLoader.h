@@ -39,7 +39,7 @@ void destroyProcess(int PID);
 
 /// @brief Llama a la funcion que elimina la informacion del pseudocodigo con el PID especificado pasado mediante params
 /// @param params El PID en forma de void*
-void destroyProcessByParams(void* params);
+void destroyProcessWithParams(void* params);
 
 
 

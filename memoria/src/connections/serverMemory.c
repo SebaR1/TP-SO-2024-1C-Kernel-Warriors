@@ -295,10 +295,7 @@ void receiveNewProcessFromKernel(int* socketClient)
     processPath->pid = *pidPointer;
     processPath->path = (char*)list_get(listPackage, 1);
 
-    // Creo un hilo que se encarga de agregar el codigo del proceso a la lista con todos los codigos de los procesos.
-    pthread_t loadCodeThread;
-    pthread_create(&loadCodeThread, NULL, loadProcessByPathWithParams, processPath);
-    pthread_detach(&loadCodeThread);
+    loadProcessByPathWithParams(processPath);
 
     free(pidPointer);
     list_destroy(listPackage);
@@ -314,10 +311,7 @@ void receiveEndProcessFromKernel(int* socketClient)
     int* pidPointer = (int*)list_get(listPackage, 0);
     processEnd->pid = *pidPointer;
 
-    // Creo un hilo que se encarga de eliminar el codigo del proceso de la lista con todos los codigos de los procesos.
-    pthread_t destroyCodeThread;
-    pthread_create(&destroyCodeThread, NULL, destroyProcessByParams, processEnd);
-    pthread_detach(&destroyCodeThread);
+    destroyProcessWithParams(processEnd);
 
     free(pidPointer);
     list_destroy(listPackage);

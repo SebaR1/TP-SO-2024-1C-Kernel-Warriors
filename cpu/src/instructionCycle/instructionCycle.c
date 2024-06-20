@@ -1,5 +1,10 @@
 #include "instructionCycle.h"
+#include "cpuDebug.h"
 
+
+#ifdef DEBUG_CPU
+#include "utilsCPU/debugUtils.h"
+#endif
 
 void runInstructionCycle()
 {
@@ -21,6 +26,10 @@ void runInstructionCycle()
 
         // Ejecuto la instruccion
         executeInstruction(type, *instructionParams);
+
+        #ifdef DEBUG_CPU
+        printRegisters(NULL);
+        #endif
 
 
         // Libero la memoria que usé

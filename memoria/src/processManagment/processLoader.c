@@ -115,7 +115,7 @@ void destroyProcess(int PID)
 }
 
 
-void destroyProcessByParams(void* params)
+void destroyProcessWithParams(void* params)
 {
     // Retardo de la operacion
     memoryDelay();
