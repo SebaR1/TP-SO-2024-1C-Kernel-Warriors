@@ -632,7 +632,7 @@ void cpuSendInterruptKillProcess(int *socketClientCPUDispatch)
     // Asigno todo el contexto que recibi de CPU al proceso popeado en Exec.
     pcb_t *processExecToExit = assignContextToPcb(contextProcess);
 
-    processExecToExit->state = PCB_EXEC; //Esto solo para que no me tire el warning.
+    list_push(pcbExecList, processExecToExit);
 
     sem_post(&semKillProcessExec);
 

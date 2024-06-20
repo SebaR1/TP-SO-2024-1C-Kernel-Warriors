@@ -29,6 +29,7 @@ int main()
     sem_init(&semMemoryOk, 0, 0);
     sem_init(&semKillProcessInInterface, 0, 0);
     sem_init(&semExitProgram, 0, 0);
+    sem_init(&semKillProcessExec, 0, 0);
 
     pthread_mutex_init(&mutex2, NULL);
 

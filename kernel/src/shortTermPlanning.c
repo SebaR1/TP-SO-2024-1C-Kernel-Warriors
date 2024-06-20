@@ -34,7 +34,9 @@ void execState()
         pcb_t *pcbToExec;
         bool flagAuxVRR = false; // Utilizo esto para saber si el proceso estaba anteriormente en pcbReadyPriorityList o no.
 
-        if(algorithm != VRR){ // FIFO Y RR tienen practicamente el mismo comportamiento. 
+        if(!list_mutex_is_empty(pcbReadyList))
+        {
+            if(algorithm != VRR){ // FIFO Y RR tienen practicamente el mismo comportamiento. 
             pcbToExec = list_pop(pcbReadyList);
             list_push(pcbExecList, pcbToExec);
             pcbToExec->state = PCB_EXEC;
@@ -101,6 +103,9 @@ void execState()
         default:
             break;
         }
+        }
+
+        
     }
   
 }

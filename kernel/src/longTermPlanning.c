@@ -203,11 +203,16 @@ void killProcess(uint32_t *paramkillProcessThread)
         break;
 
     case PCB_EXEC:
+
         sendInterruptForConsoleEndProcess(processFound);
 
         sem_wait(&semKillProcessExec);
 
+        list_remove_element_mutex(pcbExecList, processFound);
+
+
         processFound->state = PCB_EXIT;
+        
         list_push(pcbExitList, processFound);
 
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processFound->pid);
