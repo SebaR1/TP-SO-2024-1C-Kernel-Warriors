@@ -252,7 +252,15 @@ void serverCPUForMemory(int *socketClient)
             break;
 
         case MEMORY_SEND_DATA:
-            
+            memoryReceiveData(socketClient);
+            break;
+
+        case MEMORY_RESIZE_OK:
+            memoryReceiveConfirmationForWrite(socketClient);
+            break;
+
+        case MEMORY_OUT_OF_MEMORY:
+            memoryReceiveConfirmationForWrite(socketClient);
             break;
 
         case DO_NOTHING:
@@ -424,7 +432,7 @@ void memoryReceiveData(int* socketClient)
 }
 
 
-void memoryReceiveConfirmation(int* socketClient)
+void memoryReceiveConfirmationForWrite(int* socketClient)
 {
     // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
     t_list *listPackage = getPackage(*socketClient);
@@ -434,6 +442,29 @@ void memoryReceiveConfirmation(int* socketClient)
     list_destroy(listPackage);
 }
 
+void memoryReceiveConfirmationForResize(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    resizeResultReceivedFromMemory = RESIZE_SUCCESS;
+
+    sem_post(&semWaitConfirmationFromMemory);
+
+    list_destroy(listPackage);
+}
+
+void memoryReceiveOutOfMemory(int* socketClient)
+{
+    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
+    t_list *listPackage = getPackage(*socketClient);
+
+    resizeResultReceivedFromMemory = OUT_OF_MEMORY;
+
+    sem_post(&semWaitConfirmationFromMemory);
+
+    list_destroy(listPackage);
+}
 
 
 void finishAllServersSignal()

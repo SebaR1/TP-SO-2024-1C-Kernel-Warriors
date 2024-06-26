@@ -7,6 +7,7 @@
 #ifdef DEBUG_CPU
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <readline/readline.h>
 #include <commons/string.h>
 #include "logger.h"

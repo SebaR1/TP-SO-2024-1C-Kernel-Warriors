@@ -37,6 +37,23 @@ void requestFrame(int pid, int page)
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 }
 
+void sendResizeMemory(int pid, int bytes)
+{
+    // Envio la operacion y la info para pedirle el frame que necesito a la Memoria
+    t_package* package = createPackage(CPU_RESIZE_MEMORY);
+
+    requestResizeMemoryInfo resizeInfo;
+    resizeInfo.pid = pid;
+    resizeInfo.bytes = bytes;
+
+    addToPackage(package, &(resizeInfo.pid), sizeof(int)); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, &(resizeInfo.bytes), sizeof(int)); // Agrego los bytes al paquete
+
+    sendPackage(package, socketMemory); // Envio el Program Counter
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+}
+
 
 void sendReadMemory(int pid, int physicalAddress, int size)
 {
@@ -49,8 +66,8 @@ void sendReadMemory(int pid, int physicalAddress, int size)
     readInfo.size = size;
 
     addToPackage(package, &(readInfo.pid), sizeof(int)); // Agrego el Process ID al paquete para enviar
-    addToPackage(package, &(readInfo.physicalAddress), sizeof(int)); // Agrego el Process ID al paquete para enviar
-    addToPackage(package, &(readInfo.size), sizeof(int)); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, &(readInfo.physicalAddress), sizeof(int)); // Agrego la direccion fisica.
+    addToPackage(package, &(readInfo.size), sizeof(int)); // Agrego el tamaño a leer.
 
     sendPackage(package, socketMemory); // Envio el Program Counter
 
@@ -85,30 +102,10 @@ void sendContextToKernel(operationCode opCode, int pid)
     t_package* package = createPackage(opCode);
 
     contextProcess contextProcess;
-    contextProcess.pc = getPC();
-    contextProcess.registersCpu.AX = getAX();
-    contextProcess.registersCpu.BX = getBX();
-    contextProcess.registersCpu.CX = getCX();
-    contextProcess.registersCpu.DX = getDX();
-    contextProcess.registersCpu.EAX = getEAX();
-    contextProcess.registersCpu.EBX = getEBX();
-    contextProcess.registersCpu.ECX = getECX();
-    contextProcess.registersCpu.EDX = getEDX();
-    contextProcess.registersCpu.DI = getDI();
-    contextProcess.registersCpu.SI = getSI();
+    getCurrentContextProcess(&contextProcess);
 
-    addToPackage(package, &(contextProcess.pc), sizeof(uint32_t)); // Agrego el Program Counter del registros al paquete para enviar
-    addToPackage(package, &(contextProcess.registersCpu.AX), sizeof(uint8_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.BX), sizeof(uint8_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.CX), sizeof(uint8_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.DX), sizeof(uint8_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.EAX), sizeof(uint32_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.EBX), sizeof(uint32_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.ECX), sizeof(uint32_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.EDX), sizeof(uint32_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.DI), sizeof(uint32_t)); // Agrego los registros del contexto
-    addToPackage(package, &(contextProcess.registersCpu.SI), sizeof(uint32_t)); // Agrego los registros del contexto
-
+    addContextToPackage(package, &contextProcess);
+    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
     addToPackage(package, &(pid), sizeof(uint32_t));
 
     sendPackage(package, socketKernelDispatch); // Envio el Contexto
@@ -116,4 +113,97 @@ void sendContextToKernel(operationCode opCode, int pid)
     destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
 
     sem_wait(&semContinueInstructionCycle);
+}
+
+
+void sendContextToKernelForResource(operationCode opCode, int pid, char* resource)
+{
+    // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
+    t_package* package = createPackage(opCode);
+
+    contextProcess contextProcess;
+    getCurrentContextProcess(&contextProcess);
+
+    addContextToPackage(package, &contextProcess);
+    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
+    addToPackage(package, &(pid), sizeof(uint32_t));
+    addToPackage(package, resource, string_length(resource) + 1); // + 1 por el caracter nulo \0
+
+    sendPackage(package, socketKernelDispatch); // Envio el Contexto
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+
+    sem_wait(&semContinueInstructionCycle);
+}
+
+
+void sendContextToKernelForIOGeneric(int pid, char* nameInterface, uint32_t workUnits)
+{
+    // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
+    t_package* package = createPackage(CPU_SEND_CONTEXT_FOR_IO_GENERIC);
+
+    contextProcess contextProcess;
+    getCurrentContextProcess(&contextProcess);
+
+    addContextToPackage(package, &contextProcess);
+    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
+    addToPackage(package, &(pid), sizeof(uint32_t));
+    addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
+    addToPackage(package, &workUnits, sizeof(uint32_t));
+
+    sendPackage(package, socketKernelDispatch); // Envio el Contexto
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+
+    sem_wait(&semContinueInstructionCycle);
+}
+
+
+void sendContextToKernelForIOReadOrWrite(operationCode opCode, int pid, char* nameInterface, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite)
+{
+    // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
+    t_package* package = createPackage(opCode);
+
+    contextProcess contextProcess;
+    getCurrentContextProcess(&contextProcess);
+
+    addContextToPackage(package, &contextProcess);
+    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
+    addToPackage(package, &(pid), sizeof(uint32_t));
+    addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
+    addToPackage(package, &amountOfPhysicalAddresses, sizeof(int));
+
+    for (int i = 0; i < amountOfPhysicalAddresses; i++)
+    {
+        addToPackage(package, &(physicalAddressesArray[i].physicalAddress), sizeof(int));
+        addToPackage(package, &(physicalAddressesArray[i].size), sizeof(int));
+    }
+
+    addToPackage(package, &sizeToReadOrWrite, sizeof(int));
+    
+
+    sendPackage(package, socketKernelDispatch); // Envio el Contexto
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+
+    sem_wait(&semContinueInstructionCycle);
+}
+
+/////////////////// FUNCIONES AUXILIARES ///////////////////
+
+
+void addContextToPackage(t_package* package, contextProcess* context)
+{
+    addToPackage(package, &(context->pc), sizeof(uint32_t)); // Agrego el Program Counter del registros al paquete para enviar
+    addToPackage(package, &(context->registersCpu.AX), sizeof(uint8_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.BX), sizeof(uint8_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.CX), sizeof(uint8_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.DX), sizeof(uint8_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.EAX), sizeof(uint32_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.EBX), sizeof(uint32_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.ECX), sizeof(uint32_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.EDX), sizeof(uint32_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.DI), sizeof(uint32_t)); // Agrego los registros del contexto
+    addToPackage(package, &(context->registersCpu.SI), sizeof(uint32_t)); // Agrego los registros del contexto
+
 }

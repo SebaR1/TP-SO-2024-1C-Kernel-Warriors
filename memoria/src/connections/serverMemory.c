@@ -330,7 +330,18 @@ void requestResizeMemory(int* socketClient)
 
     // Hago el resize de la memoria del pid directamente, sin crear otro hilo, ya que el mismo socket va a necesitar terminar este resize antes de poder hacer
     // otra peticion.
-    resizeMemory(request.pid, request.bytes);
+    allocationResult result = resizeMemory(request.pid, request.bytes);
+
+    switch (result)
+    {
+    case RESIZE_SUCCESS:
+        sendConfirmation(*socketClient, MEMORY_RESIZE_OK);
+        break;
+    
+    case OUT_OF_MEMORY:
+        sendConfirmation(*socketClient, MEMORY_OUT_OF_MEMORY);
+        break;
+    }
 
 
     list_destroy_and_destroy_elements(listPackage, free);
@@ -375,7 +386,7 @@ void requestWriteMemory(int* socketClient)
     // otra peticion de lectura o escritura.
     writeBytes(request.pid, request.data, request.physicalAddress, request.size);
 
-    sendWriteConfirmation(*socketClient);
+    sendConfirmation(*socketClient, MEMORY_WRITE_OK);
 
     list_destroy_and_destroy_elements(listPackage, free);
 }

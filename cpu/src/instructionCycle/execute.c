@@ -528,9 +528,20 @@ void _JNZ4(uint32_t* reg, uint32_t instruction)
 ///////////////////////// INSTRUCCION RESIZE /////////////////////////
 
 
+resizeResult resizeResultReceivedFromMemory;
+
 void RESIZE(uint32_t size)
 {
+    sendResizeMemory(getCurrentPID(), size);
 
+    sem_wait(&semWaitConfirmationFromMemory);
+
+    switch (resizeResultReceivedFromMemory)
+    {
+    case OUT_OF_MEMORY:
+        sendContextToKernel(CPU_SEND_CONTEXT_FOR_OUT_OF_MEMORY, getCurrentPID());
+        break;
+    }
 }
 
 
@@ -540,7 +551,13 @@ void RESIZE(uint32_t size)
 
 void COPY_STRING(uint32_t size)
 {
+    void* stringToCopy = malloc(size);
 
+    readFromMemory(stringToCopy, getSI(), size, MEMORY_STRING_TYPE);
+
+    writeToMemory(stringToCopy, getDI(), size, MEMORY_STRING_TYPE);
+
+    free(stringToCopy);
 }
 
 
@@ -550,7 +567,7 @@ void COPY_STRING(uint32_t size)
 
 void WAIT(char* resource)
 {
-
+    sendContextToKernelForResource(CPU_SEND_CONTEXT_FOR_WAIT, getCurrentPID(), resource);
 }
 
 
@@ -560,7 +577,7 @@ void WAIT(char* resource)
 
 void SIGNAL(char* resource)
 {
-
+    sendContextToKernelForResource(CPU_SEND_CONTEXT_FOR_SIGNAL, getCurrentPID(), resource);
 }
 
 
@@ -570,7 +587,7 @@ void SIGNAL(char* resource)
 
 void IO_GEN_SLEEP(char* interface, uint32_t workUnits)
 {
-
+    sendContextToKernelForIOGeneric(getCurrentPID(), interface, workUnits);
 }
 
 
@@ -580,8 +597,90 @@ void IO_GEN_SLEEP(char* interface, uint32_t workUnits)
 
 void IO_STDIN_READ(char* resource, registerType direction, registerType size)
 {
+    uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** size1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** direction4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** size4bytes = malloc(sizeof(uint32_t**));
 
+
+    switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // Destination 1 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
+            _IO_STDIN_READ11(resource, *direction1bytes, *size1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
+            _IO_STDIN_READ14(resource, *direction1bytes, *size4bytes);
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // Destination 4 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
+            _IO_STDIN_READ41(resource, *direction4bytes, *size1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
+            _IO_STDIN_READ44(resource, *direction4bytes, *size4bytes);
+            break;
+        }
+
+        break;
+    }
+
+    free(size1bytes);
+    free(size4bytes);
+    free(direction1bytes);
+    free(direction4bytes);
 }
+
+void _IO_STDIN_READ11(char* resource, uint8_t* direction, uint8_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
+}
+
+void _IO_STDIN_READ14(char* resource, uint8_t* direction, uint32_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
+}
+
+void _IO_STDIN_READ41(char* resource, uint32_t* direction, uint8_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
+}
+
+void _IO_STDIN_READ44(char* resource, uint32_t* direction, uint32_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
+}
+
+
 
 
 
@@ -590,7 +689,87 @@ void IO_STDIN_READ(char* resource, registerType direction, registerType size)
 
 void IO_STDOUT_WRITE(char* resource, registerType direction, registerType size)
 {
+    uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** size1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** direction4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** size4bytes = malloc(sizeof(uint32_t**));
 
+
+    switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // Destination 1 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
+            _IO_STDOUT_WRITE11(resource, *direction1bytes, *size1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
+            _IO_STDOUT_WRITE14(resource, *direction1bytes, *size4bytes);
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // Destination 4 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
+            _IO_STDOUT_WRITE41(resource, *direction4bytes, *size1bytes);
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
+            _IO_STDOUT_WRITE44(resource, *direction4bytes, *size4bytes);
+            break;
+        }
+
+        break;
+    }
+
+    free(size1bytes);
+    free(size4bytes);
+    free(direction1bytes);
+    free(direction4bytes);
+}
+
+void _IO_STDOUT_WRITE11(char* resource, uint8_t* direction, uint8_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
+}
+
+void _IO_STDOUT_WRITE14(char* resource, uint8_t* direction, uint32_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
+}
+
+void _IO_STDOUT_WRITE41(char* resource, uint32_t* direction, uint8_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
+}
+
+void _IO_STDOUT_WRITE44(char* resource, uint32_t* direction, uint32_t* size)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+
+    free(info);
 }
 
 
@@ -806,7 +985,11 @@ void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryTyp
         break;
 
     case MEMORY_STRING_TYPE:
-        logReadMemoryString(getCurrentPID(), info[0].physicalAddress, (char*)data);
+        char* dataString = malloc(size + 1); // + 1 para agregar el caracter nulo \0
+        memcpy((void*)dataString, data, size);
+        dataString[size] = '\0';
+        logReadMemoryString(getCurrentPID(), info[0].physicalAddress, dataString);
+        free(dataString);
         break;
     }
 

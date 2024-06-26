@@ -72,9 +72,11 @@ bool closureFindPID(processInfo* processInfo)
 }
 
 
-void resizeMemory(int pid, int bytes)
+allocationResult resizeMemory(int pid, int bytes)
 {
     memoryDelay();
+
+    allocationResult result = RESIZE_SUCCESS;
 
     sem_wait(&semPidAux);
 
@@ -88,7 +90,7 @@ void resizeMemory(int pid, int bytes)
 
     if (bytes > amountOfBytesAllocated) // Hay que reservar más espacio en memoria del usuario
     {
-        allocMemory(bytes - amountOfBytesAllocated, info->pageTable, info->amountOfPages, info->internalFragmentation);
+        allocMemory(bytes - amountOfBytesAllocated, info->pageTable, info->amountOfPages, info->internalFragmentation, &result);
         logProcessSizeExpansion(pid, amountOfBytesAllocated, bytes - amountOfBytesAllocated);
     }
     else if (bytes < amountOfBytesAllocated) // Hay que liberar espacio en memoria del usuario
@@ -100,10 +102,12 @@ void resizeMemory(int pid, int bytes)
     {
         logProcessSizeNotChange(pid, amountOfBytesAllocated);
     }
+
+    return result;
 }
 
 
-int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation)
+int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation, allocationResult* result)
 {
     ///////////// CASOS DE CORTE /////////////
 
@@ -135,6 +139,7 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
     if (amountOfNewPages > amountOfFramesFree)
     {
         sem_post(&semMemoryUserFrames);
+        *result = OUT_OF_MEMORY;
         return OUT_OF_MEMORY;
     }
 
@@ -169,6 +174,7 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
     *internalFragmentation = getInternalFragmentation(getMemoryConfig()->TAM_PAGINA, bytes);
 
 
+    *result = RESIZE_SUCCESS;
     return amountOfNewPages;
 }
 

@@ -12,8 +12,8 @@
 typedef enum
 {
     OUT_OF_MEMORY = -1,
-    PROCESS_IS_BEIGN_DESTROYED = -2,
-} allocationErrors;
+    RESIZE_SUCCESS,
+} allocationResult;
 
 
 
@@ -49,7 +49,8 @@ bool closureFindPID(processInfo* processInfo);
 /// @brief Hace un resize a la memoria de un usuario. Llama a las funciones allocMemory y freeMemory
 /// @param pid El process ID al cual aumentarle o reducirle la cantidad de memoria reservada
 /// @param bytes La cantidad de bytes totales que debe tener la memoria del usuario actualmente
-void resizeMemory(int pid, int bytes);
+/// @return Retorna el resultado del resize. Retorna SUCCESS si salió todo bien, u OUT OF MEMORY si no se pudo completar el resize por falta de espacio en memoria.
+allocationResult resizeMemory(int pid, int bytes);
 
 
 
@@ -68,9 +69,10 @@ void resizeMemory(int pid, int bytes);
 /// Retorna la nueva cantidad de paginas, o indefinido si ocurre un Out Of Meemory
 /// @param internalFragmentation Puntero a una direccion que contenga la fragmentacion interna que tiene el proceso actualmente (NO debe pasarse NULL).
 /// Retorna la nueva fragmentacion interna, o indefinido si ocurre un Out Of Memory.
+/// @param result Retorna el resultado del alloc. Retorna SUCCESS si todo salió bien, u OUT OF MEMORY no se pudo completar el alloc por falta de espacio en memoria.
 /// @return Retorna la cantidad de paginas reservadas (no la cantidad total de paginas reservadas por el proceso,
 /// sino las que se reservaron al llamar a esta funcion), o -1 si se produjo un Out Of Memory
-int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation);
+int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation, allocationResult* result);
 
 
 

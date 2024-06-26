@@ -6,6 +6,7 @@
 #include "utils/utilsGeneral.h"
 #include "utils/client/utils.h"
 #include "serverCPU.h"
+#include "instructionCycle/essentials.h"
 
 
 
@@ -20,6 +21,12 @@ void sendPCToMemory(int PID, uint32_t PC);
 /// @param pid Process id
 /// @param page La pagina para pedir
 void requestFrame(int pid, int page);
+
+
+/// @brief Manda una peticion de resize a la memoria
+/// @param pid Process ID
+/// @param bytes Los bytes totales de memoria de usuario que deberá resize-earse paratener el procesos
+void sendResizeMemory(int pid, int bytes);
 
 
 /// @brief Manda una peticion de lectura a la memoria
@@ -43,13 +50,39 @@ void sendWriteMemory(int pid, void* data, int physicalAddress, int size);
 void sendContextToKernel(operationCode opCode, int pid);
 
 
+/// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de WAIT o SIGNAL con el recurso resource.
+/// @param opCode El codigo de operacion por el que se va a enviar el contexto. Es el motivo de enviar el contexto.
+/// @param pid Process ID.
+/// @param resource El nombre del recurso.
+void sendContextToKernelForResource(operationCode opCode, int pid, char* resource);
+
+
+/// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de IO GENERIC, enviando ademas el nombre de la interfaz y las unidades de trabajo.
+/// @param pid Process ID.
+/// @param nameInterface El nombre de la interfaz.
+/// @param workUnits Las unidades de trabajo.
+void sendContextToKernelForIOGeneric(int pid, char* nameInterface, uint32_t workUnits);
+
+
+/// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de IO STDIN READ o IO STDOUT WRITE,
+/// enviando ademas el nombre de la interfaz, la cantidad de direcciones fisicas,
+/// la info de cada una de las direcciones fisicas en orden (es decir, la direccion fisica en sí misma y luego el tamaño a leer/escribir en esa direccion fisica),
+/// y el tamaño total a leer/escribir para la interfaz.
+/// @param opCode El codigo de operacion por el que se va a enviar el contexto. Es el motivo de enviar el contexto.
+/// @param pid Process ID.
+/// @param nameInterface El nombre de la interfaz.
+/// @param amountOfPhysicalAddresses La cantidad de direcciones fisicas.
+/// @param physicalAddressesArray El array que contiene la info de todas las direcciones fisicas en orden.
+/// @param sizeToReadOrWrite El tamaño total a leer/escribir para la interfaz.
+void sendContextToKernelForIOReadOrWrite(operationCode opCode, int pid, char* nameInterface, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite);
 
 
 
 
+/////////////////// FUNCIONES AUXILIARES ///////////////////
 
 
-
+void addContextToPackage(t_package* package, contextProcess* context);
 
 
 

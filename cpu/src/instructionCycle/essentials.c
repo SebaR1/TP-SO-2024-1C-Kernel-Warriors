@@ -29,3 +29,19 @@ int getCurrentPID()
 {
     return PID;
 }
+
+
+void getCurrentContextProcess(contextProcess* context)
+{
+    context->pc = getPC();
+    context->registersCpu.AX = getAX();
+    context->registersCpu.BX = getBX();
+    context->registersCpu.CX = getCX();
+    context->registersCpu.DX = getDX();
+    context->registersCpu.EAX = getEAX();
+    context->registersCpu.EBX = getEBX();
+    context->registersCpu.ECX = getECX();
+    context->registersCpu.EDX = getEDX();
+    context->registersCpu.DI = getDI();
+    context->registersCpu.SI = getSI();
+}

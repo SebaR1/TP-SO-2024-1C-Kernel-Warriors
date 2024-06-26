@@ -165,9 +165,16 @@ void _JNZ1(uint8_t* reg, uint32_t instruction);
 void _JNZ4(uint32_t* reg, uint32_t instruction);
 
 
+void _IO_STDIN_READ11(char* resource, uint8_t* direction, uint8_t* size);
+void _IO_STDIN_READ14(char* resource, uint8_t* direction, uint32_t* size);
+void _IO_STDIN_READ41(char* resource, uint32_t* direction, uint8_t* size);
+void _IO_STDIN_READ44(char* resource, uint32_t* direction, uint32_t* size);
 
 
-
+void _IO_STDOUT_WRITE11(char* resource, uint8_t* direction, uint8_t* size);
+void _IO_STDOUT_WRITE14(char* resource, uint8_t* direction, uint32_t* size);
+void _IO_STDOUT_WRITE41(char* resource, uint32_t* direction, uint8_t* size);
+void _IO_STDOUT_WRITE44(char* resource, uint32_t* direction, uint32_t* size);
 
 
 
@@ -186,7 +193,7 @@ registerTypeByBytes _typeToRegister(registerType type, uint8_t** outRegister1byt
 /// @brief Lee la cantidad size de bytes de la memoria del usuario, a partir de la direccion fisica, y pone la informacion en data
 /// @param data Donde se copiará la informacion
 /// @param direction La direccion fisica
-/// @param size La cantidad de bytes a leer de la memoria de usuario (deberia ser igual al sizeof(data))
+/// @param size La cantidad de bytes a leer de la memoria de usuario.
 /// @param type El tipo de dato que se lee
 void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryType type);
 
@@ -195,7 +202,7 @@ void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryTyp
 /// @brief Escribe la cantidad size de bytes de la memoria del usuario, a partir de la direccion fisica, y espera la confirmacion de la memoria
 /// @param data La data a escribir en la memoria de usuario
 /// @param direction La direccion fisica
-/// @param size La cantidad de bytes a escribir de la memoria de usuario (deberia ser igual al sizeof(data))
+/// @param size La cantidad de bytes a escribir de la memoria de usuario.
 /// @param type El tipo de dato que se escribe
 void writeToMemory(void* data, uint32_t direction, int size, readWriteMemoryType type);
 

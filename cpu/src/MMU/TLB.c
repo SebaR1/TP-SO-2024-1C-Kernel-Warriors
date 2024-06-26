@@ -197,6 +197,8 @@ TLBResult getFrameLRU(int pid, int page, int* frame)
     }
     
     list_iterator_destroy(iterator);
+
+    return result;
 }
 
 

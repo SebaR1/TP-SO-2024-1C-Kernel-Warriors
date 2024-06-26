@@ -14,9 +14,10 @@ void sendInstructionToCpu(int socketClient, cpuGiveMeNextInstruction* params);
 void sendData(int socketClient, void* data, int size);
 
 
-/// @brief Envia un codigo de operacion de confirmacion de escritura al socket esepcificado
+/// @brief Envia un codigo de operacion de confirmacion al socket esepcificado
 /// @param socketClient El socket a quien mandarle la confirmacion
-void sendWriteConfirmation(int socketClient);
+/// @param confirmationCode El codigo de operacion de confirmacion de mandar. 
+void sendConfirmation(int socketClient, operationCode confirmationCode);
 
 
 /// @brief Envia un codigo de operacion de confirmacion de la creacion de un nuevo proceso al socket especificado.

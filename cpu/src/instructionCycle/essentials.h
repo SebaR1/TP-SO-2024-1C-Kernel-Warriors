@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <semaphore.h>
+#include "utils/utilsGeneral.h"
 
 
 
@@ -86,6 +87,11 @@ typedef enum
 } instructionType;
 
 
+typedef enum
+{
+    OUT_OF_MEMORY = -1,
+    RESIZE_SUCCESS,
+} resizeResult;
 
 
 
@@ -217,6 +223,7 @@ extern int PID;
 
 extern void* dataReceivedFromMemory;
 
+extern resizeResult resizeResultReceivedFromMemory;
 
 
 
@@ -271,7 +278,9 @@ void setCurrentPID(int value);
 int getCurrentPID();
 
 
-
+/// @brief Obtiene el contexto del proceso actual.
+/// @param context Retorna el contexto del proceso actual.
+void getCurrentContextProcess(contextProcess* context);
 
 
 ////////////////////// SEMAFOROS //////////////////////

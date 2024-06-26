@@ -85,9 +85,17 @@ void receiveContext(int* socketClient);
 void memoryReceiveData(int* socketClient);
 
 
-/// @brief Recibe una confirmacion de que se escribió correctamente en la memoria
+/// @brief Recibe una confirmacion de escritura por parte de la memoria
 /// @param socketClient El socket del cliente
-void memoryReceiveConfirmation(int* socketClient);
+void memoryReceiveConfirmationForWrite(int* socketClient);
 
+
+/// @brief Recibe una confirmacion de que se hizo correctamente el resize.
+/// @param socketClient El socket del cliente.
+void memoryReceiveConfirmationForResize(int* socketClient);
+
+/// @brief Recibe un OUT OF MEMORY de la memoria
+/// @param socketClient El socket del cliente
+void memoryReceiveOutOfMemory(int* socketClient);
 
 #endif
