@@ -539,7 +539,7 @@ void RESIZE(uint32_t size)
     switch (resizeResultReceivedFromMemory)
     {
     case OUT_OF_MEMORY:
-        sendContextToKernel(CPU_SEND_CONTEXT_FOR_OUT_OF_MEMORY, getCurrentPID());
+        sendContextToKernel(CPU_SEND_CONTEXT_FOR_OUT_OF_MEMORY);
         break;
     }
 }
@@ -567,7 +567,7 @@ void COPY_STRING(uint32_t size)
 
 void WAIT(char* resource)
 {
-    sendContextToKernelForResource(CPU_SEND_CONTEXT_FOR_WAIT, getCurrentPID(), resource);
+    sendContextToKernelForResource(CPU_SEND_CONTEXT_FOR_WAIT, resource);
 }
 
 
@@ -577,7 +577,7 @@ void WAIT(char* resource)
 
 void SIGNAL(char* resource)
 {
-    sendContextToKernelForResource(CPU_SEND_CONTEXT_FOR_SIGNAL, getCurrentPID(), resource);
+    sendContextToKernelForResource(CPU_SEND_CONTEXT_FOR_SIGNAL, resource);
 }
 
 
@@ -587,7 +587,7 @@ void SIGNAL(char* resource)
 
 void IO_GEN_SLEEP(char* interface, uint32_t workUnits)
 {
-    sendContextToKernelForIOGeneric(getCurrentPID(), interface, workUnits);
+    sendContextToKernelForIOGeneric(interface, workUnits);
 }
 
 
@@ -645,7 +645,7 @@ void _IO_STDIN_READ11(char* resource, uint8_t* direction, uint8_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -655,7 +655,7 @@ void _IO_STDIN_READ14(char* resource, uint8_t* direction, uint32_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -665,7 +665,7 @@ void _IO_STDIN_READ41(char* resource, uint32_t* direction, uint8_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -675,7 +675,7 @@ void _IO_STDIN_READ44(char* resource, uint32_t* direction, uint32_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -737,7 +737,7 @@ void _IO_STDOUT_WRITE11(char* resource, uint8_t* direction, uint8_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -747,7 +747,7 @@ void _IO_STDOUT_WRITE14(char* resource, uint8_t* direction, uint32_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -757,7 +757,7 @@ void _IO_STDOUT_WRITE41(char* resource, uint32_t* direction, uint8_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -767,7 +767,7 @@ void _IO_STDOUT_WRITE44(char* resource, uint32_t* direction, uint32_t* size)
     physicalAddressInfo* info;
     int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, getCurrentPID(), resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -829,7 +829,7 @@ void IO_FS_READ(char* resource, char* fileName, registerType direction, register
 
 void EXIT()
 {
-    sendContextToKernel(CPU_SEND_CONTEXT_FOR_EXIT, getCurrentPID());
+    sendContextToKernel(CPU_SEND_CONTEXT_FOR_EXIT);
 }
 
 

@@ -46,22 +46,19 @@ void sendWriteMemory(int pid, void* data, int physicalAddress, int size);
 
 /// @brief Envia el contexto actualizado del proceso al Kernel
 /// @param opCode El codigo de operacion por el que se va a enviar el contexto. Es el motivo de enviar el contexto.
-/// @param pid Process ID
-void sendContextToKernel(operationCode opCode, int pid);
+void sendContextToKernel(operationCode opCode);
 
 
 /// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de WAIT o SIGNAL con el recurso resource.
 /// @param opCode El codigo de operacion por el que se va a enviar el contexto. Es el motivo de enviar el contexto.
-/// @param pid Process ID.
 /// @param resource El nombre del recurso.
-void sendContextToKernelForResource(operationCode opCode, int pid, char* resource);
+void sendContextToKernelForResource(operationCode opCode, char* resource);
 
 
 /// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de IO GENERIC, enviando ademas el nombre de la interfaz y las unidades de trabajo.
-/// @param pid Process ID.
 /// @param nameInterface El nombre de la interfaz.
 /// @param workUnits Las unidades de trabajo.
-void sendContextToKernelForIOGeneric(int pid, char* nameInterface, uint32_t workUnits);
+void sendContextToKernelForIOGeneric(char* nameInterface, uint32_t workUnits);
 
 
 /// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de IO STDIN READ o IO STDOUT WRITE,
@@ -69,12 +66,11 @@ void sendContextToKernelForIOGeneric(int pid, char* nameInterface, uint32_t work
 /// la info de cada una de las direcciones fisicas en orden (es decir, la direccion fisica en sí misma y luego el tamaño a leer/escribir en esa direccion fisica),
 /// y el tamaño total a leer/escribir para la interfaz.
 /// @param opCode El codigo de operacion por el que se va a enviar el contexto. Es el motivo de enviar el contexto.
-/// @param pid Process ID.
 /// @param nameInterface El nombre de la interfaz.
 /// @param amountOfPhysicalAddresses La cantidad de direcciones fisicas.
 /// @param physicalAddressesArray El array que contiene la info de todas las direcciones fisicas en orden.
 /// @param sizeToReadOrWrite El tamaño total a leer/escribir para la interfaz.
-void sendContextToKernelForIOReadOrWrite(operationCode opCode, int pid, char* nameInterface, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite);
+void sendContextToKernelForIOReadOrWrite(operationCode opCode, char* nameInterface, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite);
 
 
 

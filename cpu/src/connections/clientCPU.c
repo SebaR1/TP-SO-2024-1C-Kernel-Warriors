@@ -96,7 +96,7 @@ void sendWriteMemory(int pid, void* data, int physicalAddress, int size)
 }
 
 
-void sendContextToKernel(operationCode opCode, int pid)
+void sendContextToKernel(operationCode opCode)
 {
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
     t_package* package = createPackage(opCode);
@@ -105,8 +105,6 @@ void sendContextToKernel(operationCode opCode, int pid)
     getCurrentContextProcess(&contextProcess);
 
     addContextToPackage(package, &contextProcess);
-    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
-    addToPackage(package, &(pid), sizeof(uint32_t));
 
     sendPackage(package, socketKernelDispatch); // Envio el Contexto
 
@@ -116,7 +114,7 @@ void sendContextToKernel(operationCode opCode, int pid)
 }
 
 
-void sendContextToKernelForResource(operationCode opCode, int pid, char* resource)
+void sendContextToKernelForResource(operationCode opCode, char* resource)
 {
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
     t_package* package = createPackage(opCode);
@@ -125,8 +123,6 @@ void sendContextToKernelForResource(operationCode opCode, int pid, char* resourc
     getCurrentContextProcess(&contextProcess);
 
     addContextToPackage(package, &contextProcess);
-    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
-    addToPackage(package, &(pid), sizeof(uint32_t));
     addToPackage(package, resource, string_length(resource) + 1); // + 1 por el caracter nulo \0
 
     sendPackage(package, socketKernelDispatch); // Envio el Contexto
@@ -137,7 +133,7 @@ void sendContextToKernelForResource(operationCode opCode, int pid, char* resourc
 }
 
 
-void sendContextToKernelForIOGeneric(int pid, char* nameInterface, uint32_t workUnits)
+void sendContextToKernelForIOGeneric(char* nameInterface, uint32_t workUnits)
 {
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
     t_package* package = createPackage(CPU_SEND_CONTEXT_FOR_IO_GENERIC);
@@ -146,8 +142,6 @@ void sendContextToKernelForIOGeneric(int pid, char* nameInterface, uint32_t work
     getCurrentContextProcess(&contextProcess);
 
     addContextToPackage(package, &contextProcess);
-    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
-    addToPackage(package, &(pid), sizeof(uint32_t));
     addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
     addToPackage(package, &workUnits, sizeof(uint32_t));
 
@@ -159,7 +153,7 @@ void sendContextToKernelForIOGeneric(int pid, char* nameInterface, uint32_t work
 }
 
 
-void sendContextToKernelForIOReadOrWrite(operationCode opCode, int pid, char* nameInterface, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite)
+void sendContextToKernelForIOReadOrWrite(operationCode opCode, char* nameInterface, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite)
 {
     // Envio la operacion y el Program Counter a la memoria para avisarle que me tiene que dar la proxima instruccion
     t_package* package = createPackage(opCode);
@@ -168,8 +162,6 @@ void sendContextToKernelForIOReadOrWrite(operationCode opCode, int pid, char* na
     getCurrentContextProcess(&contextProcess);
 
     addContextToPackage(package, &contextProcess);
-    // Borrar esta linea si el Kernel no recibe el pid cuando la CPU le manda el contexto.
-    addToPackage(package, &(pid), sizeof(uint32_t));
     addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
     addToPackage(package, &amountOfPhysicalAddresses, sizeof(int));
 
@@ -188,6 +180,10 @@ void sendContextToKernelForIOReadOrWrite(operationCode opCode, int pid, char* na
 
     sem_wait(&semContinueInstructionCycle);
 }
+
+
+
+
 
 /////////////////// FUNCIONES AUXILIARES ///////////////////
 

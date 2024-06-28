@@ -57,10 +57,10 @@ void attendInterruption(interruptionType type)
 
 void attendInterruptionEndQuantum()
 {
-    sendContextToKernel(CPU_SEND_CONTEXT_FOR_END_QUANTUM, getCurrentPID());
+    sendContextToKernel(CPU_SEND_CONTEXT_FOR_END_QUANTUM);
 }
 
 void attendInterruptionEndProcess()
 {
-    sendContextToKernel(CPU_SEND_CONTEXT_FOR_END_PROCESS, getCurrentPID());
+    sendContextToKernel(CPU_SEND_CONTEXT_FOR_END_PROCESS);
 }
