@@ -434,12 +434,7 @@ void memoryReceiveData(int* socketClient)
 
 void memoryReceiveConfirmationForWrite(int* socketClient)
 {
-    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
-    t_list *listPackage = getPackage(*socketClient);
-
     sem_post(&semWaitConfirmationFromMemory);
-
-    list_destroy(listPackage);
 }
 
 void memoryReceiveConfirmationForResize(int* socketClient)

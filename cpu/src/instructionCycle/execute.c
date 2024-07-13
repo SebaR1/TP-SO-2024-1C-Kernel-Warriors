@@ -960,7 +960,14 @@ void* dataReceivedFromMemory;
 void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryType type)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, info);
+
+    physicalAddressInfo** outInfo = malloc(sizeof(physicalAddressInfo**));
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, outInfo);
+    info = *outInfo;
+
+    free(outInfo);
+
+
 
     int offset = 0;
     for (int i = 0; i < amountOfPhysicalAddresses; i++)
@@ -1001,7 +1008,13 @@ void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryTyp
 void writeToMemory(void* data, uint32_t direction, int size, readWriteMemoryType type)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, info);
+
+    physicalAddressInfo** outInfo = malloc(sizeof(physicalAddressInfo**));
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, outInfo);
+    info = *outInfo;
+
+    free(outInfo);
+
 
     int offset = 0;
     for (int i = 0; i < amountOfPhysicalAddresses; i++)

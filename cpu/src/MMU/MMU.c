@@ -42,7 +42,7 @@ void getPageAndOffset(int logicalAddress, pageAndOffset* outPageAndOffset)
 }
 
 
-int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddressInfo* outPhysicalAddressesInfo)
+int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddressInfo** outPhysicalAddressesInfo)
 {
     ////////// CASOS DE CORTE //////////
     // Si no hay que escribir o leer ninguna cantidad de bytes en esa direccion, no hago nada y retorno 0.
@@ -73,31 +73,39 @@ int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddre
 
     // Hago todos los calculos necesarios para determinar informacion del tamaño de la primera y ultima pagina, y me fijo cuantas paginas hay "en el medio"
 
-    sizeFirstPhysAddr = getTamPagina() - logicalAddressSplitted.offset;
+    // Si solo hay una direccion fisica, es decir, una sola pagina involucrada,
+    // el tamaño de esa unica direccion fisica es el mismo que se pasó por parametro a la funcion,
+    // sino el tamaño es lo que le falta al offset para llegar al ultimo de la pagina.
+    sizeFirstPhysAddr = logicalAddressSplitted.offset + size <= getTamPagina() ? size : getTamPagina() - logicalAddressSplitted.offset;
 
+    // El tamaño que falta por leer o escribir en las siguientes paginas. Si hay que leer o escribir una sola pagina, el resultado de la operacion es siempre 0.
     sizeAfterFirstPhysAddr = size - sizeFirstPhysAddr;
 
+    // Obtengo el tamaño a leer o escribir de la ultima pagina. Si hay que leer o escribir una sola pagina, el resultado de la operacion es siempre 0.
     sizeLastPhysAddr = getInternalFragmentation(getTamPagina(), sizeAfterFirstPhysAddr);
 
+    // La cantidad de paginas que hay que leer o escribir sin contar la prinera y ultima pagina, ya que estos tienen un trato especial
+    // porque pueden leer o escribir tamaños diferentes, mientras que las paginas del medio siempre van a leer o escribir el tamaño de pagina
     amountOfPhysAddrWithoutFirstAndLast = getAmountOfPagesAllocated(getTamPagina(), sizeAfterFirstPhysAddr) - 1; // -1 porque no tengo que contar la ultima pagina
 
+    // La cantidad de paginas totales que hay que leer o escribir, contando la primera y ultima pagina.
     amountOfPhysAddr = amountOfPhysAddrWithoutFirstAndLast + 2; // + 2 porque tengo que contar la primer y ultima pagina.
 
 
     // Reservo memoria para todas las direcciones fisicas que necesito.
-    outPhysicalAddressesInfo = malloc(amountOfPhysAddr * sizeof(physicalAddressInfo));
+    *outPhysicalAddressesInfo = malloc(amountOfPhysAddr * sizeof(physicalAddressInfo));
 
     int i = 0; // Contador para ir asignando en el array
 
     // Pongo la primera physicalAddressInfo
-    createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeFirstPhysAddr, outPhysicalAddressesInfo + i);
+    createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeFirstPhysAddr, *outPhysicalAddressesInfo + i);
     i++;
 
 
     // Pongo las physicalAddressInfo "del medio"
     while (i < amountOfPhysAddrWithoutFirstAndLast + 1) // + 1 para tener en cuenta que la primera pagina ya fue puesta
     {
-        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeFirstPhysAddr, outPhysicalAddressesInfo + i);
+        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeFirstPhysAddr, *outPhysicalAddressesInfo + i);
         i++;
     }
 
@@ -105,7 +113,7 @@ int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddre
     // Pongo la ultima physicalAddressInfo si todavia sobran bytes para leer o escribir en memoria
     if (sizeLastPhysAddr > 0)
     {
-        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeLastPhysAddr, outPhysicalAddressesInfo + i);
+        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeLastPhysAddr, *outPhysicalAddressesInfo + i);
     }
 
 

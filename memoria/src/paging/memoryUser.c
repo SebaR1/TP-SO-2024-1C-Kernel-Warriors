@@ -51,7 +51,13 @@ void initMemoryUser()
 
     amountOfFramesFree = maxFrames;
 
-    lastIndexChecked = 0;
+    lastIndexChecked = -1;
+}
+
+
+void* getMemoryUser()
+{
+    return memoryUser;
 }
 
 
@@ -63,8 +69,6 @@ bool isFrameBusy(int frame)
 
 
 int pidAux; // Pid auxiliar usado para la closure para buscar el pid en una lista
-
-sem_t semPidAux; // Semaforo para la posible condicion de carrera del pidAux
 
 bool closureFindPID(processInfo* processInfo)
 {
@@ -78,25 +82,30 @@ allocationResult resizeMemory(int pid, int bytes)
 
     allocationResult result = RESIZE_SUCCESS;
 
-    sem_wait(&semPidAux);
+    sem_wait(&semAuxPID);
 
     pidAux = pid;
     processInfo* info = (processInfo*)list_find_mutex(processesList, closureFindPID);
 
-    sem_post(&semPidAux);
+    sem_post(&semAuxPID);
 
 
     int amountOfBytesAllocated = getAmountOfBytesAllocated(getMemoryConfig()->TAM_PAGINA, info->amountOfPages, info->internalFragmentation);
 
     if (bytes > amountOfBytesAllocated) // Hay que reservar más espacio en memoria del usuario
     {
-        allocMemory(bytes - amountOfBytesAllocated, info->pageTable, info->amountOfPages, info->internalFragmentation, &result);
         logProcessSizeExpansion(pid, amountOfBytesAllocated, bytes - amountOfBytesAllocated);
+
+        int** pointerToPageTable = malloc(sizeof(int**));
+        *pointerToPageTable = info->pageTable;
+        allocMemory(bytes - amountOfBytesAllocated, pointerToPageTable, &info->amountOfPages, &info->internalFragmentation, &result);
+        info->pageTable = *pointerToPageTable;
+        free(pointerToPageTable);
     }
     else if (bytes < amountOfBytesAllocated) // Hay que liberar espacio en memoria del usuario
     {
-        freeMemory(amountOfBytesAllocated - bytes, info->pageTable, info->amountOfPages, info->internalFragmentation);
         logProcessSizeReduction(pid, amountOfBytesAllocated, amountOfBytesAllocated - bytes);
+        freeMemory(amountOfBytesAllocated - bytes, info->pageTable, &info->amountOfPages, &info->internalFragmentation);
     }
     else // Entra en este else cuando bytes == amountOfBytesAllocated
     {
@@ -107,7 +116,7 @@ allocationResult resizeMemory(int pid, int bytes)
 }
 
 
-int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation, allocationResult* result)
+int allocMemory(int bytes, int** pages, int* const amountOfPages, int* const internalFragmentation, allocationResult* result)
 {
     ///////////// CASOS DE CORTE /////////////
 
@@ -157,12 +166,12 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
 
 
     // Expando el array de paginas
-    pages = realloc(pages, *amountOfPages * sizeof(int));
+    *pages = realloc(*pages, *amountOfPages * sizeof(int));
 
     // Le asigno un frame libre a cada nueva pagina.
-    for ( ; newPagesIndex < amountOfPages; newPagesIndex++)
+    for ( ; newPagesIndex < *amountOfPages; newPagesIndex++)
     {
-        pages[newPagesIndex] = allocNextFrameFree();
+        *pages[newPagesIndex] = allocNextFrameFree();
     }
 
 
@@ -180,7 +189,7 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
 
 
 
-int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation)
+int freeMemory(int bytes, int** pages, int* const amountOfPages, int* const internalFragmentation)
 {
     ///////////// CASOS DE CORTE /////////////
 
@@ -233,7 +242,7 @@ int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const inter
     // Libero los frames que ya no estan en uso.
     for ( ; i >= *amountOfPages; i--)
     {
-        freeFrame(pages[i]);
+        freeFrame(*pages[i]);
     }
 
 
@@ -242,7 +251,7 @@ int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const inter
 
     
     // Reduzco el array de paginas
-    pages = realloc(pages, *amountOfPages * sizeof(int));
+    *pages = realloc(pages, *amountOfPages * sizeof(int));
 
 
     // Obtengo la nueva fragmentacion interna de la ultima pagina

@@ -1,5 +1,5 @@
-#ifndef DEBUG_UTILS_H_
-#define DEBUG_UTILS_H_
+#ifndef CPU_DEBUG_UTILS_H_
+#define CPU_DEBUG_UTILS_H_
 
 
 #include "cpuDebug.h"
@@ -11,11 +11,11 @@
 
 
 
-/// @brief Muestra todos los registros si se escribe en la consola "regs" o "registers"
+/// @brief Muestra todos los registros.
 void printRegisters();
 
 
-/// @brief Thread que muestra todos los registros si se escribe en la consola "regs" o "registers". Tambien da ayuda si se escribe "help" o "h"
+/// @brief Thread que muestra cierta informacion segun los comandos escritos. Por ejemplo, uno de los comandos es "help", que da ayuda sobre la funcionalidad.
 void printRegistersThread(void* ignore);
 
 #endif

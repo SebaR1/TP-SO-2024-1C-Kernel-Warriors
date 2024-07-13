@@ -76,7 +76,7 @@ void receiveClientIteration(int socketServer)
 
         log_info(getLogger(), "Se conectó un módulo CPU");
 
-        sendTamPagina(&socketClient, getMemoryConfig()->TAM_PAGINA);
+        sendTamPagina(socketClient, getMemoryConfig()->TAM_PAGINA);
 
         initServerForASocket(socketClient, serverMemoryForCPU);
 

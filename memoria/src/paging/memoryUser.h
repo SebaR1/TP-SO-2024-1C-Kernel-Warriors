@@ -32,10 +32,15 @@ extern sem_t semMemoryUserFrames;
 void initMemoryUser();
 
 
+/// @brief Retorna el espacio contiguo de memoria que representa la memoria del usuario
+/// @return Retorna el espacio contiguo de memoria que representa la memoria del usuario
+void* getMemoryUser();
+
+
+
 /// @brief Retorna true si el frame especificado está ocupado
 /// @param frame El frame a verificar.
 bool isFrameBusy(int frame);
-
 
 
 
@@ -59,7 +64,7 @@ allocationResult resizeMemory(int pid, int bytes);
 /// @brief Reserva la cantidad determinada de bytes en la memoria de usuario si no se produce un Out Of Memory. Si se intenta reservar 0 bytes,
 /// La funcion retorna 0 y no hace nada mas.
 /// @param bytes Cantidad de bytes a reservar (no se le tiene que pasar el numero total de bytes reservados por el proceso, solo la cantidad que se quiere expandir).
-/// @param pages Se le debe pasar el puntero a  la tabla de paginas actual. Si aun no hay tabla de paginas, debe pasarse el puntero de paginas apuntando a NULL.
+/// @param pages Se le debe pasar el puntero a la tabla de paginas actual. Si aun no hay tabla de paginas, debe pasarse el puntero de paginas apuntando a NULL.
 /// (NO debe pasarse NULL).
 /// Modifica o crea la tabla de paginas, donde el indice es cada pagina,
 /// y el contenido de cada indice es el numero de frame en la memoria de usuario.
@@ -72,7 +77,7 @@ allocationResult resizeMemory(int pid, int bytes);
 /// @param result Retorna el resultado del alloc. Retorna SUCCESS si todo salió bien, u OUT OF MEMORY no se pudo completar el alloc por falta de espacio en memoria.
 /// @return Retorna la cantidad de paginas reservadas (no la cantidad total de paginas reservadas por el proceso,
 /// sino las que se reservaron al llamar a esta funcion), o -1 si se produjo un Out Of Memory
-int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation, allocationResult* result);
+int allocMemory(int bytes, int** pages, int* const amountOfPages, int* const internalFragmentation, allocationResult* result);
 
 
 
@@ -90,7 +95,7 @@ int allocMemory(int bytes, int* pages, int* const amountOfPages, int* const inte
 /// Retorna la nueva fragmentacion interna.
 /// @return Retorna la cantidad de paginas liberadas (no la cantidad total de paginas reservadas por el proceso,
 /// sino las que se liberaron al llamar a esta funcion).
-int freeMemory(int bytes, int* pages, int* const amountOfPages, int* const internalFragmentation);
+int freeMemory(int bytes, int** pages, int* const amountOfPages, int* const internalFragmentation);
 
 
 

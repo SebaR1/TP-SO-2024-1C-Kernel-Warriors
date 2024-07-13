@@ -9,6 +9,7 @@
 #include "processManagment/processLoader.h"
 #include "paging/memoryUser.h"
 #include "memoryDebug.h"
+#include "utilsMemory/debugUtils.h"
 
 
 
@@ -57,6 +58,10 @@ int main(int argc, char *argv[])
 
 
     #ifdef DEBUG_MEMORY
+
+    pthread_t printRegistersThreadVar;
+    pthread_create(&printRegistersThreadVar, NULL, (void*)printMemoryThread, NULL);
+    pthread_join(printRegistersThreadVar, NULL);
 
     logInitialMessageDebug();
 

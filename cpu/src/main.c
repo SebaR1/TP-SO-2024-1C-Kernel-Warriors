@@ -18,6 +18,7 @@ int main()
     initLogger("CPU.log", "CPU", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
+
     initCPUConfig("CPU.config");
 
 
