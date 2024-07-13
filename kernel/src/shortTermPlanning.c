@@ -37,14 +37,7 @@ void execState()
         if(!list_mutex_is_empty(pcbReadyList))
         {
             if(algorithm != VRR){ // FIFO Y RR tienen practicamente el mismo comportamiento. 
-            pcbToExec = list_pop(pcbReadyList);
-            list_push(pcbExecList, pcbToExec);
-            pcbToExec->state = PCB_EXEC;
 
-            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
-
-        } else {
-            if(list_mutex_is_empty(pcbReadyPriorityList)){ // Si el algoritmo de planificacion es VRR y pcbReadyPriorityList esta vacia, tiene el mismo comportamiento que RR o FIFO.
                 pcbToExec = list_pop(pcbReadyList);
                 list_push(pcbExecList, pcbToExec);
                 pcbToExec->state = PCB_EXEC;
@@ -52,57 +45,72 @@ void execState()
                 log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
 
             } else {
-                pcbToExec = list_pop(pcbReadyPriorityList);
-                list_push(pcbExecList, pcbToExec);
-                pcbToExec->state = PCB_EXEC;
-                log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY_PLUS - Estado Actual: PCB_EXEC", pcbToExec->pid);
-                flagAuxVRR = true;
+
+                if(list_mutex_is_empty(pcbReadyPriorityList)){ // Si el algoritmo de planificacion es VRR y pcbReadyPriorityList esta vacia, tiene el mismo comportamiento que RR o FIFO.
+                    
+                    pcbToExec = list_pop(pcbReadyList);
+                    list_push(pcbExecList, pcbToExec);
+                    pcbToExec->state = PCB_EXEC;
+
+                    log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXEC", pcbToExec->pid);
+
+                } else {
+
+                    pcbToExec = list_pop(pcbReadyPriorityList);
+                    list_push(pcbExecList, pcbToExec);
+                    pcbToExec->state = PCB_EXEC;
+                    log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY_PLUS - Estado Actual: PCB_EXEC", pcbToExec->pid);
+                    flagAuxVRR = true;
+
+                }
             }
-        }
-        
 
-        switch (algorithm)
-        {
-        case FIFO:
-            //No hace nada porque es el caso default
-            sendContextToCPU(pcbToExec);
-            break;
-        
-        case RR:
-            sendContextToCPU(pcbToExec);
-            pthread_t QuantumInterruptThread;
-            pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterrupt, pcbToExec);
-            pthread_detach(QuantumInterruptThread);
-            break;
-
-        case VRR:
-            if(flagAuxVRR){ //Quiere decir que estaba en pcbReadyPriorityList, entonces me aseguro que tiene algo de quantum sobrante.
-
-                paramsQuantumVRRThread *paramsQuantumVRR = malloc(sizeof(paramsQuantumVRRThread));
-                paramsQuantumVRR->process = pcbToExec;
-                paramsQuantumVRR->timeForQuantum = getKernelConfig()->QUANTUM - temporal_gettime(pcbToExec->quantumForVRR); // El tiempo del Quantum - el tiempo que estuve en exec. Ese es el tiempo que va a estar en exec por estar en pcbReadyPriorityList.
-
+            switch (algorithm)
+            {
+            case FIFO:
+                //No hace nada porque es el caso default
                 sendContextToCPU(pcbToExec);
-
-                pthread_t QuantumInterruptThread;
-                pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterruptVRR, paramsQuantumVRR);
-                pthread_detach(QuantumInterruptThread);
-
-            } else { // Como no hay nada en pcbReadyPriorityList, actua como RR pero ademas contando el tiempo.
-
-                pcbToExec->quantumForVRR = temporal_create(); // Antes del send inicia el tiempo. A tener en cuenta la diferencia de ms, puede ser que se tenga que iniciar el temporizador despues de que se mande.
+                break;
+            
+            case RR:
                 sendContextToCPU(pcbToExec);
-
                 pthread_t QuantumInterruptThread;
                 pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterrupt, pcbToExec);
                 pthread_detach(QuantumInterruptThread);
+                break;
 
+            case VRR:
+                if(flagAuxVRR){ //Quiere decir que estaba en pcbReadyPriorityList, entonces me aseguro que tiene algo de quantum sobrante.
+
+                    paramsQuantumVRRThread *paramsQuantumVRR = malloc(sizeof(paramsQuantumVRRThread));
+                    paramsQuantumVRR->process = pcbToExec;
+                    paramsQuantumVRR->timeForQuantum = getKernelConfig()->QUANTUM - temporal_gettime(pcbToExec->quantumForVRR); // El tiempo del Quantum - el tiempo que estuve en exec. Ese es el tiempo que va a estar en exec por estar en pcbReadyPriorityList.
+
+                    sendContextToCPU(pcbToExec);
+
+                    pthread_t QuantumInterruptThread;
+                    pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterruptVRR, paramsQuantumVRR);
+                    pthread_detach(QuantumInterruptThread);
+
+                } else { // Como no hay nada en pcbReadyPriorityList, actua como RR pero ademas contando el tiempo.
+
+                    pcbToExec->quantumForVRR = temporal_create(); // Antes del send inicia el tiempo. A tener en cuenta la diferencia de ms, puede ser que se tenga que iniciar el temporizador despues de que se mande.
+                    sendContextToCPU(pcbToExec);
+
+                    pthread_t QuantumInterruptThread;
+                    pthread_create(&QuantumInterruptThread, NULL, (void*)quantumControlInterrupt, pcbToExec);
+                    pthread_detach(QuantumInterruptThread);
+
+                }
+                break;
+
+            default:
+                break;
             }
-            break;
+        } else { // Caso muy especifico para solucionar un bug.
 
-        default:
-            break;
-        }
+            sem_post(&semMultiProcessing);
+
         }
 
         

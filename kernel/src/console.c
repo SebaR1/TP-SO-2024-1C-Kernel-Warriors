@@ -62,7 +62,7 @@ bool _isAnInstruction(char* instruction){
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
     else if(string_equals_ignore_case(consoleCommand[0], "PROCESO_ESTADO")){
-            return true;
+        return true;
     }
 
     string_array_destroy(consoleCommand);

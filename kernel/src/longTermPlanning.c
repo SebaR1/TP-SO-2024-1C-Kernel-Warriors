@@ -212,7 +212,7 @@ void killProcess(uint32_t *paramkillProcessThread)
 
 
         processFound->state = PCB_EXIT;
-        
+
         list_push(pcbExitList, processFound);
 
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processFound->pid);

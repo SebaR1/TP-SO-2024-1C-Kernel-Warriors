@@ -701,6 +701,9 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
 
         if(resourceFound->instances >= 0){ //Si el recurso queda >= 0 se le asigna ese recurso al proceso
 
+            //Para debuggear
+            log_info(getLogger(), "Se hizo un wait de %s, le quedan %d instancias", resourceFound->name, resourceFound->instances);
+
             list_push(processExec->resources, resourceFound); // Asigna el recurso al proceso
 
             list_push(pcbExecList, processExec); // El proceso tiene que volver devuelta a exec PORQUE PUEDE. (Podria generar segmentacion fault sino)
@@ -754,7 +757,8 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
 
         // Se fija si el proceso tenia el recurso asignado, si lo tiene lo libera.
         if(list_remove_element_mutex(processExec->resources, resourceFound)){ 
-            log_info(getLogger(), "Se libero el recurso que tenia en WAIT");
+            //PARA DEBUGGEAR
+            log_info(getLogger(), "Se libero el recurso %s que tenia en WAIT, ahora tiene %d instancias", resourceFound->name, resourceFound->instances);
         }
 
         // Se fija si hay algun proceso que este bloqueado para asignarlo por el signal.
@@ -762,6 +766,10 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
             pcb_t* processBlockToReady = list_pop(resourceFound->blockList);
             list_push(processBlockToReady->resources, resourceFound);
             processBlockToReady->state = PCB_READY;
+        
+            //PARA DEBUGGEAR
+            log_info(getLogger(), "El recurso se asigno al proceso %d", processBlockToReady->pid);
+
             list_push(pcbReadyList, processBlockToReady);
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
 

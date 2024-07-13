@@ -27,7 +27,7 @@ char* resourceNameToFind;
 bool compareNameResource(void *data)
 {
     resource_t *resource = (resource_t *)data;
-    return resource->name == resourceNameToFind;
+    return string_equals_ignore_case(resource->name, resourceNameToFind);
 }
 
 resource_t* foundResource(char* resourceName)
@@ -53,7 +53,7 @@ void addInstanceResource(resource_t* resource)
 void subtractInstanceResource(resource_t* resource)
 {
     pthread_mutex_lock(&(resource->mutexForInstances));
-    resource->instances++;
+    resource->instances--;
     pthread_mutex_unlock(&(resource->mutexForInstances));
 }
 
