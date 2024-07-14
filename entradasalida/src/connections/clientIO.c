@@ -17,6 +17,8 @@ void sendIOGenSleepResultsToKernel()
     log_info(getLogger(), "Se enviaran los resultados de la operacion IO_GEN_SLEEP al Kernel.");
     t_package* package = createPackage(IO_OK);
 
+    addToPackage(package, interfaceData.name, string_length(interfaceData.name) + 1);
+
     sendPackage(package, socketKernel);
 
     log_info(getLogger(), "Resultados de la operacion IO_GEN_SLEEP enviados al Kernel.");
