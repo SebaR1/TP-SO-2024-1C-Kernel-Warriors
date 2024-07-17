@@ -37,16 +37,18 @@ void sendIOGenSleepOperationToIO(interface_t *interface, uint32_t timeOfOperatio
 
 /// @brief Le avisa a la interfaz que realice la operacion de IO_STDIN_READ con su direccion de registro y registro de tamaño.
 /// @param interface La interfaz que tiene el nombre identificador y su socket.
-/// @param registerDirection Direccion de registro necesario para la operacion.
-/// @param registerSize Tamaño de registro necesario para la operacion.
-void sendIOStdinReadOperationToIO(interface_t *interface, uint32_t registerDirection, uint32_t registerSize);
+/// @param listOfPhysicalAdressesInfo Lista que contiene todas las direcciones fisicas.
+/// @param amountOfPhysicalAddresses Cantidad de direcciones fisicas que contiene la lista.
+/// @param sizeToReadOrWrite Nose.
+void sendIOStdinReadOperationToIO(interface_t* interface, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite);
 
 
-/// @brief Le avisa a la interfaz que realice la operacion de IO_STDIN_READ con su direccion de registro y registro de tamaño.
+/// @brief Le avisa a la interfaz que realice la operacion de IO_STDOUT_WRITE con su direccion de registro y registro de tamaño.
 /// @param interface La interfaz que tiene el nombre identificador y su socket.
-/// @param registerDirection Direccion de registro necesario para la operacion.
-/// @param registerSize Tamaño de registro necesario para la operacion.
-void sendIOStdoutWriteOperationToIO(interface_t *interface, uint32_t registerDirection, uint32_t registerSize);
+/// @param listOfPhysicalAdressesInfo Lista que contiene todas las direcciones fisicas.
+/// @param amountOfPhysicalAddresses Cantidad de direcciones fisicas que contiene la lista.
+/// @param sizeToReadOrWrite Nose.
+void sendIOStdoutWriteOperationToIO(interface_t* interface, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite);
 
 
 //////////// A MEMORIA ///////////////

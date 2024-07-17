@@ -68,13 +68,24 @@ void sendIOGenSleepOperationToIO(interface_t* interface, uint32_t timeOfOperatio
     destroyPackage(package);
 }
 
-void sendIOStdinReadOperationToIO(interface_t* interface, uint32_t registerDirection, uint32_t registerSize)
+void sendIOStdinReadOperationToIO(interface_t* interface, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite)
 {
     t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_STDIN_INTERFACE);
 
     addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
-    addToPackage(package, &(registerDirection), sizeof(uint32_t));
-    addToPackage(package, &(registerSize), sizeof(uint32_t));
+
+    addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
+
+    for(int i = 0; i < amountOfPhysicalAddresses; i++){
+        physicalAddressInfo adresses;
+
+        adresses = *(physicalAddressInfo*)list_get(listOfPhysicalAdressesInfo, i);
+
+        addToPackage(package, &(adresses.physicalAddress), sizeof(int));
+        addToPackage(package, &(adresses.size), sizeof(int));
+    }
+
+    addToPackage(package, &(sizeToReadOrWrite), sizeof(int));
 
     // Uso el socket de la interfaz.
     sendPackage(package, *interface->socket);
@@ -82,13 +93,24 @@ void sendIOStdinReadOperationToIO(interface_t* interface, uint32_t registerDirec
     destroyPackage(package);
 }
 
-void sendIOStdoutWriteOperationToIO(interface_t* interface, uint32_t registerDirection, uint32_t registerSize)
+void sendIOStdoutWriteOperationToIO(interface_t* interface, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite)
 {
     t_package* package = createPackage(KERNEL_SEND_OPERATION_TO_STDOUT_INTERFACE);
 
     addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
-    addToPackage(package, &(registerDirection), sizeof(uint32_t));
-    addToPackage(package, &(registerSize), sizeof(uint32_t));
+
+    addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
+
+    for(int i = 0; i < amountOfPhysicalAddresses; i++){
+        physicalAddressInfo adresses;
+
+        adresses = *(physicalAddressInfo*)list_get(listOfPhysicalAdressesInfo, i);
+
+        addToPackage(package, &(adresses.physicalAddress), sizeof(int));
+        addToPackage(package, &(adresses.size), sizeof(int));
+    }
+
+    addToPackage(package, &(sizeToReadOrWrite), sizeof(int));
 
     // Uso el socket de la interfaz.
     sendPackage(package, *interface->socket);

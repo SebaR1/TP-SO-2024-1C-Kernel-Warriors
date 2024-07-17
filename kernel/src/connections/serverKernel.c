@@ -343,15 +343,15 @@ void ioSendEndOperation(int *socketClientIO)
             break;
 
         case STDIN:
-            int registerDirectionRead = atoi(processBlocked->params->param1);
-            int registerSizeRead = atoi(processBlocked->params->param2);
-            sendIOStdinReadOperationToIO(interfaceFound, registerDirectionRead, registerSizeRead);
+            //int registerDirectionRead = atoi(processBlocked->params->param1);
+            //int registerSizeRead = atoi(processBlocked->params->param2);
+            //endIOStdinReadOperationToIO(interfaceFound, registerDirectionRead, registerSizeRead);
             break;
         
         case STDOUT:
-            int registerDirectionWrite = atoi(processBlocked->params->param1);
-            int registerSizeWrite = atoi(processBlocked->params->param2);
-            sendIOStdoutWriteOperationToIO(interfaceFound, registerDirectionWrite, registerSizeWrite);
+            //int registerDirectionWrite = atoi(processBlocked->params->param1);
+            //int registerSizeWrite = atoi(processBlocked->params->param2);
+            //sendIOStdoutWriteOperationToIO(interfaceFound, registerDirectionWrite, registerSizeWrite);
             break;
 
         default:
@@ -455,9 +455,21 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
     // Recibo el nombre de la interfaz a usar.
     char* nameRequestInterface = list_remove(listPackage, 0);
 
-    uint32_t registerDirection = *(uint32_t*)list_remove(listPackage, 0);
+    int *amountOfPhysicalAddresses = (int*)list_remove(listPackage, 0);
 
-    uint32_t registerSize = *(uint32_t*)list_remove(listPackage, 0);
+    t_list *listOfPhysicalAddresses = list_create();
+
+    for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+    {
+        physicalAddressInfo *adresses = malloc(sizeof(physicalAddressInfo));
+
+        adresses->physicalAddress = (int*)list_remove(listPackage, 0);
+        adresses->size = (int*)list_remove(listPackage, 0);
+
+        list_add(listOfPhysicalAddresses, adresses);
+    }
+
+    int *sizeToReadOrWrite = list_remove(listPackage, 0);
 
     // Busco la interfaz por el nombre identificador.
     interface_t *interfaceFound = foundInterface(nameRequestInterface);
@@ -499,17 +511,31 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
 
                 processExec->isInInterface = true;
 
-                sendIOStdinReadOperationToIO(interfaceFound, registerDirection, registerSize);
+                sendIOStdinReadOperationToIO(interfaceFound, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite);
                 
             } else {
-                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
-                processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                //processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                //processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
 
             }
         }
     }
+
+    free(nameRequestInterface);
+    
+    for(int i = 0; i > *amountOfPhysicalAddresses; i++){
+        physicalAddressInfo *adresses = list_remove(listOfPhysicalAddresses, 0);
+
+        free(adresses->physicalAddress);
+        free(adresses->size);
+        free(adresses);
+    }
+
+    free(amountOfPhysicalAddresses);
+    list_destroy(listOfPhysicalAddresses);
+    free(sizeToReadOrWrite);
 
     list_destroy(listPackage);
 
@@ -528,9 +554,21 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
     // Recibo el nombre de la interfaz a usar.
     char* nameRequestInterface = list_remove(listPackage, 0);
 
-    uint32_t registerDirection = *(uint32_t*)list_remove(listPackage, 0);
+    int *amountOfPhysicalAddresses = (int*)list_remove(listPackage, 0);
 
-    uint32_t registerSize = *(uint32_t*)list_remove(listPackage, 0);
+    t_list *listOfPhysicalAddresses = list_create();
+
+    for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+    {
+        physicalAddressInfo *adresses = malloc(sizeof(physicalAddressInfo));
+
+        adresses->physicalAddress = (int*)list_remove(listPackage, 0);
+        adresses->size = (int*)list_remove(listPackage, 0);
+
+        list_add(listOfPhysicalAddresses, adresses);
+    }
+
+    int *sizeToReadOrWrite = list_remove(listPackage, 0);
 
     // Busco la interfaz por el nombre identificador.
     interface_t *interfaceFound = foundInterface(nameRequestInterface);
@@ -545,7 +583,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
         sem_post(&semExit);
 
     } else {
-        if(interfaceFound->interfaceType != STDOUT){ // El tipo de interfaz STDOUT es el unico que puede realizar la operacion IO_STDOUT_WRITE. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+        if(interfaceFound->interfaceType != STDIN){ // El tipo de interfaz STDIN es el unico que puede realizar la operacion IO_STDIN_READ. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
             list_push(pcbExitList, processExec);
             processExec->state = PCB_EXIT;
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
@@ -562,8 +600,8 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
             processExec->state = PCB_BLOCK;
 
             // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
-            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR);
-            
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
+
             sem_post(&semMultiProcessing);; // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
             
             if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
@@ -572,20 +610,33 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
 
                 processExec->isInInterface = true;
 
-                sendIOStdoutWriteOperationToIO(interfaceFound, registerDirection, registerSize);
+                sendIOStdoutWriteOperationToIO(interfaceFound, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite);
                 
             } else {
-                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
-                processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                //processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                //processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
 
             }
         }
     }
 
-    list_destroy(listPackage);
+    free(nameRequestInterface);
+    
+    for(int i = 0; i > *amountOfPhysicalAddresses; i++){
+        physicalAddressInfo *adresses = list_remove(listOfPhysicalAddresses, 0);
 
+        free(adresses->physicalAddress);
+        free(adresses->size);
+        free(adresses);
+    }
+
+    free(amountOfPhysicalAddresses);
+    list_destroy(listOfPhysicalAddresses);
+    free(sizeToReadOrWrite);
+
+    list_destroy(listPackage);
 }
 
 
@@ -789,17 +840,42 @@ contextProcess recieveContextFromPackage(t_list* package)
     contextProcess contextProcess;
     
     // Recibe todo el contexto del proceso ejecutando de CPU
-    contextProcess.pc = *(uint32_t *)list_remove(package, 0);
-    contextProcess.registersCpu.AX = *(uint8_t *)list_remove(package, 0);
-    contextProcess.registersCpu.BX = *(uint8_t *)list_remove(package, 0);
-    contextProcess.registersCpu.CX = *(uint8_t *)list_remove(package, 0);
-    contextProcess.registersCpu.DX = *(uint8_t *)list_remove(package, 0);
-    contextProcess.registersCpu.EAX = *(uint32_t *)list_remove(package, 0);
-    contextProcess.registersCpu.EBX = *(uint32_t *)list_remove(package, 0);
-    contextProcess.registersCpu.ECX = *(uint32_t *)list_remove(package, 0);
-    contextProcess.registersCpu.EDX = *(uint32_t *)list_remove(package, 0);
-    contextProcess.registersCpu.DI = *(uint32_t *)list_remove(package, 0);
-    contextProcess.registersCpu.SI = *(uint32_t *)list_remove(package, 0);
+
+    uint32_t *pc = (uint32_t *)list_remove(package, 0);
+    uint8_t *ax = (uint8_t *)list_remove(package, 0);
+    uint8_t *bx = (uint8_t *)list_remove(package, 0);
+    uint8_t *cx = (uint8_t *)list_remove(package, 0);
+    uint8_t *dx = (uint8_t *)list_remove(package, 0);
+    uint32_t *eax = (uint32_t *)list_remove(package, 0);
+    uint32_t *ebx = (uint32_t *)list_remove(package, 0);
+    uint32_t *ecx = (uint32_t *)list_remove(package, 0);
+    uint32_t *edx = (uint32_t *)list_remove(package, 0);
+    uint32_t *di = (uint32_t *)list_remove(package, 0);
+    uint32_t *si =  (uint32_t *)list_remove(package, 0);
+
+    contextProcess.pc = *pc;
+    contextProcess.registersCpu.AX = *ax;
+    contextProcess.registersCpu.BX = *bx;
+    contextProcess.registersCpu.CX = *cx;
+    contextProcess.registersCpu.DX = *dx;
+    contextProcess.registersCpu.EAX = *eax;
+    contextProcess.registersCpu.EBX = *ebx;
+    contextProcess.registersCpu.ECX = *ecx;
+    contextProcess.registersCpu.EDX = *edx;
+    contextProcess.registersCpu.DI = *di;
+    contextProcess.registersCpu.SI = *si;
+
+    free(pc);
+    free(ax);
+    free(bx);
+    free(cx);
+    free(dx);
+    free(eax);
+    free(ebx);
+    free(ecx);
+    free(edx);
+    free(di);
+    free(si);
 
     return contextProcess;
 }

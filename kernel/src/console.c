@@ -10,11 +10,11 @@ void readKernelConsole(){
 
     while(1){
         if(string_equals_ignore_case(read, "SALIR")){
-            log_info(getLogger(), "Apagando el sistema");
+            log_info(getLogger(), "Apagando el sistema.");
             break;
         }
         if(!_isAnInstruction(read)){
-            log_error(getLogger(), "Comando de consola no recognized");
+            log_error(getLogger(), "Comando de consola no reconocido.");
             free(read);
             read = readline("");
             continue;
@@ -33,13 +33,11 @@ bool _isAnInstruction(char* instruction){
 
     if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PROCESO")){
         if(string_array_size(consoleCommand) == 2) {
-            string_array_destroy(consoleCommand);
             return true;
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
     else if(string_equals_ignore_case(consoleCommand[0], "EJECUTAR_SCRIPT")){
         if(string_array_size(consoleCommand) == 2) {
-            string_array_destroy(consoleCommand);
             return true;
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
@@ -77,8 +75,9 @@ void attendInstruction(char* instruction)
     char** consoleCommand = string_split(instruction, " ");
 
     if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PROCESO")){
+        pthread_mutex_lock(&mutexSendProcessToMemory);
         pthread_t initProcessThread;
-        char* paramInitProcessThread = malloc(sizeof(string_length(consoleCommand[1] + 1)));
+        char* paramInitProcessThread = malloc(string_length(consoleCommand[1]) + 1);
         strcpy(paramInitProcessThread, consoleCommand[1]);
         pthread_create(&initProcessThread, NULL, (void*)addPcbToNew, paramInitProcessThread);
         pthread_detach(initProcessThread);
@@ -100,11 +99,12 @@ void attendInstruction(char* instruction)
         flagAuxStopPlanning = false;
     }
     else if(string_equals_ignore_case(consoleCommand[0], "EJECUTAR_SCRIPT")){
-        pthread_t executeScriptThread;
-        char* paramExecuteScriptThread = malloc(sizeof(string_length(consoleCommand[1] + 1)));
-        strcpy(paramExecuteScriptThread, consoleCommand[1]);
-        pthread_create(&executeScriptThread, NULL, (void*)executeScript, consoleCommand[1]);
-        pthread_detach(executeScriptThread);
+        //pthread_t executeScriptThread;
+        //char* paramExecuteScriptThread = malloc(string_length(consoleCommand[1] + 1));
+        executeScript(consoleCommand[1]);
+        //strcpy(paramExecuteScriptThread, consoleCommand[1]);
+        //pthread_create(&executeScriptThread, NULL, (void*)executeScript, paramExecuteScriptThread);
+        //pthread_detach(executeScriptThread);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "MULTIPROGRAMACION")){
         pthread_t changeMultiprogrammingThread;
@@ -117,7 +117,7 @@ void attendInstruction(char* instruction)
         showProcessByState();
     }
 
-    string_array_destroy(consoleCommand);
+    //string_array_destroy(consoleCommand);
 }
 
 void executeScript(char* path)
@@ -126,11 +126,41 @@ void executeScript(char* path)
 
     if (fileScript == NULL) {
 
-        exit(EXIT_FAILURE);
-
+        log_info(getLogger(), "No se encontro el archivo de script.");
+        free(path);
+        return;
     }
 
-    free(path);
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    pthread_mutex_t mutex;
+    pthread_mutex_init(&mutex, NULL);
+
+    while (1) {
+
+        pthread_mutex_lock(&mutex);
+        read = getline(&line, &len, fileScript);
+
+        if (read == -1) break;
+
+        if (line[read - 1] == '\n') {
+            line[read - 1] = '\0';
+        }
+
+        if (_isAnInstruction(line)) {
+            attendInstruction(line);
+        } else {
+            log_info(getLogger(), "Comando de consola no reconocido");
+        }
+        pthread_mutex_unlock(&mutex);
+    }
+
+    pthread_mutex_destroy(&mutex);
+    free(line);
+    fclose(fileScript);
+    //free(path);
 }
 
 void showProcessByState()

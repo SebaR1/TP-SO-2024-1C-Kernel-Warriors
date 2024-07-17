@@ -106,7 +106,6 @@ void addPcbToNew(char* path)
     sem_wait(&semPausePlanning);
     sem_post(&semPausePlanning);
 
-    pthread_mutex_lock(&mutexSendProcessToMemory);
     sendProcessPathToMemory(process, path);
     sem_wait(&semMemoryOk); // Esperan a que la memoria de el ok de que el proceso se creo correctamente
     pthread_mutex_unlock(&mutexSendProcessToMemory);
@@ -116,6 +115,10 @@ void addPcbToNew(char* path)
         list_push(pcbNewList, process); 
         //Log obligatorio
         log_info(getLogger(), "Se crea el proceso %d en NEW", process->pid);
+
+        log_info(getLogger(), "%s", path);
+
+
         sem_post(&semNew);
     } else {
 
@@ -124,7 +127,7 @@ void addPcbToNew(char* path)
 
     }
     
-    free(path);
+    //free(path);
 }
 
 void destroyProcess(pcb_t *process)
