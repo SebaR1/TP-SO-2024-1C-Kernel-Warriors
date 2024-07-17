@@ -83,11 +83,13 @@ allocationResult resizeMemory(int pid, int bytes)
     allocationResult result = RESIZE_SUCCESS;
 
     sem_wait(&semAuxPID);
-
     pidAux = pid;
     processInfo* info = (processInfo*)list_find_mutex(processesList, closureFindPID);
-
     sem_post(&semAuxPID);
+
+    // Necesito un puntero a la tabla de paginas, porque necesito pasarlo como referencia y dentro se va a cambiar la direccion de memoria de la tabla de paginas, y necesito retornar ese valor.
+    int** pointerToPageTable = malloc(sizeof(int**));
+    *pointerToPageTable = info->pageTable;
 
 
     int amountOfBytesAllocated = getAmountOfBytesAllocated(getMemoryConfig()->TAM_PAGINA, info->amountOfPages, info->internalFragmentation);
@@ -96,21 +98,22 @@ allocationResult resizeMemory(int pid, int bytes)
     {
         logProcessSizeExpansion(pid, amountOfBytesAllocated, bytes - amountOfBytesAllocated);
 
-        int** pointerToPageTable = malloc(sizeof(int**));
-        *pointerToPageTable = info->pageTable;
         allocMemory(bytes - amountOfBytesAllocated, pointerToPageTable, &info->amountOfPages, &info->internalFragmentation, &result);
         info->pageTable = *pointerToPageTable;
-        free(pointerToPageTable);
     }
     else if (bytes < amountOfBytesAllocated) // Hay que liberar espacio en memoria del usuario
     {
         logProcessSizeReduction(pid, amountOfBytesAllocated, amountOfBytesAllocated - bytes);
-        freeMemory(amountOfBytesAllocated - bytes, info->pageTable, &info->amountOfPages, &info->internalFragmentation);
+
+        freeMemory(amountOfBytesAllocated - bytes, pointerToPageTable, &info->amountOfPages, &info->internalFragmentation);
+        info->pageTable = *pointerToPageTable;
     }
     else // Entra en este else cuando bytes == amountOfBytesAllocated
     {
         logProcessSizeNotChange(pid, amountOfBytesAllocated);
     }
+
+    free(pointerToPageTable);
 
     return result;
 }

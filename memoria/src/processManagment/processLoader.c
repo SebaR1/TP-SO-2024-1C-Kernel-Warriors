@@ -109,10 +109,18 @@ void destroyProcess(int PID)
     string_array_destroy(info->pseudocodeInstructions);
 
 
-    // Libero la memoria de usuario
+    // Cantidad de bytes a liberar de la memoria de usuario.
     int bytesToFree = getAmountOfBytesAllocated(getMemoryConfig()->TAM_PAGINA, info->amountOfPages, info->internalFragmentation);
-    int amountOfPagesFree = freeMemory(bytesToFree, info->pageTable, info->amountOfPages, info->internalFragmentation);
 
+    // Necesito un puntero a la tabla de paginas, porque necesito pasarlo como referencia y dentro se va a cambiar la direccion de memoria de la tabla de paginas, y necesito retornar ese valor.
+    int** pointerToPageTable = malloc(sizeof(int**));
+    *pointerToPageTable = info->pageTable;
+
+    // Libero la memoria de usuario
+    int amountOfPagesFree = freeMemory(bytesToFree, pointerToPageTable, &info->amountOfPages, &info->internalFragmentation);
+    info->pageTable = *pointerToPageTable;
+
+    free(pointerToPageTable);
     free(info);
 
     logDestroyProcess(PID, amountOfPagesFree);
