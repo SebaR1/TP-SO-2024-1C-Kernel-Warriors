@@ -83,7 +83,8 @@ int getFrame(int pid, int page)
         frame = waitFrameFromMemory(pid, page);
 
         // HACER EL LOG DEL TLB_MISS ACAAAAAA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+        logTLBMiss(pid, page);
+        
         return frame;
     }
 
@@ -206,7 +207,7 @@ void moveElementOfListToLast(t_list_iterator* iterator, void* actualElement)
 {
     list_iterator_remove(iterator);
 
-    
+    // Voy al ultimo elemento de la lista
     while (list_iterator_has_next(iterator))
     {
         list_iterator_next(iterator);

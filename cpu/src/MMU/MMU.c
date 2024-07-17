@@ -98,14 +98,14 @@ int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddre
     int i = 0; // Contador para ir asignando en el array
 
     // Pongo la primera physicalAddressInfo
-    createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeFirstPhysAddr, *outPhysicalAddressesInfo + i);
+    createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i) + logicalAddressSplitted.offset, sizeFirstPhysAddr, *outPhysicalAddressesInfo + i);
     i++;
 
 
     // Pongo las physicalAddressInfo "del medio"
     while (i < amountOfPhysAddrWithoutFirstAndLast + 1) // + 1 para tener en cuenta que la primera pagina ya fue puesta
     {
-        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeFirstPhysAddr, *outPhysicalAddressesInfo + i);
+        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i) + logicalAddressSplitted.offset, sizeFirstPhysAddr, *outPhysicalAddressesInfo + i);
         i++;
     }
 
@@ -113,7 +113,7 @@ int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddre
     // Pongo la ultima physicalAddressInfo si todavia sobran bytes para leer o escribir en memoria
     if (sizeLastPhysAddr > 0)
     {
-        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i), sizeLastPhysAddr, *outPhysicalAddressesInfo + i);
+        createPhysicalAddressInfoParam(getFrame(pid, logicalAddressSplitted.page + i) + logicalAddressSplitted.offset, sizeLastPhysAddr, *outPhysicalAddressesInfo + i);
     }
 
 

@@ -86,7 +86,7 @@ void sendWriteMemory(int pid, void* data, int physicalAddress, int size)
     writeInfo.size = size;
 
     addToPackage(package, &(writeInfo.pid), sizeof(int)); // Agrego el Process ID al paquete para enviar
-    addToPackage(package, &(writeInfo.data), size); // Agrego el Process ID al paquete para enviar
+    addToPackage(package, writeInfo.data, size); // Agrego el Process ID al paquete para enviar
     addToPackage(package, &(writeInfo.physicalAddress), sizeof(int)); // Agrego el Process ID al paquete para enviar
     addToPackage(package, &(writeInfo.size), sizeof(int)); // Agrego el Process ID al paquete para enviar
 

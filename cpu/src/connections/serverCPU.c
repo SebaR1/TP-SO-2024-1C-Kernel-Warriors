@@ -256,10 +256,14 @@ void serverCPUForMemory(int *socketClient)
             break;
 
         case MEMORY_RESIZE_OK:
-            memoryReceiveConfirmationForWrite(socketClient);
+            memoryReceiveConfirmationForResize(socketClient);
             break;
 
         case MEMORY_OUT_OF_MEMORY:
+            memoryReceiveOutOfMemory(socketClient);
+            break;
+
+        case MEMORY_WRITE_OK:
             memoryReceiveConfirmationForWrite(socketClient);
             break;
 
@@ -439,26 +443,16 @@ void memoryReceiveConfirmationForWrite(int* socketClient)
 
 void memoryReceiveConfirmationForResize(int* socketClient)
 {
-    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
-    t_list *listPackage = getPackage(*socketClient);
-
     resizeResultReceivedFromMemory = RESIZE_SUCCESS;
 
     sem_post(&semWaitConfirmationFromMemory);
-
-    list_destroy(listPackage);
 }
 
 void memoryReceiveOutOfMemory(int* socketClient)
 {
-    // Recibo el mensaje por parte de la memoria, lo almaceno en el lugar correspondiente y destruyo la lista.
-    t_list *listPackage = getPackage(*socketClient);
-
     resizeResultReceivedFromMemory = OUT_OF_MEMORY;
 
     sem_post(&semWaitConfirmationFromMemory);
-
-    list_destroy(listPackage);
 }
 
 
