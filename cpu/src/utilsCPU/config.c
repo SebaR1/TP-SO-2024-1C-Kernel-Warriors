@@ -38,8 +38,10 @@ ALGORITMO_TLB_TYPE getTLBAlgorithm(char* ALGORITMO_TLB)
 {
     ALGORITMO_TLB_TYPE type;
 
-    if(strcmp(ALGORITMO_TLB, "FIFO")) type = ALGORITMO_FIFO;
-    else if(strcmp(ALGORITMO_TLB, "LRU")) type = ALGORITMO_LRU;
+    if(string_equals_ignore_case(ALGORITMO_TLB, "FIFO"))
+        type = ALGORITMO_FIFO;
+    else if(string_equals_ignore_case(ALGORITMO_TLB, "LRU"))
+        type = ALGORITMO_LRU;
 
     return type;
 }
