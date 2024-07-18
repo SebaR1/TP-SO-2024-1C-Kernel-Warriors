@@ -174,7 +174,7 @@ int allocMemory(int bytes, int** pages, int* const amountOfPages, int* const int
     // Le asigno un frame libre a cada nueva pagina.
     for ( ; newPagesIndex < *amountOfPages; newPagesIndex++)
     {
-        *pages[newPagesIndex] = allocNextFrameFree();
+        (*pages)[newPagesIndex] = allocNextFrameFree();
     }
 
 
@@ -245,7 +245,7 @@ int freeMemory(int bytes, int** pages, int* const amountOfPages, int* const inte
     // Libero los frames que ya no estan en uso.
     for ( ; i >= *amountOfPages; i--)
     {
-        freeFrame(*pages[i]);
+        freeFrame((*pages)[i]);
     }
 
 

@@ -76,13 +76,15 @@ int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddre
     // Si solo hay una direccion fisica, es decir, una sola pagina involucrada,
     // el tamaño de esa unica direccion fisica es el mismo que se pasó por parametro a la funcion,
     // sino el tamaño es lo que le falta al offset para llegar al ultimo de la pagina.
-    sizeFirstPhysAddr = logicalAddressSplitted.offset + size <= getTamPagina() ? size : getTamPagina() - logicalAddressSplitted.offset;
+    bool isThereOnePage = logicalAddressSplitted.offset + size <= getTamPagina();
+    sizeFirstPhysAddr = isThereOnePage ? size : getTamPagina() - logicalAddressSplitted.offset;
 
     // El tamaño que falta por leer o escribir en las siguientes paginas. Si hay que leer o escribir una sola pagina, el resultado de la operacion es siempre 0.
     sizeAfterFirstPhysAddr = size - sizeFirstPhysAddr;
 
     // Obtengo el tamaño a leer o escribir de la ultima pagina. Si hay que leer o escribir una sola pagina, el resultado de la operacion es siempre 0.
-    sizeLastPhysAddr = getInternalFragmentation(getTamPagina(), sizeAfterFirstPhysAddr);
+    int internalFragmentation = getInternalFragmentation(getTamPagina(), sizeAfterFirstPhysAddr);
+    sizeLastPhysAddr = isThereOnePage ? 0 : getTamPagina() - internalFragmentation;
 
     // La cantidad de paginas que hay que leer o escribir sin contar la prinera y ultima pagina, ya que estos tienen un trato especial
     // porque pueden leer o escribir tamaños diferentes, mientras que las paginas del medio siempre van a leer o escribir el tamaño de pagina
