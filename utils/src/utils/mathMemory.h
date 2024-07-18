@@ -48,6 +48,14 @@ int getAmountOfPagesAllocated(int pageSize, int bytesAllocated);
 int getAmountOfPagesToFree(int pageSize, int bytesToFree);
 
 
+/// @brief Calcula la direccion fisica a partir del tamaño de página, el frame y el offset.
+/// @param pageSize El tamaño de pagina
+/// @param frame El frame
+/// @param offset El offset
+/// @return Retorna frame * pageSize + offset
+int calculatePhysicalAddr(int pageSize, int frame, int offset);
+
+
 
 
 

@@ -26,3 +26,8 @@ int getAmountOfPagesToFree(int pageSize, int bytesToFree)
 {
     return floor(bytesToFree / pageSize) + 1;
 }
+
+int calculatePhysicalAddr(int pageSize, int frame, int offset)
+{
+    return frame * pageSize + offset;
+}

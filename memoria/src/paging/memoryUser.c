@@ -254,7 +254,7 @@ int freeMemory(int bytes, int** pages, int* const amountOfPages, int* const inte
 
     
     // Reduzco el array de paginas
-    *pages = realloc(pages, *amountOfPages * sizeof(int));
+    *pages = realloc(*pages, *amountOfPages * sizeof(int));
 
 
     // Obtengo la nueva fragmentacion interna de la ultima pagina
