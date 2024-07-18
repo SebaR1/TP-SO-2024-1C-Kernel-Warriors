@@ -10,6 +10,7 @@
 #include "paging/memoryUser.h"
 #include "memoryDebug.h"
 #include "utilsMemory/debugUtils.h"
+#include "utils/config.h"
 
 
 
@@ -19,7 +20,13 @@ int main(int argc, char *argv[])
     initLogger("memoria.log", "memoria", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
+    #ifdef DEBUG_MEMORY
     initMemoryConfig("memoria.config");
+    #else
+    char* path = askForConfigPath();
+    initMemoryConfig(path);
+    free(path);
+    #endif
 
 
 

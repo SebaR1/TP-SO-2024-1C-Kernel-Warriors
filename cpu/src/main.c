@@ -9,6 +9,7 @@
 #include "finish.h"
 #include "cpuDebug.h"
 #include "utilsCPU/debugUtils.h"
+#include "utils/config.h"
 
 
 
@@ -18,8 +19,13 @@ int main()
     initLogger("CPU.log", "CPU", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
-
+    #ifdef DEBUG_CPU
     initCPUConfig("CPU.config");
+    #else
+    char* path = askForConfigPath();
+    initCPUConfig(path);
+    free(path);
+    #endif
 
 
 

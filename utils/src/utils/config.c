@@ -1,6 +1,7 @@
 #include "config.h"
 #include <stdio.h>
-
+#include <readline/readline.h>
+#include <unistd.h>
 
 
 
@@ -67,4 +68,26 @@ t_list* _fromConfigToListOfInts(char** listChars)
     }
 
     return list;
+}
+
+
+char* askForConfigPath()
+{
+    char* path;
+
+    path = readline("¡Hola! Introduce el path del archivo de configuracion: ");
+
+    // Mientras que el archivo no exista, va a seguir preguntando por el archivo de configuracion
+    while (!fileExists(path))
+    {
+        free(path);
+        path = readline("¡Oh no, el archivo no existe!, ¿lo escribiste correctamente? Introducelo de nuevo: ");
+    }
+    
+    return path;
+}
+
+bool fileExists(char* path)
+{
+    return access(path, F_OK) == 0;
 }
