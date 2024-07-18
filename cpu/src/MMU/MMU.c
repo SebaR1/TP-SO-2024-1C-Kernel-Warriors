@@ -115,7 +115,7 @@ int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddre
     while (i < amountOfPhysAddrWithoutFirstAndLast + 1) // + 1 para tener en cuenta que la primera pagina ya fue puesta
     {
         frame = getFrame(pid, logicalAddressSplitted.page + i);
-        physicalAddress = calculatePhysicalAddr(getTamPagina(), frame, logicalAddressSplitted.offset);
+        physicalAddress = calculatePhysicalAddr(getTamPagina(), frame, 0);
 
         createPhysicalAddressInfoParam(physicalAddress, getTamPagina(), *outPhysicalAddressesInfo + i);
 
@@ -127,7 +127,7 @@ int getAllPhysicalAddresses(int pid, int logicalAddress, int size, physicalAddre
     if (sizeLastPhysAddr > 0)
     {
         frame = getFrame(pid, logicalAddressSplitted.page + i);
-        physicalAddress = calculatePhysicalAddr(getTamPagina(), frame, logicalAddressSplitted.offset);
+        physicalAddress = calculatePhysicalAddr(getTamPagina(), frame, 0);
 
         createPhysicalAddressInfoParam(physicalAddress, sizeLastPhysAddr, *outPhysicalAddressesInfo + i);
     }
