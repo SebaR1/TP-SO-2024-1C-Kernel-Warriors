@@ -19,12 +19,12 @@ int getAmountOfBytesAllocated(int pageSize, int amountOfPages, int internalFragm
 
 int getAmountOfPagesAllocated(int pageSize, int bytesAllocated)
 {
-    return ceil(bytesAllocated / pageSize);
+    return ceil((float)bytesAllocated / (float)pageSize);
 }
 
 int getAmountOfPagesToFree(int pageSize, int bytesToFree)
 {
-    return floor(bytesToFree / pageSize) + 1;
+    return floor((float)bytesToFree / (float)pageSize) + 1;
 }
 
 int calculatePhysicalAddr(int pageSize, int frame, int offset)
