@@ -107,4 +107,22 @@ int waitFrameFromMemory(int pid, int page);
 
 
 
+/// @brief Deja invalidas las entradas del pid cuyas paginas sean mayores que la cantidad de paginas.
+/// Este caso en el que las paginas sean mayores que la cantidad paginas puede ocurrir si se hace un RESIZE X, y luego un RESIZE Y, con X > Y
+/// @param pid El Process ID
+/// @param amountOfPages La cantidad de paginas que tiene el proceso.
+void updateEntries(int pid, int amountOfPages);
+
+
+/// @brief Esta la implementacion de updateEntries en caso de que el algoritmo de reemplazo que se esté usado sea FIFO.
+/// @param pid El Process ID
+/// @param amountOfPages La cantidad de paginas que tiene el proceso.
+void updateEntriesFIFO(int pid, int amountOfPages);
+
+
+/// @brief Esta la implementacion de updateEntries en caso de que el algoritmo de reemplazo que se esté usado sea LRU.
+/// @param pid El Process ID
+/// @param amountOfPages La cantidad de paginas que tiene el proceso.
+void updateEntriesLRU(int pid, int amountOfPages);
+
 #endif

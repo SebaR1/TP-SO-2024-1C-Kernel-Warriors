@@ -48,6 +48,13 @@ void initTLB()
 void initFIFOAlgorithm()
 {
     TLBFIFO = malloc(getCPUConfig()->CANTIDAD_ENTRADAS_TLB * sizeof(TLBElement));
+
+    // Inicializo todas las entradas con pid = -1, lo que significa que no contienen informacion valida en este momento esas entradas.
+    for (int i = 0; i < getCPUConfig()->CANTIDAD_ENTRADAS_TLB; i++)
+    {
+        TLBFIFO[i].pid = -1;
+    }
+
     fifoCounter = 0;
 }
 
@@ -108,6 +115,8 @@ int getFrame(int pid, int page)
         break;
     }
     
+    // Log obligatorio de Obtener Marco
+    logGetFrame(pid, page, frame);
 
     //// Hago los logs necesarios si ocurrió TLB_HIT o TLB_MISS
     switch (result)
@@ -153,8 +162,6 @@ TLBResult getFrameFIFO(int pid, int page, int* frame)
         TLBFIFO[fifoCounter].frame = *frame;
 
         fifoCounter = (fifoCounter + 1) % getCPUConfig()->CANTIDAD_ENTRADAS_TLB;
-
-        logGetFrame(pid, page, *frame);
     }
 
     return result;
@@ -162,7 +169,7 @@ TLBResult getFrameFIFO(int pid, int page, int* frame)
 
 TLBResult getFrameLRU(int pid, int page, int* frame)
 {
-        ///// La TLB tiene al menos 1 entrada
+    ///// La TLB tiene al menos 1 entrada
 
     TLBResult result = TLB_MISS;
 
@@ -224,4 +231,50 @@ int waitFrameFromMemory(int pid, int page)
     sem_wait(&semTLBMiss);
 
     return getCurrentFrame();
+}
+
+
+void updateEntries(int pid, int amountOfPages)
+{
+    //// Dejo invalidas las entradas de las paginas que sean mayores a la cantidad de pagians y tenga igual pid.
+    //// Esto segun algoritmo de reemplazo, ya que el trato es diferente porque se almacenan en estructuras distintas.
+    switch (getCPUConfig()->ALGORITMO_TLB)
+    {
+    case ALGORITMO_FIFO:
+        updateEntriesFIFO(pid, amountOfPages);
+        break;
+    
+    case ALGORITMO_LRU:
+        updateEntriesLRU(pid, amountOfPages);
+        break;
+    }
+}
+
+void updateEntriesFIFO(int pid, int amountOfPages)
+{
+    int lastPageNumber = amountOfPages - 1;
+
+    for (int i = 0; i < getCPUConfig()->CANTIDAD_ENTRADAS_TLB; i++)
+    {
+        if (TLBFIFO[i].pid == pid && TLBFIFO[i].page > lastPageNumber)
+        {
+            TLBFIFO[i].pid = -1;
+        }
+    }
+}
+
+void updateEntriesLRU(int pid, int amountOfPages)
+{
+    int lastPageNumber = amountOfPages - 1;
+
+    t_list_iterator* iterator = list_iterator_create(TLBLRU);
+
+    while (list_iterator_has_next(iterator))
+    {
+        TLBElement* element = (TLBElement*)list_iterator_next(iterator);
+        if (element->pid == pid && element->page > lastPageNumber)
+        {
+            element->pid = -1;
+        }
+    }
 }

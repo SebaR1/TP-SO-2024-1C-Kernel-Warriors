@@ -2,6 +2,8 @@
 #include "MMU/MMU.h"
 #include "connections/clientCPU.h"
 #include "utilsCPU/logger.h"
+#include "MMU/TLB.h"
+#include "utils/mathMemory.h"
 
 uint32_t PC = 0; // Program Counter, indica la próxima instrucción a ejecutar una vez completado un ciclo de ejecucion
 uint8_t AX = 0; // Registro Numérico de propósito general
@@ -534,6 +536,8 @@ void RESIZE(uint32_t size)
 {
     sendResizeMemory(getCurrentPID(), size);
 
+    updateEntries(getCurrentPID(), getAmountOfPagesAllocated(getTamPagina(), size));
+
     sem_wait(&semWaitConfirmationFromMemory);
 
     switch (resizeResultReceivedFromMemory)
@@ -968,7 +972,7 @@ void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryTyp
     free(outInfo);
 
 
-
+    int* physicalAddresses = malloc(amountOfPhysicalAddresses * sizeof(int)); // Unicamente para los logs
     int offset = 0;
     for (int i = 0; i < amountOfPhysicalAddresses; i++)
     {
@@ -977,6 +981,9 @@ void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryTyp
         memcpy(data + offset, dataReceivedFromMemory, info[i].size);
         offset += info[i].size;
         free(dataReceivedFromMemory);
+
+        // Unicamente para los logs
+        physicalAddresses[i] = info[i].physicalAddress;
     }
 
 
@@ -984,23 +991,23 @@ void readFromMemory(void* data, uint32_t direction, int size, readWriteMemoryTyp
     switch (type)
     {
     case MEMORY_UINT8_TYPE:
-        logReadMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint8_t*)data));
+        logReadMemoryUint(getCurrentPID(), amountOfPhysicalAddresses, physicalAddresses, *((uint8_t*)data));
         break;
 
     case MEMORY_UINT32_TYPE:
-        logReadMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint32_t*)data));
+        logReadMemoryUint(getCurrentPID(), amountOfPhysicalAddresses, physicalAddresses, *((uint32_t*)data));
         break;
 
     case MEMORY_STRING_TYPE:
-        char* dataString = malloc(size + 1); // + 1 para agregar el caracter nulo \0
+        char* dataString = malloc(size + 1); // +1 para agregar el caracter nulo \0
         memcpy((void*)dataString, data, size);
         dataString[size] = '\0';
-        logReadMemoryString(getCurrentPID(), info[0].physicalAddress, dataString);
+        logReadMemoryString(getCurrentPID(), amountOfPhysicalAddresses, physicalAddresses, dataString);
         free(dataString);
         break;
     }
 
-
+    free(physicalAddresses);
     free(info);
 }
 
@@ -1016,32 +1023,41 @@ void writeToMemory(void* data, uint32_t direction, int size, readWriteMemoryType
     free(outInfo);
 
 
+    int* physicalAddresses = malloc(amountOfPhysicalAddresses * sizeof(int)); // Unicamente para los logs
     int offset = 0;
     for (int i = 0; i < amountOfPhysicalAddresses; i++)
     {
         sendWriteMemory(getCurrentPID(), data + offset, info[i].physicalAddress, info[i].size);
         offset += info[i].size;
+        physicalAddresses[i] = info[i].physicalAddress; // Unicamente para los logs
         sem_wait(&semWaitConfirmationFromMemory);
+
     }
-
-
 
     ////// Solo para logs este switch
     switch (type)
     {
     case MEMORY_UINT8_TYPE:
-        logWriteMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint8_t*)data));
-        break;
-
-    case MEMORY_UINT32_TYPE:
-        logWriteMemoryUint(getCurrentPID(), info[0].physicalAddress, *((uint32_t*)data));
-        break;
-
-    case MEMORY_STRING_TYPE:
-        logWriteMemoryString(getCurrentPID(), info[0].physicalAddress, (char*)data);
+    {
+        logWriteMemoryUint(getCurrentPID(), amountOfPhysicalAddresses, physicalAddresses, *((uint8_t*)data));
         break;
     }
+    case MEMORY_UINT32_TYPE:
+    {
+        logWriteMemoryUint(getCurrentPID(), amountOfPhysicalAddresses, physicalAddresses, *((uint32_t*)data));
+        break;
+    }
+    case MEMORY_STRING_TYPE:
+    {        
+        char* dataString = malloc(size + 1); // +1 para agregar el caracter nulo \0
+        memcpy((void*)dataString, data, size);
+        dataString[size] = '\0';
+        logWriteMemoryString(getCurrentPID(), amountOfPhysicalAddresses, physicalAddresses, dataString);
+        free(dataString);
+        break;
+    }
+    }
 
-
+    free(physicalAddresses);
     free(info);
 }

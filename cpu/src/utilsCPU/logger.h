@@ -36,13 +36,13 @@ void logTLBMiss(int pid, int page);
 
 void logGetFrame(int pid, int page, int frame);
 
-void logReadMemoryUint(int pid, int physicalAddress, uint32_t value);
+void logReadMemoryUint(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], uint32_t value);
 
-void logReadMemoryString(int pid, int physicalAddress, char* value);
+void logReadMemoryString(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], char* value);
 
-void logWriteMemoryUint(int pid, int physicalAddress, uint32_t value);
+void logWriteMemoryUint(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], uint32_t value);
 
-void logWriteMemoryString(int pid, int physicalAddress, char* value);
+void logWriteMemoryString(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], char* value);
 
 
 
@@ -81,6 +81,17 @@ void logInitialMessageRealese();
 
 #endif
 
+
+
+////////////////////// FUNCIONES AUXILIARES //////////////////////
+
+
+/// @brief Convierte un array de direcciones fisicas en un string, con el siguiente formato (los numeros son de ejemplo): 0, 3, 7, 4, 2, 10
+/// @param amountOfPhysicalAddresses La cantidadd de direcciones fisicas
+/// @param physicalAddresses El array de direcciones fisicas
+/// @return Retorna el string. Es necesario hacerle un free despues de usarlo.
+/// @warning Es necesario liberar la memoria del string una vez usado.
+char* physicalAddressesToString(int amountOfPhysicalAddresses, int physicalAddresses[]);
 
 
 
