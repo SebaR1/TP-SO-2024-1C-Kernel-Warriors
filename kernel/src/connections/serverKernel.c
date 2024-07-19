@@ -461,7 +461,7 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
 
     for (int i = 0; i < *amountOfPhysicalAddresses; i++)
     {
-        physicalAddressInfo *adresses = malloc(sizeof(physicalAddressInfo));
+        physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
 
         adresses->physicalAddress = (int*)list_remove(listPackage, 0);
         adresses->size = (int*)list_remove(listPackage, 0);
@@ -526,7 +526,7 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
     free(nameRequestInterface);
     
     for(int i = 0; i > *amountOfPhysicalAddresses; i++){
-        physicalAddressInfo *adresses = list_remove(listOfPhysicalAddresses, 0);
+        physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
 
         free(adresses->physicalAddress);
         free(adresses->size);
@@ -560,7 +560,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
 
     for (int i = 0; i < *amountOfPhysicalAddresses; i++)
     {
-        physicalAddressInfo *adresses = malloc(sizeof(physicalAddressInfo));
+        physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
 
         adresses->physicalAddress = (int*)list_remove(listPackage, 0);
         adresses->size = (int*)list_remove(listPackage, 0);
@@ -625,7 +625,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
     free(nameRequestInterface);
     
     for(int i = 0; i > *amountOfPhysicalAddresses; i++){
-        physicalAddressInfo *adresses = list_remove(listOfPhysicalAddresses, 0);
+        physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
 
         free(adresses->physicalAddress);
         free(adresses->size);

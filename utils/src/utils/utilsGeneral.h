@@ -194,9 +194,16 @@ typedef struct
 
 typedef struct
 {
+	int physicalAddress;
+	int size;
+} physicalAddressInfo;
+
+typedef struct
+{
 	int* physicalAddress;
 	int* size;
-} physicalAddressInfo;
+} physicalAddressInfoP;
+
 
 
 #endif

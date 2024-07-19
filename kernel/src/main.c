@@ -32,6 +32,7 @@ int main()
     sem_init(&semKillProcessExec, 0, 0);
 
     pthread_mutex_init(&mutex2, NULL);
+    pthread_mutex_init(&mutexOrderProcessByScript, NULL);
 
     defineAlgorithm();
 

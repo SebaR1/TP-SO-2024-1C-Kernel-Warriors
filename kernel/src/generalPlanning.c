@@ -34,7 +34,11 @@ sem_t semExitProgram;
 
 pthread_mutex_t mutexSendProcessToMemory;
 
+pthread_mutex_t mutexOrderProcessByScript;
+
 bool flagMemoryResponse;
+
+bool flagExecutingScript;
 
 int pid;
 

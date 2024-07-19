@@ -100,15 +100,16 @@ pcb_t* createProcess()
 //Agrega el proceso a la lista de NEW
 void addPcbToNew(char* path)
 {
-
     pcb_t *process = createProcess();
 
     sem_wait(&semPausePlanning);
     sem_post(&semPausePlanning);
 
+    pthread_mutex_lock(&mutexSendProcessToMemory);
     sendProcessPathToMemory(process, path);
     sem_wait(&semMemoryOk); // Esperan a que la memoria de el ok de que el proceso se creo correctamente
     pthread_mutex_unlock(&mutexSendProcessToMemory);
+
 
     if(flagMemoryResponse)
     {
@@ -126,8 +127,10 @@ void addPcbToNew(char* path)
         destroyProcess(process);
 
     }
+
+    free(path);
     
-    //free(path);
+    if(flagExecutingScript) pthread_mutex_unlock(&mutexOrderProcessByScript);
 }
 
 void destroyProcess(pcb_t *process)

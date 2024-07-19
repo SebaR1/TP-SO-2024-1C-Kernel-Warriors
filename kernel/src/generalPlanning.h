@@ -112,7 +112,11 @@ extern sem_t semExitProgram;;
 
 extern pthread_mutex_t mutexSendProcessToMemory;
 
+extern pthread_mutex_t mutexOrderProcessByScript;
+
 extern bool flagMemoryResponse;
+
+extern bool flagExecutingScript;
 
 extern int pid;
 

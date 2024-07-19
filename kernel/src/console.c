@@ -4,6 +4,9 @@
 
 //Habilita una consola y valida las instrucciones
 void readKernelConsole(){
+
+    flagExecutingScript = false;
+
     log_info(getLogger(), "Consola iniciada\n");
     char* read;
     read = readline("");
@@ -21,6 +24,7 @@ void readKernelConsole(){
         }
 
         attendInstruction(read);
+        free(read);
         read = readline("");
     } //Para terminar la consola se pone algo vacio
     free(read);
@@ -33,11 +37,13 @@ bool _isAnInstruction(char* instruction){
 
     if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PROCESO")){
         if(string_array_size(consoleCommand) == 2) {
+            string_array_destroy(consoleCommand);
             return true;
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
     else if(string_equals_ignore_case(consoleCommand[0], "EJECUTAR_SCRIPT")){
         if(string_array_size(consoleCommand) == 2) {
+            string_array_destroy(consoleCommand);
             return true;
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
@@ -48,9 +54,11 @@ bool _isAnInstruction(char* instruction){
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
     else if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PLANIFICACION")){
+        string_array_destroy(consoleCommand);
         return true;
     }
     else if(string_equals_ignore_case(consoleCommand[0], "DETENER_PLANIFICACION")){
+        string_array_destroy(consoleCommand);
         return true;
     }
     else if(string_equals_ignore_case(consoleCommand[0], "MULTIPROGRAMACION")){
@@ -60,6 +68,7 @@ bool _isAnInstruction(char* instruction){
             } //Se fija si tiene la cantidad de parametros que pide la instruccion
     }
     else if(string_equals_ignore_case(consoleCommand[0], "PROCESO_ESTADO")){
+        string_array_destroy(consoleCommand);
         return true;
     }
 
@@ -75,7 +84,6 @@ void attendInstruction(char* instruction)
     char** consoleCommand = string_split(instruction, " ");
 
     if(string_equals_ignore_case(consoleCommand[0], "INICIAR_PROCESO")){
-        pthread_mutex_lock(&mutexSendProcessToMemory);
         pthread_t initProcessThread;
         char* paramInitProcessThread = malloc(string_length(consoleCommand[1]) + 1);
         strcpy(paramInitProcessThread, consoleCommand[1]);
@@ -99,12 +107,11 @@ void attendInstruction(char* instruction)
         flagAuxStopPlanning = false;
     }
     else if(string_equals_ignore_case(consoleCommand[0], "EJECUTAR_SCRIPT")){
-        //pthread_t executeScriptThread;
-        //char* paramExecuteScriptThread = malloc(string_length(consoleCommand[1] + 1));
-        executeScript(consoleCommand[1]);
-        //strcpy(paramExecuteScriptThread, consoleCommand[1]);
-        //pthread_create(&executeScriptThread, NULL, (void*)executeScript, paramExecuteScriptThread);
-        //pthread_detach(executeScriptThread);
+        pthread_t executeScriptThread;
+        char* paramExecuteScriptThread = malloc(string_length(consoleCommand[1]) + 1);
+        strcpy(paramExecuteScriptThread, consoleCommand[1]);
+        pthread_create(&executeScriptThread, NULL, (void*)executeScript, paramExecuteScriptThread);
+        pthread_detach(executeScriptThread);
     }
     else if(string_equals_ignore_case(consoleCommand[0], "MULTIPROGRAMACION")){
         pthread_t changeMultiprogrammingThread;
@@ -117,7 +124,7 @@ void attendInstruction(char* instruction)
         showProcessByState();
     }
 
-    //string_array_destroy(consoleCommand);
+    string_array_destroy(consoleCommand);
 }
 
 void executeScript(char* path)
@@ -131,6 +138,8 @@ void executeScript(char* path)
         return;
     }
 
+    flagExecutingScript = true;
+
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
@@ -140,7 +149,8 @@ void executeScript(char* path)
 
     while (1) {
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutexOrderProcessByScript);
+
         read = getline(&line, &len, fileScript);
 
         if (read == -1) break;
@@ -154,13 +164,16 @@ void executeScript(char* path)
         } else {
             log_info(getLogger(), "Comando de consola no reconocido");
         }
-        pthread_mutex_unlock(&mutex);
+
     }
+
+    pthread_mutex_unlock(&mutexOrderProcessByScript);
+    flagExecutingScript = false;
 
     pthread_mutex_destroy(&mutex);
     free(line);
     fclose(fileScript);
-    //free(path);
+    free(path);
 }
 
 void showProcessByState()
