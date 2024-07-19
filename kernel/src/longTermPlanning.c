@@ -135,13 +135,15 @@ void addPcbToNew(char* path)
 
 void destroyProcess(pcb_t *process)
 {
-    for(int i = 0; i < list_size(process->resources->list); i++) // Pasa por todos los recursos asignados que tiene para basicamente hacerles un signal.
+    for(int i = 0; i < list_mutex_size(process->resources); i++) // Pasa por todos los recursos asignados que tiene para basicamente hacerles un signal.
     {
         resource_t* resourceToFree = list_pop(process->resources); // Popea el recurso asignado
         addInstanceResource(resourceToFree);
         
         if(list_mutex_size(resourceToFree->blockList) > 0){ // Se fija si tiene procesos bloqueados que esperen este recurso.
         pcb_t* processBlockToReady = list_pop(resourceToFree->blockList);
+        list_push(processBlockToReady->resources, resourceToFree);
+        list_remove_element_mutex(pcbBlockList, processBlockToReady);
         processBlockToReady->state = PCB_READY;
         list_push(pcbReadyList, processBlockToReady);
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);

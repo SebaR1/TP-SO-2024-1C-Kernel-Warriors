@@ -886,13 +886,18 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
         if(list_mutex_size(resourceFound->blockList) > 0){
             pcb_t* processBlockToReady = list_pop(resourceFound->blockList);
             list_push(processBlockToReady->resources, resourceFound);
-            processBlockToReady->state = PCB_READY;
+
         
             //PARA DEBUGGEAR
             log_info(getLogger(), "El recurso se asigno al proceso %d", processBlockToReady->pid);
 
+            list_remove_element_mutex(pcbBlockList, processBlockToReady);
+
+            processBlockToReady->state = PCB_READY;
             list_push(pcbReadyList, processBlockToReady);
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY", processBlockToReady->pid);
+
+            sem_post(&semReady);
 
         }
         list_push(pcbExecList, processExec); // El proceso tiene que volver devuelta a exec PORQUE PUEDE. (Podria generar segmentacion fault sino)

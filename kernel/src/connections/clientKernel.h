@@ -39,7 +39,7 @@ void sendIOGenSleepOperationToIO(interface_t *interface, uint32_t timeOfOperatio
 /// @param interface La interfaz que tiene el nombre identificador y su socket.
 /// @param listOfPhysicalAdressesInfo Lista que contiene todas las direcciones fisicas.
 /// @param amountOfPhysicalAddresses Cantidad de direcciones fisicas que contiene la lista.
-/// @param sizeToReadOrWrite Nose.
+/// @param sizeToReadOrWrite Suma de tamanio de direcciones fisicas.
 void sendIOStdinReadOperationToIO(interface_t* interface, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite);
 
 
@@ -47,7 +47,7 @@ void sendIOStdinReadOperationToIO(interface_t* interface, t_list* listOfPhysical
 /// @param interface La interfaz que tiene el nombre identificador y su socket.
 /// @param listOfPhysicalAdressesInfo Lista que contiene todas las direcciones fisicas.
 /// @param amountOfPhysicalAddresses Cantidad de direcciones fisicas que contiene la lista.
-/// @param sizeToReadOrWrite Nose.
+/// @param sizeToReadOrWrite Suma de tamanio de direcciones fisicas.
 void sendIOStdoutWriteOperationToIO(interface_t* interface, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite);
 
 
