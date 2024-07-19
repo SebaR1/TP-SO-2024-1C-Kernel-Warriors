@@ -23,10 +23,13 @@ typedef enum
 
 typedef struct
 {
-	char* param1;
-	char* param2;
+	uint32_t param1;
+	uint32_t param2;
 	char* param3;
 	char* param4;
+	char* param5;
+	char* param6;
+	t_list* listAux;
 } paramsKernelForIO;
 
 //Estructra del pcb del proceso

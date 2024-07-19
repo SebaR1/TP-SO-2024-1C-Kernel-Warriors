@@ -323,8 +323,6 @@ void ioSendEndOperation(int *socketClientIO)
 
     }
 
-    
-
 
     if(!list_mutex_is_empty(interfaceFound->blockList)){ // Se fija si la interfaz tiene algun otro proceso en espera. 
         pcb_t* processBlocked = list_pop(interfaceFound->blockList);
@@ -334,24 +332,45 @@ void ioSendEndOperation(int *socketClientIO)
         
         processBlocked->isInInterface = true;
 
+        t_list *listOfPhysicalAdressesInfo;
+        uint32_t amountOfPhysicalAddresses;
+        uint32_t sizeToReadOrWrite;
+
         switch (interfaceFound->interfaceType)
         {
         case Generic:
-            int timeOfOperation = atoi(processBlocked->params->param1); // Agarro el parametro que tenia y lo convierto a int.
-            uint32_t timeOfOperationCast = (uint32_t)timeOfOperation; // Lo casteo para que se mande de esa forma por problemas de arquitectura entre computadoras. 
-            sendIOGenSleepOperationToIO(interfaceFound, timeOfOperationCast); 
+            uint32_t timeOfOperation = processBlocked->params->param1; // Agarro el parametro que tenia. 
+            sendIOGenSleepOperationToIO(interfaceFound, timeOfOperation); 
             break;
 
         case STDIN:
-            //int registerDirectionRead = atoi(processBlocked->params->param1);
-            //int registerSizeRead = atoi(processBlocked->params->param2);
-            //endIOStdinReadOperationToIO(interfaceFound, registerDirectionRead, registerSizeRead);
+            listOfPhysicalAdressesInfo = processBlocked->params->listAux;
+            amountOfPhysicalAddresses = processBlocked->params->param1;
+            sizeToReadOrWrite = processBlocked->params->param2;
+            sendIOStdinReadOperationToIO(interfaceFound, listOfPhysicalAdressesInfo, amountOfPhysicalAddresses, sizeToReadOrWrite);
+            
+            for (int i = 0; i < amountOfPhysicalAddresses; i++) {
+                physicalAddressInfoP *adresses = list_remove(processBlocked->params->listAux, 0);
+
+                free(adresses->physicalAddress);
+                free(adresses->size);
+                free(adresses);
+            }
             break;
         
         case STDOUT:
-            //int registerDirectionWrite = atoi(processBlocked->params->param1);
-            //int registerSizeWrite = atoi(processBlocked->params->param2);
-            //sendIOStdoutWriteOperationToIO(interfaceFound, registerDirectionWrite, registerSizeWrite);
+            listOfPhysicalAdressesInfo = processBlocked->params->listAux;
+            amountOfPhysicalAddresses = processBlocked->params->param1;
+            sizeToReadOrWrite = processBlocked->params->param2;
+            sendIOStdinReadOperationToIO(interfaceFound, listOfPhysicalAdressesInfo, amountOfPhysicalAddresses, sizeToReadOrWrite);
+            
+            for (int i = 0; i < amountOfPhysicalAddresses; i++) {
+                physicalAddressInfoP *adresses = list_remove(processBlocked->params->listAux, 0);
+
+                free(adresses->physicalAddress);
+                free(adresses->size);
+                free(adresses);
+            }
             break;
 
         default:
@@ -374,10 +393,10 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
     pcb_t *processExec = assignContextToPcb(contextProcess);
 
     // Recibo el nombre de la interfaz a usar.
-    char* nameRequestInterface = list_remove(listPackage, 0);
+    char* nameRequestInterface = (char*)list_remove(listPackage, 0);
 
     // Recibo la cantidad de tiempo a utilizar.
-    uint32_t timeOfOperation = *(uint32_t*)list_remove(listPackage, 0);
+    uint32_t *timeOfOperation = (uint32_t*)list_remove(listPackage, 0);
 
     // Busco la interfaz por el nombre identificador.
     interface_t *interfaceFound = foundInterface(nameRequestInterface);
@@ -428,16 +447,18 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
 
                 processExec->isInInterface = true;
 
-                sendIOGenSleepOperationToIO(interfaceFound, timeOfOperation);
+                sendIOGenSleepOperationToIO(interfaceFound, *timeOfOperation);
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->param1 = string_itoa(timeOfOperation); // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+                processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
             }
         }
     }
 
+    free(timeOfOperation);
+    free(nameRequestInterface);
     list_destroy(listPackage);
 
 }
@@ -514,10 +535,25 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
                 sendIOStdinReadOperationToIO(interfaceFound, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite);
                 
             } else {
-                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                //processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
-                //processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                processExec->params->param1 = *amountOfPhysicalAddresses;
+                processExec->params->param2 = *sizeToReadOrWrite;
+
+                // Se guarda la informacion de la lista para tenerla al momento que se desoscupe la interfaz.
+                for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+                {
+                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfo));
+                    adresses->physicalAddress = malloc(sizeof(int));
+                    adresses->size = malloc(sizeof(int));
+
+                    physicalAddressInfoP *adressesAux = list_get(listOfPhysicalAddresses, i);
+
+                    *(adresses->physicalAddress) = *(adressesAux->physicalAddress);
+                    *(adresses->size) = *(adressesAux->size);
+
+                    list_add(processExec->params->listAux, adresses);
+                }
 
             }
         }
@@ -525,7 +561,7 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
 
     free(nameRequestInterface);
     
-    for(int i = 0; i > *amountOfPhysicalAddresses; i++){
+    for(int i = 0; i < *amountOfPhysicalAddresses; i++){
         physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
 
         free(adresses->physicalAddress);
@@ -613,18 +649,32 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
                 sendIOStdoutWriteOperationToIO(interfaceFound, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite);
                 
             } else {
-                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                //processExec->params->param1 = string_itoa(registerDirection); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
-                //processExec->params->param2 = string_itoa(registerSize); // Se guarda el la direccion de registro para usarse despues que la interfaz este liberada. 
+                processExec->params->param1 = *amountOfPhysicalAddresses;
+                processExec->params->param2 = *sizeToReadOrWrite;
 
+                // Se guarda la informacion de la lista para tenerla al momento que se desoscupe la interfaz.
+                for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+                {
+                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfo));
+                    adresses->physicalAddress = malloc(sizeof(int));
+                    adresses->size = malloc(sizeof(int));
+
+                    physicalAddressInfoP *adressesAux = list_get(listOfPhysicalAddresses, i);
+
+                    *(adresses->physicalAddress) = *(adressesAux->physicalAddress);
+                    *(adresses->size) = *(adressesAux->size);
+
+                    list_add(processExec->params->listAux, adresses);
+                }
             }
         }
     }
 
     free(nameRequestInterface);
     
-    for(int i = 0; i > *amountOfPhysicalAddresses; i++){
+    for(int i = 0; i < *amountOfPhysicalAddresses; i++){
         physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
 
         free(adresses->physicalAddress);
@@ -773,6 +823,7 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
         }
     }
 
+    free(resourceName);
     list_destroy(listPackage);
 }
 
@@ -832,6 +883,7 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
         sem_post(&semBlock);  // No hace nada pero me quedaba bonito. :s
     }
 
+    free(resourceName);
     list_destroy(listPackage);
 }
 

@@ -45,7 +45,6 @@ void exitState()
         pthread_mutex_lock(&mutex2);
         sendEndProcessToMemory(process);
         pthread_mutex_unlock(&mutex2);
-        log_info(getLogger(), "Se borro el proceso con PID: %d", process->pid);
         destroyProcess(process);
 
         if(prevState != PCB_NEW){
@@ -92,6 +91,7 @@ pcb_t* createProcess()
     process->registersCpu->SI = 0;
     process->registersCpu->DI = 0;
     process->params = malloc(sizeof(paramsKernelForIO));
+    process->params->listAux = list_create();
     return process;
 };
 
@@ -151,7 +151,17 @@ void destroyProcess(pcb_t *process)
 
     }   
 
+    for(int i = 0; i < list_size(process->params->listAux); i++)
+    {
+        physicalAddressInfoP *adresses = list_remove(process->params->listAux, 0);
+
+        free(adresses->physicalAddress);
+        free(adresses->size);
+        free(adresses);
+    }
+
     destroyListMutex(process->resources); 
+    list_destroy(process->params->listAux);
     free(process->params);
     free(process->registersCpu);
     free(process);

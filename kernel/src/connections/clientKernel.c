@@ -77,12 +77,12 @@ void sendIOStdinReadOperationToIO(interface_t* interface, t_list* listOfPhysical
     addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
 
     for(int i = 0; i < amountOfPhysicalAddresses; i++){
-        physicalAddressInfo adresses;
+        physicalAddressInfoP *adresses;
 
-        adresses = *(physicalAddressInfo*)list_get(listOfPhysicalAdressesInfo, i);
+        adresses = (physicalAddressInfoP*)list_get(listOfPhysicalAdressesInfo, i);
 
-        addToPackage(package, &(adresses.physicalAddress), sizeof(int));
-        addToPackage(package, &(adresses.size), sizeof(int));
+        addToPackage(package, adresses->physicalAddress, sizeof(int));
+        addToPackage(package, adresses->size, sizeof(int));
     }
 
     addToPackage(package, &(sizeToReadOrWrite), sizeof(int));
