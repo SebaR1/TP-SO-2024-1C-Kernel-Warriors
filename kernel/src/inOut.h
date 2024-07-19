@@ -16,6 +16,10 @@ bool comparePidAssignInInterface(void *data);
 
 interface_t *foundInterfaceByProcessPidAssign(uint32_t pid);
 
+bool compareSocketValAssignOfInterface(void *data);
+
+interface_t *foundInterfaceBySocket(int socket);
+
 
 // Destruye las interfaces.
 void destroyInterfaces();

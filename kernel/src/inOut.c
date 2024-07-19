@@ -3,7 +3,10 @@
 interface_t *createInterface(char* nameInterface, interfaceType typeInterface)
 {
     interface_t *newInterface = malloc(sizeof(interface_t));
-    newInterface->name = nameInterface;
+
+    newInterface->name = malloc(string_length(nameInterface) + 1); // +1 por el nulo
+    strcpy(newInterface->name, nameInterface);
+
     newInterface->interfaceType = typeInterface;
     newInterface->flagKillProcess = false;
     newInterface->isBusy = false;
@@ -50,6 +53,24 @@ interface_t *foundInterfaceByProcessPidAssign(uint32_t pid)
     return interfaceFound;
 }
 
+int auxSocketVal;
+
+bool compareSocketValAssignOfInterface(void *data)
+{
+    interface_t *interface = (interface_t *)data;
+    return *(interface->socket) == auxSocketVal;
+}
+
+interface_t *foundInterfaceBySocket(int socket)
+{
+    auxSocketVal = socket;
+
+    interface_t *interfaceFound = (interface_t*)list_find_mutex(interfacesList, compareSocketValAssignOfInterface);
+
+    if (interfaceFound == NULL) return NULL;
+
+    return interfaceFound;
+}
 
 void destroyInterfaces()
 {
@@ -57,6 +78,8 @@ void destroyInterfaces()
 
     for(int i = 0; i < interfacesSize; i++){
         interface_t *interfaceToDestroy = list_pop(interfacesList);
+
+        free(interfaceToDestroy->name);
         destroyListMutex(interfaceToDestroy->blockList);
         free(interfaceToDestroy);
     }

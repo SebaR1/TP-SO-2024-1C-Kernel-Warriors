@@ -151,6 +151,7 @@ void serverKernelForIO(int *socketClient)
 
         case ERROR:
             log_error(getLogger(), ERROR_CASE_MESSAGE);
+            ioInterfaceDisconnect(socketClient);
             exitLoop = true;
             break;
 
@@ -239,10 +240,13 @@ void memorySendResponseForNewProcess(int *socketClientMemory)
 {
     t_list *listPackage = getPackage(*socketClientMemory);
 
-    flagMemoryResponse = *(bool*)list_remove(listPackage, 0);
+    bool* pFlagMemoryResponseAux = (bool*)list_remove(listPackage, 0); 
+
+    flagMemoryResponse = *pFlagMemoryResponseAux;
 
     sem_post(&semMemoryOk);
 
+    free(pFlagMemoryResponseAux);
     list_destroy(listPackage);
 }
 
@@ -257,16 +261,18 @@ void ioSendInterface(int *socketClientIO)
 
     // Recibo el nombre y tipo de la interfaz.
     char* nameInterface = (char*)list_remove(listPackage, 0);
-    interfaceType typeInterface = *(interfaceType*)list_remove(listPackage, 0);
+    interfaceType *typeInterface = (interfaceType*)list_remove(listPackage, 0);
     
     // Creo la interfaz.
-    interface_t *newInterface = createInterface(nameInterface, typeInterface);
+    interface_t *newInterface = createInterface(nameInterface, *typeInterface);
 
     // Guardo el socket, para tener la conexion.
     newInterface->socket = socketClientIO;
 
     list_push(interfacesList, newInterface);
 
+    free(nameInterface);
+    free(typeInterface);
     list_destroy(listPackage);
 
 }
@@ -378,8 +384,21 @@ void ioSendEndOperation(int *socketClientIO)
         }
     }
 
+    free(nameInterface);
     list_destroy(listPackage);
+}
 
+void ioInterfaceDisconnect(int *socketClientIO)
+{
+    interface_t *interfaceFound = foundInterfaceBySocket(*socketClientIO); //Nunca deberia encontrar nada.
+
+    if (interfaceFound == NULL) log_error(getLogger(), "No deberia ocurrir nunca. Se desconecta una interfaz que nunca se conecto antes.");
+
+    list_remove_element_mutex(interfacesList, interfaceFound);
+
+    free(interfaceFound->name);
+    destroyListMutex(interfaceFound->blockList);
+    free(interfaceFound);
 }
 
 void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)

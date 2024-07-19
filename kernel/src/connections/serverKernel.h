@@ -36,6 +36,15 @@ void serverKernelForIO(int* socketClient);
 void operationPackageFromIO(t_list* package);
 
 
+void ioSendInterface(int *socketClientIO);
+
+
+void ioSendEndOperation(int *socketClientIO);
+
+
+void ioInterfaceDisconnect(int *socketClientIO);
+
+
 //////////////////////////////////////MEMORIA///////////////////////////////////////////
 
 
@@ -46,6 +55,7 @@ void memorySendResponseForNewProcess(int *socketClientMemory);
 
 
 //////////////////////////////////////CPU///////////////////////////////////////////////
+
 
 // Hilo que funciona como servidor para recibir paquetes de un cliente especificado por parametro, y realizar determinadas operaciones en base al paquete recibido
 void serverKernelForCPU(int *socketClient);
@@ -75,12 +85,6 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch);
 
 
 void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch);
-
-
-void ioSendInterface(int *socketClientIO);
-
-
-void ioSendEndOperation(int *socketClientIO);
 
 
 // Recibe el contexto del proceso de un package y lo retorna. 
