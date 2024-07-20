@@ -163,8 +163,8 @@ void sendContextToKernelForIOReadOrWrite(operationCode opCode, char* nameInterfa
 
     addContextToPackage(package, &contextProcess);
     addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
-    addToPackage(package, &amountOfPhysicalAddresses, sizeof(int));
 
+    addToPackage(package, &amountOfPhysicalAddresses, sizeof(int));
     for (int i = 0; i < amountOfPhysicalAddresses; i++)
     {
         addToPackage(package, &(physicalAddressesArray[i].physicalAddress), sizeof(int));
@@ -181,6 +181,76 @@ void sendContextToKernelForIOReadOrWrite(operationCode opCode, char* nameInterfa
     sem_wait(&semContinueInstructionCycle);
 }
 
+
+void sendContextToKernelForIOFSCreateOrDelete(operationCode opCode, char* nameInterface, char* fileName)
+{
+    t_package* package = createPackage(opCode);
+
+    contextProcess contextProcess;
+    getCurrentContextProcess(&contextProcess);
+
+    addContextToPackage(package, &contextProcess);
+
+    addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
+    addToPackage(package, fileName, string_length(fileName) + 1); // + 1 por el caracter nulo \0
+
+    sendPackage(package, socketKernelDispatch); // Envio el Contexto
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+
+    sem_wait(&semContinueInstructionCycle);
+}
+
+
+void sendContextToKernelForIOFSTruncate(char* nameInterface, char* fileName, uint32_t size)
+{
+    t_package* package = createPackage(CPU_SEND_CONTEXT_FOR_IO_FS_TRUNCATE);
+
+    contextProcess contextProcess;
+    getCurrentContextProcess(&contextProcess);
+
+    addContextToPackage(package, &contextProcess);
+
+    addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
+    addToPackage(package, fileName, string_length(fileName) + 1); // + 1 por el caracter nulo \0
+    addToPackage(package, &size, sizeof(uint32_t));
+
+    sendPackage(package, socketKernelDispatch); // Envio el Contexto
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+
+    sem_wait(&semContinueInstructionCycle);
+}
+
+
+void sendContextToKernelForIOFSReadOrWrite(operationCode opCode, char* nameInterface, char* fileName, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite, int filePointer)
+{
+    t_package* package = createPackage(opCode);
+
+    contextProcess contextProcess;
+    getCurrentContextProcess(&contextProcess);
+
+    addContextToPackage(package, &contextProcess);
+
+    addToPackage(package, nameInterface, string_length(nameInterface) + 1); // + 1 por el caracter nulo \0
+    addToPackage(package, fileName, string_length(fileName) + 1); // + 1 por el caracter nulo \0
+
+    addToPackage(package, &amountOfPhysicalAddresses, sizeof(int));
+    for (int i = 0; i < amountOfPhysicalAddresses; i++)
+    {
+        addToPackage(package, &(physicalAddressesArray[i].physicalAddress), sizeof(int));
+        addToPackage(package, &(physicalAddressesArray[i].size), sizeof(int));
+    }
+
+    addToPackage(package, &sizeToReadOrWrite, sizeof(int));
+    addToPackage(package, &filePointer, sizeof(int));
+
+    sendPackage(package, socketKernelDispatch); // Envio el Contexto
+
+    destroyPackage(package); // Destruyo el paquete (libero la memoria usada)
+
+    sem_wait(&semContinueInstructionCycle);
+}
 
 
 

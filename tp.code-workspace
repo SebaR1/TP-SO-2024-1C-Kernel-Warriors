@@ -14,7 +14,9 @@
 			"atomic": "c",
 			"string": "c",
 			"typeinfo": "c",
-			"random": "c"
+			"random": "c",
+			"memory_resource": "c",
+			"ratio": "c"
 		},
 		"C_Cpp.errorSquiggles": "disabled",
 	},

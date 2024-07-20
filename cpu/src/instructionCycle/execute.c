@@ -614,7 +614,7 @@ void IO_GEN_SLEEP(char* interface, uint32_t workUnits)
 ///////////////////////// INSTRUCCION IO_STDIN_READ /////////////////////////
 
 
-void IO_STDIN_READ(char* resource, registerType direction, registerType size)
+void IO_STDIN_READ(char* interface, registerType direction, registerType size)
 {
     uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
     uint8_t** size1bytes = malloc(sizeof(uint8_t**));
@@ -628,11 +628,11 @@ void IO_STDIN_READ(char* resource, registerType direction, registerType size)
         switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
-            _IO_STDIN_READ11(resource, *direction1bytes, *size1bytes);
+            _IO_STDIN_READ11(interface, *direction1bytes, *size1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
-            _IO_STDIN_READ14(resource, *direction1bytes, *size4bytes);
+            _IO_STDIN_READ14(interface, *direction1bytes, *size4bytes);
             break;
         }
 
@@ -642,11 +642,11 @@ void IO_STDIN_READ(char* resource, registerType direction, registerType size)
         switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
-            _IO_STDIN_READ41(resource, *direction4bytes, *size1bytes);
+            _IO_STDIN_READ41(interface, *direction4bytes, *size1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
-            _IO_STDIN_READ44(resource, *direction4bytes, *size4bytes);
+            _IO_STDIN_READ44(interface, *direction4bytes, *size4bytes);
             break;
         }
 
@@ -659,42 +659,42 @@ void IO_STDIN_READ(char* resource, registerType direction, registerType size)
     free(direction4bytes);
 }
 
-void _IO_STDIN_READ11(char* resource, uint8_t* direction, uint8_t* size)
+void _IO_STDIN_READ11(char* interface, uint8_t* direction, uint8_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
 
-void _IO_STDIN_READ14(char* resource, uint8_t* direction, uint32_t* size)
+void _IO_STDIN_READ14(char* interface, uint8_t* direction, uint32_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
 
-void _IO_STDIN_READ41(char* resource, uint32_t* direction, uint8_t* size)
+void _IO_STDIN_READ41(char* interface, uint32_t* direction, uint8_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
 
-void _IO_STDIN_READ44(char* resource, uint32_t* direction, uint32_t* size)
+void _IO_STDIN_READ44(char* interface, uint32_t* direction, uint32_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDIN, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -706,7 +706,7 @@ void _IO_STDIN_READ44(char* resource, uint32_t* direction, uint32_t* size)
 ///////////////////////// INSTRUCCION IO_STDOUT_WRITE /////////////////////////
 
 
-void IO_STDOUT_WRITE(char* resource, registerType direction, registerType size)
+void IO_STDOUT_WRITE(char* interface, registerType direction, registerType size)
 {
     uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
     uint8_t** size1bytes = malloc(sizeof(uint8_t**));
@@ -720,11 +720,11 @@ void IO_STDOUT_WRITE(char* resource, registerType direction, registerType size)
         switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
-            _IO_STDOUT_WRITE11(resource, *direction1bytes, *size1bytes);
+            _IO_STDOUT_WRITE11(interface, *direction1bytes, *size1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
-            _IO_STDOUT_WRITE14(resource, *direction1bytes, *size4bytes);
+            _IO_STDOUT_WRITE14(interface, *direction1bytes, *size4bytes);
             break;
         }
 
@@ -734,11 +734,11 @@ void IO_STDOUT_WRITE(char* resource, registerType direction, registerType size)
         switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
         {
         case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
-            _IO_STDOUT_WRITE41(resource, *direction4bytes, *size1bytes);
+            _IO_STDOUT_WRITE41(interface, *direction4bytes, *size1bytes);
             break;
         
         case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
-            _IO_STDOUT_WRITE44(resource, *direction4bytes, *size4bytes);
+            _IO_STDOUT_WRITE44(interface, *direction4bytes, *size4bytes);
             break;
         }
 
@@ -751,42 +751,42 @@ void IO_STDOUT_WRITE(char* resource, registerType direction, registerType size)
     free(direction4bytes);
 }
 
-void _IO_STDOUT_WRITE11(char* resource, uint8_t* direction, uint8_t* size)
+void _IO_STDOUT_WRITE11(char* interface, uint8_t* direction, uint8_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
 
-void _IO_STDOUT_WRITE14(char* resource, uint8_t* direction, uint32_t* size)
+void _IO_STDOUT_WRITE14(char* interface, uint8_t* direction, uint32_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
 
-void _IO_STDOUT_WRITE41(char* resource, uint32_t* direction, uint8_t* size)
+void _IO_STDOUT_WRITE41(char* interface, uint32_t* direction, uint8_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
 
-void _IO_STDOUT_WRITE44(char* resource, uint32_t* direction, uint32_t* size)
+void _IO_STDOUT_WRITE44(char* interface, uint32_t* direction, uint32_t* size)
 {
     physicalAddressInfo* info;
-    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, info);
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), *direction, *size, &info);
 
-    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, resource, amountOfPhysicalAddresses, info, *size);
+    sendContextToKernelForIOReadOrWrite(CPU_SEND_CONTEXT_FOR_IO_STDOUT, interface, amountOfPhysicalAddresses, info, *size);
 
     free(info);
 }
@@ -796,9 +796,9 @@ void _IO_STDOUT_WRITE44(char* resource, uint32_t* direction, uint32_t* size)
 ///////////////////////// INSTRUCCION IO_FS_CREATE /////////////////////////
 
 
-void IO_FS_CREATE(char* resource, char* fileName)
+void IO_FS_CREATE(char* interface, char* fileName)
 {
-
+    sendContextToKernelForIOFSCreateOrDelete(CPU_SEND_CONTEXT_FOR_IO_FS_CREATE, interface, fileName);
 }
 
 
@@ -806,9 +806,9 @@ void IO_FS_CREATE(char* resource, char* fileName)
 ///////////////////////// INSTRUCCION IO_FS_DELETE /////////////////////////
 
 
-void IO_FS_DELETE(char* resource, char* fileName)
+void IO_FS_DELETE(char* interface, char* fileName)
 {
-
+    sendContextToKernelForIOFSCreateOrDelete(CPU_SEND_CONTEXT_FOR_IO_FS_DELETE, interface, fileName);
 }
 
 
@@ -816,30 +816,299 @@ void IO_FS_DELETE(char* resource, char* fileName)
 ///////////////////////// INSTRUCCION IO_FS_TRUNCATE /////////////////////////
 
 
-void IO_FS_TRUNCATE(char* resource, char* fileName, registerType size)
+void IO_FS_TRUNCATE(char* interface, char* fileName, registerType size)
 {
+    uint8_t** size1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** size4bytes = malloc(sizeof(uint32_t**));
 
+
+    switch (_typeToRegister(size, size1bytes, size4bytes))
+    {
+    case REGISTER_1_BYTE:
+        _IO_FS_TRUNCATE1(interface, fileName, size1bytes);
+        break;
+
+    case REGISTER_4_BYTES:
+        _IO_FS_TRUNCATE4(interface, fileName, size4bytes);
+        break;
+    }
+
+    free(size1bytes);
+    free(size4bytes);
 }
 
+void _IO_FS_TRUNCATE1(char* interface, char* fileName, uint8_t* size)
+{
+    sendContextToKernelForIOFSTruncate(interface, fileName, *size);
+}
+
+void _IO_FS_TRUNCATE4(char* interface, char* fileName, uint32_t* size)
+{
+    sendContextToKernelForIOFSTruncate(interface, fileName, *size);
+}
 
 
 ///////////////////////// INSTRUCCION IO_FS_WRITE /////////////////////////
 
 
-void IO_FS_WRITE(char* resource, char* fileName, registerType direction, registerType size, registerType pointer)
+void IO_FS_WRITE(char* interface, char* fileName, registerType direction, registerType size, registerType pointer)
 {
+    uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** size1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** pointer1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** direction4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** size4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** pointer4bytes = malloc(sizeof(uint32_t**));
+
+
+    switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // Destination 1 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_WRITE111(interface, fileName, *direction1bytes, *size1bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_WRITE114(interface, fileName, *direction1bytes, *size1bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_WRITE141(interface, fileName, *direction1bytes, *size4bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_WRITE144(interface, fileName, *direction1bytes, *size4bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // Destination 4 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_WRITE411(interface, fileName, *direction4bytes, *size1bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_WRITE414(interface, fileName, *direction4bytes, *size1bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_WRITE441(interface, fileName, *direction4bytes, *size4bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_WRITE444(interface, fileName, *direction4bytes, *size4bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        }
+
+        break;
+    }
+
+    free(size1bytes);
+    free(size4bytes);
+    free(direction1bytes);
+    free(direction4bytes);
+    free(pointer1bytes);
+    free(pointer4bytes);
+}
+
+
+void _IO_FS_WRITE111(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_WRITE114(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_WRITE141(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_WRITE144(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_WRITE411(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_WRITE414(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_WRITE441(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
 
 }
 
+void _IO_FS_WRITE444(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_WRITE, interface, fileName, *direction, *size, *pointer);
+}
 
 
 ///////////////////////// INSTRUCCION IO_FS_READ /////////////////////////
 
 
-void IO_FS_READ(char* resource, char* fileName, registerType direction, registerType size, registerType pointer)
+void IO_FS_READ(char* interface, char* fileName, registerType direction, registerType size, registerType pointer)
 {
+    uint8_t** direction1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** size1bytes = malloc(sizeof(uint8_t**));
+    uint8_t** pointer1bytes = malloc(sizeof(uint8_t**));
+    uint32_t** direction4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** size4bytes = malloc(sizeof(uint32_t**));
+    uint32_t** pointer4bytes = malloc(sizeof(uint32_t**));
 
+
+    switch (_typeToRegister(direction, direction1bytes, direction4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+    {
+    case REGISTER_1_BYTE: // Destination 1 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 1 bytes y origin 1 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_READ111(interface, fileName, *direction1bytes, *size1bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_READ114(interface, fileName, *direction1bytes, *size1bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 1 bytes y origin 4 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_READ141(interface, fileName, *direction1bytes, *size4bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_READ144(interface, fileName, *direction1bytes, *size4bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        }
+
+        break;
+
+    case REGISTER_4_BYTES: // Destination 4 bytes
+        switch (_typeToRegister(size, size1bytes, size4bytes)) // Se fija si la variable pasada por parametro es de 1 o 4 bytes
+        {
+        case REGISTER_1_BYTE: // Destination 4 bytes y origin 1 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_READ411(interface, fileName, *direction4bytes, *size1bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_READ414(interface, fileName, *direction4bytes, *size1bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        
+        case REGISTER_4_BYTES: // Destination 4 bytes y origin 4 bytes
+            switch (_typeToRegister(pointer, pointer1bytes, pointer4bytes))
+            {
+            case REGISTER_1_BYTE:
+                _IO_FS_READ441(interface, fileName, *direction4bytes, *size4bytes, *pointer1bytes);
+                break;
+            
+            case REGISTER_4_BYTES:
+                _IO_FS_READ444(interface, fileName, *direction4bytes, *size4bytes, *pointer4bytes);
+                break;
+            }
+            break;
+        }
+
+        break;
+    }
+
+    free(size1bytes);
+    free(size4bytes);
+    free(direction1bytes);
+    free(direction4bytes);
+    free(pointer1bytes);
+    free(pointer4bytes);
 }
+
+
+void _IO_FS_READ111(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_READ114(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_READ141(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_READ144(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_READ411(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_READ414(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_READ441(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint8_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+void _IO_FS_READ444(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint32_t* pointer)
+{
+    _generic_IO_FS_WRITE_READ(CPU_SEND_CONTEXT_FOR_IO_FS_READ, interface, fileName, *direction, *size, *pointer);
+}
+
+
 
 
 
@@ -860,6 +1129,19 @@ void EXIT()
 
 
 ///////////////////////// FUNCIONES AUXILIARES GENERALES /////////////////////////
+
+
+///////// FUNCION AUXILIAR PARA EL IO_FS_WRITE y IO_FS_READ
+void _generic_IO_FS_WRITE_READ(operationCode opCode, char* interface, char* fileName, uint32_t direction, uint32_t size, uint32_t pointer)
+{
+    physicalAddressInfo* info;
+    int amountOfPhysicalAddresses = getAllPhysicalAddresses(getCurrentPID(), direction, size, &info);
+
+    sendContextToKernelForIOFSReadOrWrite(opCode, interface, fileName, amountOfPhysicalAddresses, info, size, pointer);
+
+    free(info);
+}
+
 
 registerTypeByBytes _typeToRegister(registerType type, uint8_t** outRegister1byte, uint32_t** outRegister4bytes)
 {

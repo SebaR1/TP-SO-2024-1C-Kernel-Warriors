@@ -85,41 +85,41 @@ void IO_GEN_SLEEP(char* interface, uint32_t workUnits);
 // (Interfaz, Registro Dirección, Registro Tamaño): Esta instrucción solicita al Kernel que mediante la interfaz ingresada
 // se lea desde el STDIN (Teclado) un valor cuyo tamaño está delimitado por el valor del Registro Tamaño y el mismo se guarde
 // a partir de la Dirección Lógica almacenada en el Registro Dirección.
-void IO_STDIN_READ(char* resource, registerType direction, registerType size);
+void IO_STDIN_READ(char* interface, registerType direction, registerType size);
 
 
 // (Interfaz, Registro Dirección, Registro Tamaño): Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se
 // lea desde la posición de memoria indicada por la Dirección Lógica almacenada en el Registro Dirección, un tamaño indicado por el
 // Registro Tamaño y se imprima por pantalla.
-void IO_STDOUT_WRITE(char* resource, registerType direction, registerType size);
+void IO_STDOUT_WRITE(char* interface, registerType direction, registerType size);
 
 
 // (Interfaz, Nombre Archivo): Esta instrucción solicita al Kernel que mediante la interfaz seleccionada,
 // se cree un archivo en el FS montado en dicha interfaz.
-void IO_FS_CREATE(char* resource, char* fileName);
+void IO_FS_CREATE(char* interface, char* fileName);
 
 
 // (Interfaz, Nombre Archivo): Esta instrucción solicita al Kernel que mediante la interfaz seleccionada,
 // se elimine un archivo en el FS montado en dicha interfaz.
-void IO_FS_DELETE(char* resource, char* fileName);
+void IO_FS_DELETE(char* interface, char* fileName);
 
 
 // (Interfaz, Nombre Archivo, Registro Tamaño): Esta instrucción solicita al Kernel que mediante la interfaz seleccionada,
 // se modifique el tamaño del archivo en el FS montado en dicha interfaz,
 // actualizando al valor que se encuentra en el registro indicado por Registro Tamaño.
-void IO_FS_TRUNCATE(char* resource, char* fileName, registerType size);
+void IO_FS_TRUNCATE(char* interface, char* fileName, registerType size);
 
 
 // (Interfaz, Nombre Archivo, Registro Dirección, Registro Tamaño, Registro Puntero Archivo): Esta instrucción solicita al Kernel
 // que mediante la interfaz seleccionada, se lea desde Memoria la cantidad de bytes indicadas por el Registro Tamaño a partir de la
 // dirección lógica que se encuentra en el Registro Dirección y se escriban en el archivo a partir del valor del Registro Puntero Archivo.
-void IO_FS_WRITE(char* resource, char* fileName, registerType direction, registerType size, registerType pointer);
+void IO_FS_WRITE(char* interface, char* fileName, registerType direction, registerType size, registerType pointer);
 
 
 // (Interfaz, Nombre Archivo, Registro Dirección, Registro Tamaño, Registro Puntero Archivo): Esta instrucción solicita al Kernel
 // que mediante la interfaz seleccionada, se lea desde el archivo a partir del valor del Registro Puntero Archivo la
 // cantidad de bytes indicada por Registro Tamaño y se escriban en la Memoria a partir de la dirección lógica indicada en el Registro Dirección.
-void IO_FS_READ(char* resource, char* fileName, registerType direction, registerType size, registerType pointer);
+void IO_FS_READ(char* interface, char* fileName, registerType direction, registerType size, registerType pointer);
 
 
 // Esta instrucción representa la syscall de finalización del proceso. Se deberá devolver el Contexto de Ejecución actualizado al Kernel para su finalización.
@@ -165,16 +165,41 @@ void _JNZ1(uint8_t* reg, uint32_t instruction);
 void _JNZ4(uint32_t* reg, uint32_t instruction);
 
 
-void _IO_STDIN_READ11(char* resource, uint8_t* direction, uint8_t* size);
-void _IO_STDIN_READ14(char* resource, uint8_t* direction, uint32_t* size);
-void _IO_STDIN_READ41(char* resource, uint32_t* direction, uint8_t* size);
-void _IO_STDIN_READ44(char* resource, uint32_t* direction, uint32_t* size);
+void _IO_STDIN_READ11(char* interface, uint8_t* direction, uint8_t* size);
+void _IO_STDIN_READ14(char* interface, uint8_t* direction, uint32_t* size);
+void _IO_STDIN_READ41(char* interface, uint32_t* direction, uint8_t* size);
+void _IO_STDIN_READ44(char* interface, uint32_t* direction, uint32_t* size);
 
 
-void _IO_STDOUT_WRITE11(char* resource, uint8_t* direction, uint8_t* size);
-void _IO_STDOUT_WRITE14(char* resource, uint8_t* direction, uint32_t* size);
-void _IO_STDOUT_WRITE41(char* resource, uint32_t* direction, uint8_t* size);
-void _IO_STDOUT_WRITE44(char* resource, uint32_t* direction, uint32_t* size);
+void _IO_STDOUT_WRITE11(char* interface, uint8_t* direction, uint8_t* size);
+void _IO_STDOUT_WRITE14(char* interface, uint8_t* direction, uint32_t* size);
+void _IO_STDOUT_WRITE41(char* interface, uint32_t* direction, uint8_t* size);
+void _IO_STDOUT_WRITE44(char* interface, uint32_t* direction, uint32_t* size);
+
+void _IO_FS_TRUNCATE1(char* interface, char* fileName, uint8_t* size);
+void _IO_FS_TRUNCATE4(char* interface, char* fileName, uint32_t* size);
+
+void _IO_FS_WRITE111(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint8_t* pointer);
+void _IO_FS_WRITE114(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint32_t* pointer);
+void _IO_FS_WRITE141(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint8_t* pointer);
+void _IO_FS_WRITE144(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint32_t* pointer);
+void _IO_FS_WRITE411(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint8_t* pointer);
+void _IO_FS_WRITE414(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint32_t* pointer);
+void _IO_FS_WRITE441(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint8_t* pointer);
+void _IO_FS_WRITE444(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint32_t* pointer);
+
+void _IO_FS_READ111(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint8_t* pointer);
+void _IO_FS_READ114(char* interface, char* fileName, uint8_t* direction, uint8_t* size, uint32_t* pointer);
+void _IO_FS_READ141(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint8_t* pointer);
+void _IO_FS_READ144(char* interface, char* fileName, uint8_t* direction, uint32_t* size, uint32_t* pointer);
+void _IO_FS_READ411(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint8_t* pointer);
+void _IO_FS_READ414(char* interface, char* fileName, uint32_t* direction, uint8_t* size, uint32_t* pointer);
+void _IO_FS_READ441(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint8_t* pointer);
+void _IO_FS_READ444(char* interface, char* fileName, uint32_t* direction, uint32_t* size, uint32_t* pointer);
+
+///////// FUNCION AUXILIAR PARA EL IO_FS_WRITE y IO_FS_READ
+void _generic_IO_FS_WRITE_READ(operationCode opCode, char* interface, char* fileName, uint32_t direction, uint32_t size, uint32_t pointer);
+
 
 
 

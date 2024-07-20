@@ -73,6 +73,33 @@ void sendContextToKernelForIOGeneric(char* nameInterface, uint32_t workUnits);
 void sendContextToKernelForIOReadOrWrite(operationCode opCode, char* nameInterface, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite);
 
 
+/// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de IO FS CREATE o IO FS DELETE, junto a sus parametros.
+/// @param opCode El codigo de operacion (para saber si es IO_FS_CREATE o IO_FS_DELETE)
+/// @param nameInterface El nombre de la interfaz.
+/// @param fileName El nombre del archivo.
+void sendContextToKernelForIOFSCreateOrDelete(operationCode opCode, char* nameInterface, char* fileName);
+
+
+/// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de IO FS TRUNCATE, junto a sus parametros.
+/// @param nameInterface El nombre de la interfaz.
+/// @param fileName El nombre del archivo.
+/// @param size EL tamaño a truncar
+void sendContextToKernelForIOFSTruncate(char* nameInterface, char* fileName, uint32_t size);
+
+
+/// @brief Envia el contexto actualizado del proceso al Kernel con un motivo de IO FS READ o IO FS WRITE, junto a sus parametros.
+/// @param opCode El codigo de operacion (para saber si es IO_FS_READ o IO_FS_WRITE)
+/// @param nameInterface El nombre de la interfaz.
+/// @param fileName El nombre del archivo.
+/// @param amountOfPhysicalAddresses La cantidad de direcciones fisicas.
+/// @param physicalAddressesArray El array que contiene la info de todas las direcciones fisicas en orden.
+/// @param sizeToReadOrWrite El tamaño total a leer/escribir para la interfaz.
+/// @param filePointer El puntero al archivo
+void sendContextToKernelForIOFSReadOrWrite(operationCode opCode, char* nameInterface, char* fileName, int amountOfPhysicalAddresses, physicalAddressInfo* physicalAddressesArray, int sizeToReadOrWrite, int filePointer);
+
+
+
+
 
 
 /////////////////// FUNCIONES AUXILIARES ///////////////////
