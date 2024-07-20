@@ -87,6 +87,7 @@ void executeInstruction(instructionType type, void* paramsGeneric)
     {
         WAIT_STRUCT* params = paramsGeneric;
         WAIT(params->resource);
+        free(params->resource);
         break;
     }
 
@@ -94,6 +95,7 @@ void executeInstruction(instructionType type, void* paramsGeneric)
     {
         SIGNAL_STRUCT* params = paramsGeneric;
         SIGNAL(params->resource);
+        free(params->resource);
         break;
     }
 
@@ -101,55 +103,68 @@ void executeInstruction(instructionType type, void* paramsGeneric)
     {
         IO_GEN_SLEEP_STRUCT* params = paramsGeneric;
         IO_GEN_SLEEP(params->interface, params->workUnits);
+        free(params->interface);
         break;
     }
 
     case IO_STDIN_READ_TYPE:
     {
         IO_STDIN_READ_STRUCT* params = paramsGeneric;
-        IO_STDIN_READ(params->resource, params->direction, params->size);
+        IO_STDIN_READ(params->interface, params->direction, params->size);
+        free(params->interface);
         break;
     }
 
     case IO_STDOUT_WRITE_TYPE:
     {
         IO_STDOUT_WRITE_STRUCT* params = paramsGeneric;
-        IO_STDOUT_WRITE(params->resource, params->direction, params->size);
+        IO_STDOUT_WRITE(params->interface, params->direction, params->size);
+        free(params->interface);
         break;
     }
 
     case IO_FS_CREATE_TYPE:
     {
         IO_FS_CREATE_STRUCT* params = paramsGeneric;
-        IO_FS_CREATE(params->resource, params->fileName);
+        IO_FS_CREATE(params->interface, params->fileName);
+        free(params->interface);
+        free(params->fileName);
         break;
     }
 
     case IO_FS_DELETE_TYPE:
     {
         IO_FS_DELETE_STRUCT* params = paramsGeneric;
-        IO_FS_DELETE(params->resource, params->fileName);
+        IO_FS_DELETE(params->interface, params->fileName);
+        free(params->interface);
+        free(params->fileName);
         break;
     }
 
     case IO_FS_TRUNCATE_TYPE:
     {
         IO_FS_TRUNCATE_STRUCT* params = paramsGeneric;
-        IO_FS_TRUNCATE(params->resource, params->fileName, params->size);
+        IO_FS_TRUNCATE(params->interface, params->fileName, params->size);
+        free(params->interface);
+        free(params->fileName);
         break;
     }
 
     case IO_FS_WRITE_TYPE:
     {
         IO_FS_WRITE_STRUCT* params = paramsGeneric;
-        IO_FS_WRITE(params->resource, params->fileName, params->direction, params->size, params->pointer);
+        IO_FS_WRITE(params->interface, params->fileName, params->direction, params->size, params->pointer);
+        free(params->interface);
+        free(params->fileName);
         break;
     }
 
     case IO_FS_READ_TYPE:
     {
         IO_FS_READ_STRUCT* params = paramsGeneric;
-        IO_FS_READ(params->resource, params->fileName, params->direction, params->size, params->pointer);
+        IO_FS_READ(params->interface, params->fileName, params->direction, params->size, params->pointer);
+        free(params->interface);
+        free(params->fileName);
         break;
     }
 

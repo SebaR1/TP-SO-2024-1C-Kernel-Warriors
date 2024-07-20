@@ -162,40 +162,40 @@ typedef struct
 
 typedef struct
 {
-    char* resource;
+    char* interface;
     registerType direction;
     registerType size;
 } IO_STDIN_READ_STRUCT;
 
 typedef struct
 {
-    char* resource;
+    char* interface;
     registerType direction;
     registerType size;
 } IO_STDOUT_WRITE_STRUCT;
 
 typedef struct
 {
-    char* resource;
+    char* interface;
     char* fileName;
 } IO_FS_CREATE_STRUCT;
 
 typedef struct
 {
-    char* resource;
+    char* interface;
     char* fileName;
 } IO_FS_DELETE_STRUCT;
 
 typedef struct
 {
-    char* resource;
+    char* interface;
     char* fileName;
     registerType size;
 } IO_FS_TRUNCATE_STRUCT;
 
 typedef struct
 {
-    char* resource;
+    char* interface;
     char* fileName;
     registerType direction;
     registerType size;
@@ -204,7 +204,7 @@ typedef struct
 
 typedef struct
 {
-    char* resource;
+    char* interface;
     char* fileName;
     registerType direction;
     registerType size;

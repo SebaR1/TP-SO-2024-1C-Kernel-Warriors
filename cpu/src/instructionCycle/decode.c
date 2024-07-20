@@ -173,7 +173,7 @@ instructionType IO_GEN_SLEEP_GET_INFO(char** instructionSplitted, void** outPara
 instructionType IO_STDIN_READ_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_STDIN_READ_STRUCT* params = malloc(sizeof(IO_STDIN_READ_STRUCT));
-    params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
+    params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->direction = _stringRegisterToType(instructionSplitted[2]);
     params->size = _stringRegisterToType(instructionSplitted[3]);
 
@@ -184,7 +184,7 @@ instructionType IO_STDIN_READ_GET_INFO(char** instructionSplitted, void** outPar
 instructionType IO_STDOUT_WRITE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_STDOUT_WRITE_STRUCT* params = malloc(sizeof(IO_STDOUT_WRITE_STRUCT));
-    params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
+    params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->direction = _stringRegisterToType(instructionSplitted[2]);
     params->size = _stringRegisterToType(instructionSplitted[3]);
 
@@ -195,7 +195,7 @@ instructionType IO_STDOUT_WRITE_GET_INFO(char** instructionSplitted, void** outP
 instructionType IO_FS_CREATE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_CREATE_STRUCT* params = malloc(sizeof(IO_FS_CREATE_STRUCT));
-    params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
+    params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
 
     *outParams = params;
@@ -205,7 +205,7 @@ instructionType IO_FS_CREATE_GET_INFO(char** instructionSplitted, void** outPara
 instructionType IO_FS_DELETE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_DELETE_STRUCT* params = malloc(sizeof(IO_FS_DELETE_STRUCT));
-    params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
+    params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
 
     *outParams = params;
@@ -215,7 +215,7 @@ instructionType IO_FS_DELETE_GET_INFO(char** instructionSplitted, void** outPara
 instructionType IO_FS_TRUNCATE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_TRUNCATE_STRUCT* params = malloc(sizeof(IO_FS_TRUNCATE_STRUCT));
-    params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
+    params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->size = _stringRegisterToType(instructionSplitted[3]);
 
@@ -226,7 +226,7 @@ instructionType IO_FS_TRUNCATE_GET_INFO(char** instructionSplitted, void** outPa
 instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_WRITE_STRUCT* params = malloc(sizeof(IO_FS_WRITE_STRUCT));
-    params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
+    params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->direction = _stringRegisterToType(instructionSplitted[3]);
     params->size = _stringRegisterToType(instructionSplitted[4]);
@@ -239,7 +239,7 @@ instructionType IO_FS_WRITE_GET_INFO(char** instructionSplitted, void** outParam
 instructionType IO_FS_READ_GET_INFO(char** instructionSplitted, void** outParams)
 {
     IO_FS_READ_STRUCT* params = malloc(sizeof(IO_FS_READ_STRUCT));
-    params->resource = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
+    params->interface = string_duplicate(instructionSplitted[1]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->fileName = string_duplicate(instructionSplitted[2]); // NO OLVIDARSE LIBERAR CON FREE EL STRING DUPLICADO CUANDO YA SEA USADO
     params->direction = _stringRegisterToType(instructionSplitted[3]);
     params->size = _stringRegisterToType(instructionSplitted[4]);
