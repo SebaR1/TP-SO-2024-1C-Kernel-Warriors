@@ -135,13 +135,18 @@ void logInitialMessageRealese()
 char* physicalAddressesToString(int amountOfPhysicalAddresses, int physicalAddresses[])
 {
     char* string = string_new();
+    char* currentPhysicalAddressString;
 
-    string_append(&string, string_itoa(physicalAddresses[0]));
+    currentPhysicalAddressString = string_itoa(physicalAddresses[0]);
+    string_append(&string, currentPhysicalAddressString);
+    free(currentPhysicalAddressString);
 
     for (int i = 1; i < amountOfPhysicalAddresses; i++)
     {
+        currentPhysicalAddressString = string_itoa(physicalAddresses[i]);
         string_append(&string, ", ");
-        string_append(&string, string_itoa(physicalAddresses[i]));
+        string_append(&string, currentPhysicalAddressString);
+        free(currentPhysicalAddressString);
     }
     
     return string;
