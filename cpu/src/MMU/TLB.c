@@ -277,4 +277,6 @@ void updateEntriesLRU(int pid, int amountOfPages)
             element->pid = -1;
         }
     }
+
+    list_iterator_destroy(iterator);
 }
