@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "utils/config.h"
 
 
 int main()
@@ -7,7 +8,9 @@ int main()
     initLogger("kernel.log", "kernel", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general del kernel.
-    initKernelConfig("kernel.config");
+    char* path = askForConfigPath();
+    initKernelConfig(path);
+    free(path);
 
     // Inicializo todo.
     pid = 0;
