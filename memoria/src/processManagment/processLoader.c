@@ -76,11 +76,17 @@ void loadProcessByPathWithParams(void* params)
     // Retardo de la operacion
     memoryDelay();
 
-    // La operacion
 
+    // Convierto los parametros para tenerlo como un struct
     kernelPathProcess* processPath = (kernelPathProcess*)params;
 
-    bool result = loadProcessByPath(processPath->pid, processPath->path);
+    // Obtengo el fullPath, que seria la ruta del config + la ruta que me mandó el Kernel
+    char* fullPath = string_duplicate(getMemoryConfig()->PATH_INSTRUCCIONES);
+    string_append(&fullPath, processPath->path);
+
+    // Cargo el proceso. Me retorna si fue posible cargarlo (true) o no (false)
+    bool result = loadProcessByPath(processPath->pid, fullPath);
+    
 
     if (result)
     {
@@ -88,11 +94,12 @@ void loadProcessByPathWithParams(void* params)
     }
     else
     {
-        logCreateProcessError(processPath->path);
+        logCreateProcessError(fullPath);
     }
 
     sendProcessCreatedResult(socketKernel, result);
 
+    free(fullPath);
     free(processPath->path);
     free(processPath);
 }
