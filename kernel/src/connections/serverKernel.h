@@ -65,6 +65,9 @@ void serverKernelForCPU(int *socketClient);
 void cpuSendExitProcess(int *socketClientCPUDispatch);
 
 
+void cpuSendOutOfMemoryProcess(int *socketClientCPUDispatch);
+
+
 void cpuSendInterruptKillProcess(int *socketClientCPUDispatch);
 
 
@@ -85,6 +88,8 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch);
 
 
 void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch);
+
+
 
 
 // Recibe el contexto del proceso de un package y lo retorna. 

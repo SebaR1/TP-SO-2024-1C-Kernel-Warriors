@@ -215,6 +215,10 @@ void serverKernelForCPU(int *socketClient)
             cpuSendRequestForIOStdoutWrite(socketClient);
             break;
 
+        case CPU_SEND_CONTEXT_FOR_OUT_OF_MEMORY:
+            cpuSendOutOfMemoryProcess(socketClient);
+            break;
+
         case DO_NOTHING:
             break;
 
@@ -708,7 +712,34 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
     list_destroy(listPackage);
 }
 
+void cpuSendOutOfMemoryProcess(int *socketClientCPUDispatch)
+{
 
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
+    pcb_t *processExecToExit = assignContextToPcb(contextProcess);
+
+    log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExecToExit->pid);
+
+    processExecToExit->state = PCB_EXIT;
+
+    sem_wait(&semPausePlanning);
+    sem_post(&semPausePlanning);
+
+    log_info(getLogger(), "Finaliza el proceso %d - Motivo: OUT_OF_MEMORY", processExecToExit->pid);
+
+    list_push(pcbExitList, processExecToExit);
+
+    list_destroy(listPackage);
+
+    sem_post(&semExit);
+    sem_post(&semMultiProcessing);
+
+}
 
 void finishAllServersSignal()
 {
