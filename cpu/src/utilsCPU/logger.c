@@ -33,54 +33,54 @@ void destroyLogger()
 
 void logFetchInstruction(int pid, uint32_t pc)
 {
-    log_info(getLogger(), "Fetch Instrucción: PID: %d - FETCH - Program Counter: %d", pid, pc);
+    log_info(getLogger(), "PID: %d - FETCH - Program Counter: %d", pid, pc);
 }
 
 void logExecutingInstruction(int pid, char* instruction)
 {
-    log_info(getLogger(), "Ejecutando Instrucción: PID: %d - Ejecutando: %s", pid, instruction);
+    log_info(getLogger(), "PID: %d - Ejecutando: %s", pid, instruction);
 }
 
 void logTLBHit(int pid, int page)
 {
-    log_info(getLogger(), "TLB Hit: PID: %d - TLB HIT - Pagina: %d", pid, page);
+    log_info(getLogger(), "PID: %d - TLB HIT - Pagina: %d", pid, page);
 }
 
 void logTLBMiss(int pid, int page)
 {
-    log_info(getLogger(), "TLB Miss: PID: %d - TLB MISS - Pagina: %d", pid, page);
+    log_info(getLogger(), "PID: %d - TLB MISS - Pagina: %d", pid, page);
 }
 
 void logGetFrame(int pid, int page, int frame)
 {
-    log_info(getLogger(), "Obtener Marco: PID: %d - OBTENER MARCO - Página: %d - Marco: %d", pid, page, frame);
+    log_info(getLogger(), "PID: %d - OBTENER MARCO - Página: %d - Marco: %d", pid, page, frame);
 }
 
 void logReadMemoryUint(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], uint32_t value)
 {
     char* stringPhysicalAddresses = physicalAddressesToString(amountOfPhysicalAddresses, physicalAddresses);
-    log_info(getLogger(), "Lectura Memoria: PID: %d - Acción: LEER - Direcciones Físicas: %s - Valor: %u", pid, stringPhysicalAddresses, value);
+    log_info(getLogger(), "PID: %d - Acción: LEER - Direcciones Físicas: %s - Valor: %u", pid, stringPhysicalAddresses, value);
     free(stringPhysicalAddresses);
 }
 
 void logReadMemoryString(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], char* value)
 {
     char* stringPhysicalAddresses = physicalAddressesToString(amountOfPhysicalAddresses, physicalAddresses);
-    log_info(getLogger(), "Lectura Memoria: PID: %d - Acción: LEER - Direcciones Físicas: %s - Valor: %s", pid, stringPhysicalAddresses, value);
+    log_info(getLogger(), "PID: %d - Acción: LEER - Direcciones Físicas: %s - Valor: %s", pid, stringPhysicalAddresses, value);
     free(stringPhysicalAddresses);
 }
 
 void logWriteMemoryUint(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], uint32_t value)
 {
     char* stringPhysicalAddresses = physicalAddressesToString(amountOfPhysicalAddresses, physicalAddresses);
-    log_info(getLogger(), "Escritura Memoria: PID: %d - Acción: ESCRIBIR - Direcciones Físicas: %s - Valor: %u", pid, stringPhysicalAddresses, value);
+    log_info(getLogger(), "PID: %d - Acción: ESCRIBIR - Direcciones Físicas: %s - Valor: %u", pid, stringPhysicalAddresses, value);
     free(stringPhysicalAddresses);
 }
 
 void logWriteMemoryString(int pid, int amountOfPhysicalAddresses, int physicalAddresses[], char* value)
 {
     char* stringPhysicalAddresses = physicalAddressesToString(amountOfPhysicalAddresses, physicalAddresses);
-    log_info(getLogger(), "Escritura Memoria: PID: %d - Acción: ESCRIBIR - Direcciones Físicas: %s - Valor: %s", pid, stringPhysicalAddresses, value);
+    log_info(getLogger(), "PID: %d - Acción: ESCRIBIR - Direcciones Físicas: %s - Valor: %s", pid, stringPhysicalAddresses, value);
     free(stringPhysicalAddresses);
 }
 
