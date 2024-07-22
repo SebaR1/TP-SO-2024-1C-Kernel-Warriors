@@ -36,6 +36,8 @@ pthread_mutex_t mutexSendProcessToMemory;
 
 pthread_mutex_t mutexOrderProcessByScript;
 
+pthread_mutex_t mutexOrderReadyExecProcess;
+
 bool flagMemoryResponse;
 
 bool flagExecutingScript;

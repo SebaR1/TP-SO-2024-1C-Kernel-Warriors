@@ -111,11 +111,13 @@ extern sem_t semKillProcessInInterface;
 
 extern sem_t semKillProcessExec;
 
-extern sem_t semExitProgram;;
+extern sem_t semExitProgram;
 
 extern pthread_mutex_t mutexSendProcessToMemory;
 
 extern pthread_mutex_t mutexOrderProcessByScript;
+
+extern pthread_mutex_t mutexOrderReadyExecProcess;
 
 extern bool flagMemoryResponse;
 

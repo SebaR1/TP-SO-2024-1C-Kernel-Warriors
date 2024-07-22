@@ -30,8 +30,8 @@ void newState()
 void exitState()
 {
     while(1){
-
         sem_wait(&semExit);
+
         pcb_t *process = list_pop(pcbExitList);
 
         pcbState_t prevState = process->state;
@@ -151,7 +151,7 @@ void destroyProcess(pcb_t *process)
         sem_post(&semReady);
         }
 
-    }   
+    }
 
     for(int i = 0; i < list_size(process->params->listAux); i++)
     {

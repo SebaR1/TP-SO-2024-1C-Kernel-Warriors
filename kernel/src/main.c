@@ -1,7 +1,6 @@
 #include "kernel.h"
 #include "utils/config.h"
 
-
 int main()
 {
     // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
@@ -18,6 +17,8 @@ int main()
     diffBetweenNewAndPrevMultiprogramming = 0;
 
     pthread_mutex_init(&mutexSendProcessToMemory, NULL);
+
+    pthread_mutex_init(&mutexOrderReadyExecProcess, NULL);
 
     sem_init(&semNew, 0, 0);
     sem_init(&semReady, 0, 0);
