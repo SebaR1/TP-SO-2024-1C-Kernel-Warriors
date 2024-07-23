@@ -1352,6 +1352,7 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
 
         } else { 
             list_push(resourceFound->blockList, processExec); // Pasa a la lista de bloqueados del recurso, esperando que se libere.
+
             log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, resourceFound->name);
             processExec->state = PCB_BLOCK;
             list_push(pcbBlockList, processExec);

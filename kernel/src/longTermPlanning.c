@@ -152,6 +152,22 @@ void destroyProcess(pcb_t *process)
 
     }
 
+    for(int i = 0; i < list_mutex_size(resourcesBlockList); i++)
+    {
+        resource_t* resource = list_get(resourcesBlockList->list, i);
+
+        bool flag = true;
+
+        while(flag)
+        {
+            flag = list_remove_element_mutex(resource->blockList, process);
+            if(flag) {
+                addInstanceResource(resource);
+                log_info(getLogger(), "Se libero el recurso que tenia %s, ahora tiene %d", resource->name, resource->instances);
+            }
+        }
+    }
+
     for(int i = 0; i < list_size(process->params->listAux); i++)
     {
         physicalAddressInfoP *adresses = list_remove(process->params->listAux, 0);

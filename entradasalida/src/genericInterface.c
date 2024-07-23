@@ -7,7 +7,7 @@ void executeIOGenSleepAndSendResults()
     sendIOGenSleepResultsToKernel();
 
     interfaceData.currentOperation.operation = IO_NULL;
-    free(interfaceData.currentOperation.params);
+    //free(interfaceData.currentOperation.params);
     interfaceData.currentOperation.pid = -1;
 }
 
