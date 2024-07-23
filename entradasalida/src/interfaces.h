@@ -10,11 +10,16 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <commons/bitarray.h>
 #include <commons/collections/list.h>
 #include <semaphore.h>
 #include <readline/readline.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <dirent.h>
 typedef enum
 {   
     IO_NULL,
@@ -70,6 +75,25 @@ typedef struct
 
 typedef struct
 {
+    char *fileName;
+} t_paramsForIOFSCreateOrDelete;
+
+typedef struct
+{
+    char *fileName;
+    uint32_t registerSize;
+} t_paramsForIOFSTruncate;
+
+typedef struct
+{
+    char *fileName;
+    uint32_t registerDirection;
+    uint32_t registerSize;
+    uint32_t registerFilePointer;
+} t_paramsForIOFSWriteOrRead;
+
+typedef struct
+{
     char *resultsFromRead;
     char *resultsForMemory;
 } t_resultsForStdin;
@@ -79,19 +103,58 @@ typedef struct
     char *resultsForWrite;
 } t_resultsForStdout;
 
+typedef struct
+{
+    char *resultsForWrite;
+} t_resultsForIOFSWrite;
+
+typedef struct
+{
+    char *resultsFromRead;
+} t_resultsForIOFSRead;
+
+typedef struct
+{   
+    char* mappedFile;
+    int fd;
+} t_fileData;
+
+
 extern t_interfaceData interfaceData;
 extern t_resultsForStdin resultsForStdin;
 extern t_resultsForStdout resultsForStdout;
+extern t_resultsForIOFSWrite resultsForIOFSWrite;
+extern t_resultsForIOFSRead resultsForIOFSRead;
 
 extern sem_t semaphoreForStdin;
 extern sem_t semaphoreForStdout;
+extern sem_t semaphoreForIOFSWrite;
+extern sem_t semaphoreForIOFSRead;
 extern sem_t semaphoreForModule;
 
 extern int socketKernel;
 extern int socketMemory;
 
+extern FILE* blocks;
+extern FILE* bitmap;
+
+extern t_fileData* blocksData;
+extern t_fileData* bitmapData;
+
+extern t_bitarray* mappedBitmap;
+
+extern t_list* listFileNames;
+
 void createInterface(char* name);
 
 void destroyInterface();
+
+t_fileData* openCreateMapFile(FILE* file, char* fileName, int fileSize);
+
+void createListFileNames();
+
+void closeBlocksFile();
+
+void closeBitmapFile();
 
 #endif

@@ -12,8 +12,20 @@ void sendIOStdinReadResultsToKernel();
 
 void sendResultsFromStdinToMemory();
 
+void sendResultsFromIOFSReadToMemory();
+
 void sendIOStdoutWriteResultsToKernel();
 
 void sendIOReadRequestToMemory();
+
+void sendIOFSCreateResultsToKernel(int sucess);
+
+void sendIOFSDeleteResultsToKernel();
+
+void sendIOFSTruncateResultsToKernel();
+
+void sendIOFSWriteResultsToKernel();
+
+void sendIOFSReadResultsToKernel();
 
 #endif
