@@ -51,6 +51,21 @@ void sendIOStdinReadOperationToIO(interface_t* interface, t_list* listOfPhysical
 void sendIOStdoutWriteOperationToIO(interface_t* interface, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite);
 
 
+void sendIODialFsCreateOperationToIO(interface_t *interface, char* nameOfFile);
+
+
+void sendIODialFsDeleteOperationToIO(interface_t *interface, char* nameOfFIle);
+
+
+void sendIODialFsTruncateOperationToIO(interface_t *interface, char* nameOfFile, uint32_t size);
+
+
+void sendIODialFsReadOperationToIO(interface_t *interface, char* nameOfFile, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite, int pointer);
+
+
+void sendIODialFsWriteOperationToIO(interface_t *interface, char* nameOfFile, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite, int pointer);
+
+
 //////////// A MEMORIA ///////////////
 
 

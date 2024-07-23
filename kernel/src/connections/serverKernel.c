@@ -191,6 +191,10 @@ void serverKernelForCPU(int *socketClient)
             cpuSendInterruptKillProcess(socketClient);
             break;
 
+        case CPU_SEND_CONTEXT_FOR_OUT_OF_MEMORY:
+            cpuSendOutOfMemoryProcess(socketClient);
+            break;
+
         case CPU_SEND_CONTEXT_FOR_END_QUANTUM: 
             cpuSendInterruptQ(socketClient);
             break;
@@ -215,8 +219,24 @@ void serverKernelForCPU(int *socketClient)
             cpuSendRequestForIOStdoutWrite(socketClient);
             break;
 
-        case CPU_SEND_CONTEXT_FOR_OUT_OF_MEMORY:
-            cpuSendOutOfMemoryProcess(socketClient);
+        case CPU_SEND_CONTEXT_FOR_IO_FS_CREATE:
+            cpuSendRequestForIODialFsCreate(socketClient);
+            break;
+
+        case CPU_SEND_CONTEXT_FOR_IO_FS_DELETE:
+            cpuSendRequestForIODialFsDelete(socketClient);
+            break;
+
+        case CPU_SEND_CONTEXT_FOR_IO_FS_TRUNCATE:
+            cpuSendRequestForIODialFsTruncate(socketClient);
+            break;
+
+        case CPU_SEND_CONTEXT_FOR_IO_FS_READ:
+            cpuSendRequestForIODialFsRead(socketClient);
+            break;
+        
+        case CPU_SEND_CONTEXT_FOR_IO_FS_WRITE:
+            cpuSendRequestForIODialFsWrite(socketClient);
             break;
 
         case DO_NOTHING:
@@ -322,6 +342,12 @@ void ioSendEndOperation(int *socketClientIO)
             processBlockToReady->state = PCB_READY_PLUS;
 
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_READY_PLUS", processBlockToReady->pid);
+
+            char* listPids = _listPids(pcbReadyPriorityList->list);
+
+            log_info(getLogger(), listPids, "ReadyPlus" ,getKernelConfig()->ALGORITMO_PLANIFICACION);
+
+            free(listPids);
 
             sem_post(&semReady);
 
@@ -708,6 +734,469 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
     free(amountOfPhysicalAddresses);
     list_destroy(listOfPhysicalAddresses);
     free(sizeToReadOrWrite);
+
+    list_destroy(listPackage);
+}
+
+void cpuSendRequestForIODialFsCreate(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    interface_t* interfaceFound = foundInterface(nameRequestInterface);
+
+    char* nameFileForCreate = list_remove(listPackage, 0);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != DialFS){ // El tipo de interfaz DialFs es el unico que puede realizar la operacion Create. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            processExec->state = PCB_BLOCK;
+
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
+
+            sem_post(&semMultiProcessing); // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+
+
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
+                sendIODialFsCreateOperationToIO(interfaceFound, nameFileForCreate);
+                
+            } else {
+                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+            }
+        }
+    }
+
+    free(nameRequestInterface);
+    free(nameFileForCreate);
+
+    list_destroy(listPackage);
+}
+
+void cpuSendRequestForIODialFsDelete(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    interface_t* interfaceFound = foundInterface(nameRequestInterface);
+
+    char* nameFileForDelete = list_remove(listPackage, 0);
+    
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != DialFS){ // El tipo de interfaz DialFs es el unico que puede realizar la operacion Create. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            processExec->state = PCB_BLOCK;
+
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
+
+            sem_post(&semMultiProcessing); // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+
+
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
+                sendIODialFsDeleteOperationToIO(interfaceFound, nameFileForDelete);
+                
+            } else {
+                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+            }
+        }
+    }
+
+
+    free(nameRequestInterface);
+    free(nameFileForDelete);
+
+    list_destroy(listPackage);
+
+}
+
+void cpuSendRequestForIODialFsTruncate(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    interface_t* interfaceFound = foundInterface(nameRequestInterface);
+
+    char* nameOfFile = list_remove(listPackage, 0);
+
+    uint32_t *size = list_remove(listPackage, 0);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != DialFS){ // El tipo de interfaz DialFs es el unico que puede realizar la operacion Create. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            processExec->state = PCB_BLOCK;
+
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
+
+            sem_post(&semMultiProcessing); // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+
+
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
+                sendIODialFsTruncateOperationToIO(interfaceFound, nameOfFile, *size);
+                
+            } else {
+                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+            }
+        }
+    }
+
+    free(nameRequestInterface);
+    free(nameOfFile);
+    free(size);
+
+    list_destroy(listPackage);
+}
+
+void cpuSendRequestForIODialFsRead(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    interface_t* interfaceFound = foundInterface(nameRequestInterface);
+
+    char* nameOfFile = list_remove(listPackage, 0);
+
+    int *amountOfPhysicalAddresses = (int*)list_remove(listPackage, 0);
+
+    t_list *listOfPhysicalAddresses = list_create();
+
+    for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+    {
+        physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
+
+        adresses->physicalAddress = (int*)list_remove(listPackage, 0);
+        adresses->size = (int*)list_remove(listPackage, 0);
+
+        list_add(listOfPhysicalAddresses, adresses);
+    }
+
+    int *sizeToReadOrWrite = list_remove(listPackage, 0);
+
+    int *pointer = list_remove(listPackage, 0);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != DialFS){ // El tipo de interfaz DialFs es el unico que puede realizar la operacion Create. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            processExec->state = PCB_BLOCK;
+
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
+
+            sem_post(&semMultiProcessing); // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+
+
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
+                sendIODialFsReadOperationToIO(interfaceFound, nameOfFile, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite, *pointer);
+                
+            } else {
+                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+            }
+        }
+    }
+
+    free(nameRequestInterface);
+    free(nameOfFile);
+    
+    for(int i = 0; i < *amountOfPhysicalAddresses; i++){
+        physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
+
+        free(adresses->physicalAddress);
+        free(adresses->size);
+        free(adresses);
+    }
+
+    free(amountOfPhysicalAddresses);
+    list_destroy(listOfPhysicalAddresses);
+    free(sizeToReadOrWrite);
+    free(pointer);
+
+    list_destroy(listPackage);
+}
+
+
+void cpuSendRequestForIODialFsWrite(int *socketClientCPUDispatch)
+{
+    t_list *listPackage = getPackage(*socketClientCPUDispatch);
+
+    // Recibo el contexto del paquete
+    contextProcess contextProcess = recieveContextFromPackage(listPackage);
+
+    // Asigno todo el contexto que recibi de CPU al proceso popeado de pcbExecList
+    pcb_t *processExec = assignContextToPcb(contextProcess);
+
+    // Recibo el nombre de la interfaz a usar.
+    char* nameRequestInterface = list_remove(listPackage, 0);
+
+    interface_t* interfaceFound = foundInterface(nameRequestInterface);
+
+    char* nameOfFile = list_remove(listPackage, 0);
+
+    int *amountOfPhysicalAddresses = (int*)list_remove(listPackage, 0);
+
+    t_list *listOfPhysicalAddresses = list_create();
+
+    for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+    {
+        physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
+
+        adresses->physicalAddress = (int*)list_remove(listPackage, 0);
+        adresses->size = (int*)list_remove(listPackage, 0);
+
+        list_add(listOfPhysicalAddresses, adresses);
+    }
+
+    int *sizeToReadOrWrite = list_remove(listPackage, 0);
+
+    int *pointer = list_remove(listPackage, 0);
+
+    if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
+        list_push(pcbExitList, processExec);
+        processExec->state = PCB_EXIT;
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+        sem_post(&semMultiProcessing);
+        sem_post(&semExit);
+
+    } else {
+        if(interfaceFound->interfaceType != DialFS){ // El tipo de interfaz DialFs es el unico que puede realizar la operacion Create. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+            list_push(pcbExitList, processExec);
+            processExec->state = PCB_EXIT;
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
+
+            sem_wait(&semPausePlanning);
+            sem_post(&semPausePlanning);
+
+            log_info(getLogger(), "Finaliza el proceso %d - Motivo: INVALID_INTERFACE", processExec->pid);
+
+            sem_post(&semMultiProcessing);
+            sem_post(&semExit);
+
+        } else {
+            list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+
+            processExec->state = PCB_BLOCK;
+
+            // Detengo el tiempo en el que estuvo en exec si el algoritmo de plani es VRR.
+            if(algorithm == VRR) temporal_stop(processExec->quantumForVRR); 
+
+            sem_post(&semMultiProcessing); // Una vez que pasan a pcbBlockList dejan lugar en exec a otro proceso.
+
+
+            if(!interfaceFound->isBusy){ // Se fija si la interfaz no esta ocupada y lo asigna. 
+                interfaceFound->isBusy = true;
+                interfaceFound->processAssign = processExec;
+
+                processExec->isInInterface = true;
+
+                sendIODialFsWriteOperationToIO(interfaceFound, nameOfFile, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite, *pointer);
+                
+            } else {
+                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+            }
+        }
+    }
+
+    free(nameRequestInterface);
+    free(nameOfFile);
+    
+    for(int i = 0; i < *amountOfPhysicalAddresses; i++){
+        physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
+
+        free(adresses->physicalAddress);
+        free(adresses->size);
+        free(adresses);
+    }
+
+    free(amountOfPhysicalAddresses);
+    list_destroy(listOfPhysicalAddresses);
+    free(sizeToReadOrWrite);
+    free(pointer);
 
     list_destroy(listPackage);
 }

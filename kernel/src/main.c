@@ -46,7 +46,7 @@ int main()
     pcbBlockList = initListMutex();
     pcbExitList = initListMutex();
 
-    if(algorithm == VRR) pcbReadyPriorityList = initListMutex();
+    pcbReadyPriorityList = initListMutex();
 
     resourcesBlockList = initListMutex();
 
@@ -150,9 +150,7 @@ int main()
     releaseConnection(socketClientMemory);
     log_info(getLogger(), "Paquete enviado con exito.");
 
-    destroyPackage(initialPackageToCPUDispatch);
-    destroyPackage(initialPackageToCPUInterrupt);
-    destroyPackage(initialPackageToMemory);
+
     destroyPackage(testPackageToMemory);
     destroyPackage(testPackageToCPUDispatch);
     destroyPackage(testPackageToCPUInterrupt);
@@ -163,6 +161,13 @@ int main()
     //sleep(60);
 
 */
+
+    destroyPackage(initialPackageToCpuDispatch);
+    destroyPackage(initialPackageToCpuInterrupt);
+    destroyPackage(initialPackageM);
+
+    destroyResources();
+    destroyInterfaces();
 
     // Lanzando la senial a los servidores de que no deben escuchar mas clientes ni realizar ninguna operacion.
     finishAllServersSignal();
@@ -186,10 +191,7 @@ int main()
     destroyListMutex(pcbExecList);
     destroyListMutex(pcbBlockList);
     destroyListMutex(pcbExitList);
-    if(algorithm == VRR) destroyListMutex(pcbReadyPriorityList);
-
-    destroyResources();
-    destroyInterfaces();
+    destroyListMutex(pcbReadyPriorityList);
 
     releaseConnection(socketClientMemory);
     releaseConnection(socketClientCPUDispatch);

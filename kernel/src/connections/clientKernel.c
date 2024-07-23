@@ -118,6 +118,100 @@ void sendIOStdoutWriteOperationToIO(interface_t* interface, t_list* listOfPhysic
     destroyPackage(package);
 }
 
+void sendIODialFsCreateOperationToIO(interface_t *interface, char* nameOfFile)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_CREATE);
+
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
+    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+
+    // Uso el socket de la interfaz.
+    sendPackage(package, *interface->socket);
+
+    destroyPackage(package);
+}
+
+void sendIODialFsDeleteOperationToIO(interface_t *interface, char* nameOfFIle)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_DELETE);
+
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
+    addToPackage(package, nameOfFIle, sizeof(string_length(nameOfFIle) + 1));
+
+    // Uso el socket de la interfaz.
+    sendPackage(package, *interface->socket);
+
+    destroyPackage(package);
+}
+
+void sendIODialFsTruncateOperationToIO(interface_t *interface, char* nameOfFile, uint32_t size)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_TRUNCATE);
+
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
+    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+    addToPackage(package, &size, sizeof(uint32_t));
+
+    // Uso el socket de la interfaz.
+    sendPackage(package, *interface->socket);
+
+    destroyPackage(package);
+}
+
+void sendIODialFsReadOperationToIO(interface_t *interface, char* nameOfFile, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite, int pointer)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_READ);
+
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
+    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+
+    addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
+
+    for(int i = 0; i < amountOfPhysicalAddresses; i++){
+        physicalAddressInfo adresses;
+
+        adresses = *(physicalAddressInfo*)list_get(listOfPhysicalAdressesInfo, i);
+
+        addToPackage(package, &(adresses.physicalAddress), sizeof(int));
+        addToPackage(package, &(adresses.size), sizeof(int));
+    }
+
+    addToPackage(package, &sizeToReadOrWrite, sizeof(uint32_t));
+    addToPackage(package, &pointer, sizeof(int));
+
+    // Uso el socket de la interfaz.
+    sendPackage(package, *interface->socket);
+
+    destroyPackage(package);
+}
+
+void sendIODialFsWriteOperationToIO(interface_t *interface, char* nameOfFile, t_list* listOfPhysicalAdressesInfo, int amountOfPhysicalAddresses, int sizeToReadOrWrite, int pointer)
+{
+    t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_WRITE);
+
+    addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
+    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+
+    addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
+
+    for(int i = 0; i < amountOfPhysicalAddresses; i++){
+        physicalAddressInfo adresses;
+
+        adresses = *(physicalAddressInfo*)list_get(listOfPhysicalAdressesInfo, i);
+
+        addToPackage(package, &(adresses.physicalAddress), sizeof(int));
+        addToPackage(package, &(adresses.size), sizeof(int));
+    }
+
+    addToPackage(package, &sizeToReadOrWrite, sizeof(uint32_t));
+    addToPackage(package, &pointer, sizeof(int));
+
+    // Uso el socket de la interfaz.
+    sendPackage(package, *interface->socket);
+
+    destroyPackage(package);
+}
+
 void sendProcessPathToMemory(pcb_t *process, char* path)
 {
     

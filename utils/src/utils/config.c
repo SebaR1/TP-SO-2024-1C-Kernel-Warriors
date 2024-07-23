@@ -16,9 +16,10 @@ t_list* getListOfStringsFromConfig(t_config* config, char* key, t_log* logger, c
         log_error(logger, "%s",errorMessage);
         return NULL;
     }
-
+    
     return _fromConfigToListOfStrings(listChars);
 }
+
 
 // Funcion auxiliar para agregar todos los strings a una lista
 t_list* _fromConfigToListOfStrings(char** listChars)
@@ -28,14 +29,20 @@ t_list* _fromConfigToListOfStrings(char** listChars)
     int i = 0;
     while (listChars[i] != NULL)
     {
-        list_add(list, listChars[i]);
+        list_add(list, strdup(listChars[i])); 
         i++;
     }
 
+    i = 0;
+    while (listChars[i] != NULL)
+    {
+        free(listChars[i]);
+        i++;
+    }
+    free(listChars);
+
     return list;
 }
-
-
 
 
 // Convierte un doble puntero a char leido de un archivo de configuracion a una lista de ints. Retorna esa lista
@@ -67,8 +74,16 @@ t_list* _fromConfigToListOfInts(char** listChars)
         i++;
     }
 
+    i = 0;
+    while (listChars[i] != NULL)
+    {
+        free(listChars[i]);
+        i++;
+    }
+    free(listChars);
+
     return list;
-}
+} 
 
 
 char* askForConfigPath()

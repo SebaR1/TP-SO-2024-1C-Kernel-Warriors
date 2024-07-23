@@ -186,6 +186,13 @@ void showProcessByState()
 
     log_info(getLogger(), listProcessNew, "PCB_NEW");
     log_info(getLogger(), listProcessReady, "PCB_READY");
+
+    if(algorithm == VRR){
+        char* listProcessReadyPlus = _listProcess(pcbReadyPriorityList->list);
+        log_info(getLogger(), listProcessReadyPlus, "PCB_READY_PLUS");
+        free(listProcessReadyPlus);
+    }
+
     log_info(getLogger(), listProcessExec, "PCB_EXEC");
     log_info(getLogger(), listProcessBlock, "PCB_BLOCK");
     log_info(getLogger(), listProcessExit, "PCB_EXIT");

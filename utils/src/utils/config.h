@@ -1,6 +1,7 @@
 #ifndef UTILS_CONFIG_H_
 #define UTILS_CONFIG_H_
 
+#include <commons/string.h>
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>

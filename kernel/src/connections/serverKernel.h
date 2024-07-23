@@ -90,6 +90,19 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch);
 void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch);
 
 
+void cpuSendRequestForIODialFsCreate(int *socketClientCPUDispatch);
+
+
+void cpuSendRequestForIODialFsDelete(int *socketCLientCPUDispatch);
+
+
+void cpuSendRequestForIODialFsTruncate(int *socketClientCPUDispatch);
+
+
+void cpuSendRequestForIODialFsRead(int *socketClientCPUDispatch);
+
+
+void cpuSendRequestForIODialFsWrite(int *socketClientCPUDispatch);
 
 
 // Recibe el contexto del proceso de un package y lo retorna. 

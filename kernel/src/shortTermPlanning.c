@@ -15,7 +15,8 @@ void readyState()
 
         char* listPids = _listPids(pcbReadyList->list);
         //Log Obligatorio
-        log_info(getLogger(), listPids, getKernelConfig()->ALGORITMO_PLANIFICACION);
+        log_info(getLogger(), listPids, "Ready" ,getKernelConfig()->ALGORITMO_PLANIFICACION);
+
         free(listPids);
     
         sem_post(&semExec);
@@ -37,7 +38,7 @@ void execState()
         pcb_t *pcbToExec;
         bool flagAuxVRR = false; // Utilizo esto para saber si el proceso estaba anteriormente en pcbReadyPriorityList o no.
 
-        if(!list_mutex_is_empty(pcbReadyList))
+        if(!list_mutex_is_empty(pcbReadyList) || !list_mutex_is_empty(pcbReadyPriorityList))
         {
             if(algorithm != VRR){ // FIFO Y RR tienen practicamente el mismo comportamiento. 
 
@@ -97,7 +98,12 @@ void execState()
 
                 } else { // Como no hay nada en pcbReadyPriorityList, actua como RR pero ademas contando el tiempo.
 
-                    pcbToExec->quantumForVRR = temporal_create(); // Antes del send inicia el tiempo. A tener en cuenta la diferencia de ms, puede ser que se tenga que iniciar el temporizador despues de que se mande.
+                    
+                    //pcbToExec->quantumForVRR = temporal_create();
+
+                    pcbToExec->quantumForVRR->elapsed_ms = 0;
+                    clock_gettime(CLOCK_MONOTONIC_RAW, &(pcbToExec->quantumForVRR->current));
+                    temporal_resume(pcbToExec->quantumForVRR);  /// Antes del send inicia el tiempo. A tener en cuenta la diferencia de ms, puede ser que se tenga que iniciar el temporizador despues de que se mande.
                     sendContextToCPU(pcbToExec);
 
                     pthread_t QuantumInterruptThread;
@@ -110,6 +116,7 @@ void execState()
             default:
                 break;
             }
+            
         } else { // Caso muy especifico para solucionar un bug.
 
             sem_post(&semMultiProcessing);
@@ -147,7 +154,7 @@ void initShortTermPlanning()
 char* _listPids(t_list *list)
 {
     char* pids = string_new();
-    string_append(&pids, "Cola Ready %s: [");
+    string_append(&pids, "Cola %s %s: [");
 
     for (int i = 0; i < list_size(list); i++)
     {
@@ -169,7 +176,7 @@ void quantumControlInterrupt(pcb_t* pcbToExec)
         usleep(getKernelConfig()->QUANTUM*1000);
 
         // Verifica si el proceso sigue ejecutándose o si termino el proceso y se elimino
-        if (pcbToExec->state == PCB_EXEC || pcbToExec == NULL) {
+        if (pcbToExec->state == PCB_EXEC) {
             // Enviar interrupción para desalojar el proceso
             sendInterruptForQuantumEnd(pcbToExec);
         }
@@ -183,13 +190,14 @@ void quantumControlInterruptVRR(paramsQuantumVRRThread* paramsQuantumVRRThread)
 
     usleep(timeQuantum*1000);
 
+    free(paramsQuantumVRRThread);
+
     // Verifica si el proceso sigue ejecutándose o si termino el proceso y se elimino
-    if (pcbToExec->state == PCB_EXEC || pcbToExec == NULL) {
+    if (pcbToExec->state == PCB_EXEC) {
         // Enviar interrupción para desalojar el proceso
         sendInterruptForQuantumEnd(pcbToExec);
     }
 
-    free(paramsQuantumVRRThread);
 }
 
 void defineAlgorithm()

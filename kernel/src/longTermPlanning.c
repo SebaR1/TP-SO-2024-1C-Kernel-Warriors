@@ -79,6 +79,8 @@ pcb_t* createProcess()
     process->state = PCB_NEW;
     process->isInInterface = false;
     process->resources = initListMutex();
+    process->quantumForVRR = temporal_create();
+    temporal_stop(process->quantumForVRR);
     process->registersCpu = malloc(sizeof(t_registers));
     process->registersCpu->AX = 0;
     process->registersCpu->BX = 0;
@@ -116,9 +118,6 @@ void addPcbToNew(char* path)
         list_push(pcbNewList, process); 
         //Log obligatorio
         log_info(getLogger(), "Se crea el proceso %d en NEW", process->pid);
-
-        log_info(getLogger(), "%s", path);
-
 
         sem_post(&semNew);
     } else {
@@ -162,6 +161,7 @@ void destroyProcess(pcb_t *process)
         free(adresses);
     }
 
+    temporal_destroy(process->quantumForVRR);
     destroyListMutex(process->resources); 
     list_destroy(process->params->listAux);
     free(process->params);
