@@ -668,7 +668,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
         sem_post(&semExit);
 
     } else {
-        if(interfaceFound->interfaceType != STDIN){ // El tipo de interfaz STDIN es el unico que puede realizar la operacion IO_STDIN_READ. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
+        if(interfaceFound->interfaceType != STDOUT){ // El tipo de interfaz STDIN es el unico que puede realizar la operacion IO_STDIN_READ. COn verificar que no sea de este tipo directamente no admite la operacion y pasa a exit.
             list_push(pcbExitList, processExec);
             processExec->state = PCB_EXIT;
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_EXIT", processExec->pid);
