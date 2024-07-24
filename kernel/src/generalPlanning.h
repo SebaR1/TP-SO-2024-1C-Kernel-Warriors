@@ -37,7 +37,7 @@ typedef struct
 	char* param3;
 	uint32_t param4;
 	typeOfOperationFS typeOpFs;
-	bool isFs;
+	bool isWaitingFs;
 	t_list* listAux;
 } paramsKernelForIO;
 

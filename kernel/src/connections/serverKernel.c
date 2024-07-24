@@ -373,6 +373,7 @@ void ioSendEndOperation(int *socketClientIO)
         t_list *listOfPhysicalAdressesInfo;
         uint32_t amountOfPhysicalAddresses;
         uint32_t sizeToReadOrWrite;
+        uint32_t pointer;
 
         switch (interfaceFound->interfaceType)
         {
@@ -400,7 +401,7 @@ void ioSendEndOperation(int *socketClientIO)
             listOfPhysicalAdressesInfo = processBlocked->params->listAux;
             amountOfPhysicalAddresses = processBlocked->params->param1;
             sizeToReadOrWrite = processBlocked->params->param2;
-            sendIOStdinReadOperationToIO(interfaceFound, listOfPhysicalAdressesInfo, amountOfPhysicalAddresses, sizeToReadOrWrite);
+            sendIOStdoutWriteOperationToIO(interfaceFound, listOfPhysicalAdressesInfo, amountOfPhysicalAddresses, sizeToReadOrWrite);
             
             for (int i = 0; i < amountOfPhysicalAddresses; i++) {
                 physicalAddressInfoP *adresses = list_remove(processBlocked->params->listAux, 0);
@@ -412,26 +413,56 @@ void ioSendEndOperation(int *socketClientIO)
             break;
 
         case DialFS:
+            processBlocked->params->isWaitingFs = false;
             switch (processBlocked->params->typeOpFs)
             {
             case FS_CREATE:
-                /* code */
+                sendIODialFsCreateOperationToIO(interfaceFound, processBlocked->params->param3);
+                free(processBlocked->params->param3);
                 break;
 
             case FS_DELETE:
-                /* code */
+                sendIODialFsCreateOperationToIO(interfaceFound, processBlocked->params->param3);
+                free(processBlocked->params->param3);
                 break;
 
             case FS_TRUNCATE:
-                /* code */
+                sendIODialFsTruncateOperationToIO(interfaceFound, processBlocked->params->param3, processBlocked->params->param1);
+                free(processBlocked->params->param3);
                 break;
 
             case FS_READ:
-                /* code */
+                listOfPhysicalAdressesInfo = processBlocked->params->listAux;
+                amountOfPhysicalAddresses = processBlocked->params->param1;
+                sizeToReadOrWrite = processBlocked->params->param2;
+                pointer = processBlocked->params->param4;
+                sendIODialFsReadOperationToIO(interfaceFound, processBlocked->params->param3, listOfPhysicalAdressesInfo, amountOfPhysicalAddresses, sizeToReadOrWrite, pointer);
+
+                free(processBlocked->params->param3);
+                for (int i = 0; i < amountOfPhysicalAddresses; i++) {
+                    physicalAddressInfoP *adresses = list_remove(processBlocked->params->listAux, 0);
+
+                    free(adresses->physicalAddress);
+                    free(adresses->size);
+                    free(adresses);
+                }
                 break;
 
             case FS_WRITE:
-                /* code */
+                listOfPhysicalAdressesInfo = processBlocked->params->listAux;
+                amountOfPhysicalAddresses = processBlocked->params->param1;
+                sizeToReadOrWrite = processBlocked->params->param2;
+                pointer = processBlocked->params->param4;
+                sendIODialFsWriteOperationToIO(interfaceFound, processBlocked->params->param3, listOfPhysicalAdressesInfo, amountOfPhysicalAddresses, sizeToReadOrWrite, pointer);
+
+                free(processBlocked->params->param3);
+                for (int i = 0; i < amountOfPhysicalAddresses; i++) {
+                    physicalAddressInfoP *adresses = list_remove(processBlocked->params->listAux, 0);
+
+                    free(adresses->physicalAddress);
+                    free(adresses->size);
+                    free(adresses);
+                }
                 break;
             
             default:
@@ -905,6 +936,7 @@ void cpuSendRequestForIODialFsCreate(int *socketClientCPUDispatch)
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
 
+                processExec->params->isWaitingFs = false;
                 processExec->isInInterface = true;
 
                 sendIODialFsCreateOperationToIO(interfaceFound, nameFileForCreate);
@@ -913,7 +945,7 @@ void cpuSendRequestForIODialFsCreate(int *socketClientCPUDispatch)
 
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->isFs = true;
+                processExec->params->isWaitingFs = true;
                 processExec->params->typeOpFs = FS_CREATE;
                 processExec->params->param3 = malloc(string_length(nameFileForCreate) + 1);
                 strcpy(processExec->params->param3, nameFileForCreate);
@@ -989,6 +1021,7 @@ void cpuSendRequestForIODialFsDelete(int *socketClientCPUDispatch)
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
 
+                processExec->params->isWaitingFs = false;
                 processExec->isInInterface = true;
 
                 sendIODialFsDeleteOperationToIO(interfaceFound, nameFileForDelete);
@@ -997,7 +1030,7 @@ void cpuSendRequestForIODialFsDelete(int *socketClientCPUDispatch)
 
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->isFs = true;
+                processExec->params->isWaitingFs = true;
                 processExec->params->typeOpFs = FS_DELETE;
                 processExec->params->param3 = malloc(string_length(nameFileForDelete) + 1);
                 strcpy(processExec->params->param3, nameFileForDelete);
@@ -1077,6 +1110,7 @@ void cpuSendRequestForIODialFsTruncate(int *socketClientCPUDispatch)
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
 
+                processExec->params->isWaitingFs = false;
                 processExec->isInInterface = true;
 
                 sendIODialFsTruncateOperationToIO(interfaceFound, nameOfFile, *size);
@@ -1084,7 +1118,7 @@ void cpuSendRequestForIODialFsTruncate(int *socketClientCPUDispatch)
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->isFs = true;
+                processExec->params->isWaitingFs = true;
                 processExec->params->typeOpFs = FS_TRUNCATE;
                 processExec->params->param3 = malloc(string_length(nameOfFile) + 1);
                 strcpy(processExec->params->param3, nameOfFile);
@@ -1179,6 +1213,7 @@ void cpuSendRequestForIODialFsRead(int *socketClientCPUDispatch)
                 interfaceFound->isBusy = true;
                 interfaceFound->processAssign = processExec;
 
+                processExec->params->isWaitingFs = false;
                 processExec->isInInterface = true;
 
                 sendIODialFsReadOperationToIO(interfaceFound, nameOfFile, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite, *pointer);
@@ -1186,7 +1221,7 @@ void cpuSendRequestForIODialFsRead(int *socketClientCPUDispatch)
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->isFs = true;
+                processExec->params->isWaitingFs = true;
                 processExec->params->typeOpFs = FS_READ;
                 processExec->params->param3 = malloc(string_length(nameOfFile) + 1);
                 strcpy(processExec->params->param3, nameOfFile);
@@ -1314,13 +1349,14 @@ void cpuSendRequestForIODialFsWrite(int *socketClientCPUDispatch)
                 interfaceFound->processAssign = processExec;
 
                 processExec->isInInterface = true;
+                processExec->params->isWaitingFs = false;
 
                 sendIODialFsWriteOperationToIO(interfaceFound, nameOfFile, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite, *pointer);
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                processExec->params->isFs = true;
+                processExec->params->isWaitingFs = true;
                 processExec->params->typeOpFs = FS_WRITE;
                 processExec->params->param3 = malloc(string_length(nameOfFile) + 1);
                 strcpy(processExec->params->param3, nameOfFile);

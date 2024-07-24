@@ -94,6 +94,7 @@ pcb_t* createProcess()
     process->registersCpu->SI = 0;
     process->registersCpu->DI = 0;
     process->params = malloc(sizeof(paramsKernelForIO));
+    process->params->isWaitingFs = false;
     process->params->listAux = list_create();
     return process;
 };
@@ -191,7 +192,7 @@ void destroyProcess(pcb_t *process)
         free(adresses);
     }
 
-    if(process->params->isFs){
+    if(process->params->isWaitingFs){
         free(process->params->param3);
     }
 
