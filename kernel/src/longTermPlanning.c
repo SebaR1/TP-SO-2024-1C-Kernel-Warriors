@@ -11,11 +11,14 @@ void newState()
         sem_wait(&semMultiProgramming);
         sem_wait(&semNew);
 
+        if(!list_mutex_is_empty(pcbNewList)){
+        pcb_t* pcbToReady = list_pop(pcbNewList);
+
         sem_wait(&semPausePlanning);
         sem_post(&semPausePlanning);
 
-        if(!list_mutex_is_empty(pcbNewList)){
-        pcb_t* pcbToReady = list_pop(pcbNewList);
+        pthread_mutex_lock(&mutexOrderReadyExecProcess);
+
         list_push(pcbReadyList, pcbToReady);
         pcbToReady->state = PCB_READY;
 
@@ -42,10 +45,8 @@ void exitState()
         process->state = PCB_EXIT;
 
         // Pido a memoria que libere todo lo asociado al proceso.
-        pthread_mutex_lock(&mutex2);
         sendEndProcessToMemory(process);
         destroyProcess(process);
-        pthread_mutex_unlock(&mutex2);
 
         if(prevState != PCB_NEW){
             if(diffBetweenNewAndPrevMultiprogramming > 0){
@@ -292,14 +293,12 @@ void killProcess(uint32_t *paramkillProcessThread)
 
         if(processFound->isInInterface) // Esto es para el caso que se finalice un proceso y justo este operando algo en una interfaz, tiene que esperar hasta que termine para matarlo.
         { 
-            pthread_mutex_lock(&mutex2);
+
             interface_t* interface = foundInterfaceByProcessPidAssign(processFound);
 
             if(interface == NULL) log_error(getLogger(), "Este error no deberia pasar nunca.");
 
             interface->flagKillProcess = true;
-
-            pthread_mutex_unlock(&mutex2);
 
             sem_wait(&semKillProcessInInterface);
 

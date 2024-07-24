@@ -6,8 +6,6 @@ void readyState()
     while (1)
     {
 
-        pthread_mutex_lock(&mutexOrderReadyExecProcess);
-
         sem_wait(&semReady);
 
         sem_wait(&semPausePlanning);
@@ -18,6 +16,8 @@ void readyState()
         log_info(getLogger(), listPids, "Ready" ,getKernelConfig()->ALGORITMO_PLANIFICACION);
 
         free(listPids);
+
+        pthread_mutex_unlock(&mutexOrderReadyExecProcess);
     
         sem_post(&semExec);
     }
@@ -36,7 +36,9 @@ void execState()
         sem_post(&semPausePlanning);
 
         pcb_t *pcbToExec;
-        bool flagAuxVRR = false; // Utilizo esto para saber si el proceso estaba anteriormente en pcbReadyPriorityList o no.
+        bool flagAuxVRR = false; // Utilizo esto para saber si el proceso estaba anteriormente en pcbReadyPriorityList o no
+        
+        pthread_mutex_lock(&mutexOrderReadyExecProcess);
 
         if(!list_mutex_is_empty(pcbReadyList) || !list_mutex_is_empty(pcbReadyPriorityList))
         {

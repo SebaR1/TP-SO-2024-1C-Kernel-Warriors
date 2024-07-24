@@ -5,7 +5,6 @@ listMutex_t *pcbReadyList;
 listMutex_t *pcbExecList;
 listMutex_t *pcbBlockList;
 listMutex_t *pcbExitList;
-
 listMutex_t *pcbReadyPriorityList;
 
 listMutex_t *resourcesBlockList;
@@ -23,20 +22,17 @@ sem_t semMultiProcessing;
 sem_t semAddPid;
 
 sem_t semMemoryOk;
-
 sem_t semPausePlanning;
-
 sem_t semKillProcessInInterface;
-
 sem_t semKillProcessExec;
-
-sem_t semExitProgram;
 
 pthread_mutex_t mutexSendProcessToMemory;
 
 pthread_mutex_t mutexOrderProcessByScript;
 
 pthread_mutex_t mutexOrderReadyExecProcess;
+
+pthread_mutex_t mutexOrderPcbReadyPlus;
 
 bool flagMemoryResponse;
 
@@ -49,7 +45,5 @@ t_algorithm algorithm;
 int socketClientMemory;
 int socketClientCPUDispatch;
 int socketClientCPUInterrupt;
-
-pthread_mutex_t mutex2;
 
 int diffBetweenNewAndPrevMultiprogramming; 

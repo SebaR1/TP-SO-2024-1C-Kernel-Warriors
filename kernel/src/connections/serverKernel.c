@@ -327,6 +327,8 @@ void ioSendEndOperation(int *socketClientIO)
 
         if(algorithm != VRR){ //ESTO SI EL ALGORITMO DE PLANIFICACION ES RR O FIFO.
 
+            pthread_mutex_lock(&mutexOrderReadyExecProcess);
+
             list_push(pcbReadyList, processBlockToReady); // Lo paso a la lista de ready porque ya termino su operacion.
 
             processBlockToReady->state = PCB_READY;
@@ -1492,6 +1494,8 @@ void cpuSendInterruptQ(int *socketClientCPUDispatch)
     // Asigno todo el contexto que recibi de CPU al proceso popeado en Exec.
     pcb_t *processExecToReady = assignContextToPcb(contextProcess);
 
+    pthread_mutex_lock(&mutexOrderReadyExecProcess);
+
     list_push(pcbReadyList, processExecToReady);
     processExecToReady->state = PCB_READY;
 
@@ -1627,6 +1631,8 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
             log_info(getLogger(), "El recurso se asigno al proceso %d", processBlockToReady->pid);
 
             list_remove_element_mutex(pcbBlockList, processBlockToReady);
+
+            pthread_mutex_lock(&mutexOrderReadyExecProcess);
 
             processBlockToReady->state = PCB_READY;
             list_push(pcbReadyList, processBlockToReady);

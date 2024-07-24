@@ -7,7 +7,7 @@ void readKernelConsole(){
 
     flagExecutingScript = false;
 
-    log_info(getLogger(), "Consola iniciada\n");
+    log_info(getLogger(), "\nConsola iniciada\n");
     char* read;
     read = readline("");
 
@@ -222,6 +222,13 @@ char* _listProcess(t_list *list)
     string_append(&pids, " ]");
 
     return pids;
+}
+
+void logInitial()
+{
+    log_info(getLogger(), "-----------------------------------------------");
+    log_info(getLogger(), "MODULO KERNEL INICIADO <3");
+    log_info(getLogger(), "-----------------------------------------------");
 }
 
 void changeMultiprogramming(int* paramChangeMultiprogrammingThread)

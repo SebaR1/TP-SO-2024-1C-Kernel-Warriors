@@ -17,8 +17,9 @@ int main()
     diffBetweenNewAndPrevMultiprogramming = 0;
 
     pthread_mutex_init(&mutexSendProcessToMemory, NULL);
-
+    pthread_mutex_init(&mutexOrderProcessByScript, NULL);
     pthread_mutex_init(&mutexOrderReadyExecProcess, NULL);
+    pthread_mutex_init(&mutexOrderPcbReadyPlus, NULL);
 
     sem_init(&semNew, 0, 0);
     sem_init(&semReady, 0, 0);
@@ -32,11 +33,7 @@ int main()
     sem_init(&semPausePlanning, 0, 1);
     sem_init(&semMemoryOk, 0, 0);
     sem_init(&semKillProcessInInterface, 0, 0);
-    sem_init(&semExitProgram, 0, 0);
     sem_init(&semKillProcessExec, 0, 0);
-
-    pthread_mutex_init(&mutex2, NULL);
-    pthread_mutex_init(&mutexOrderProcessByScript, NULL);
 
     defineAlgorithm();
 
@@ -45,7 +42,6 @@ int main()
     pcbExecList = initListMutex();
     pcbBlockList = initListMutex();
     pcbExitList = initListMutex();
-
     pcbReadyPriorityList = initListMutex();
 
     resourcesBlockList = initListMutex();
@@ -53,7 +49,6 @@ int main()
     interfacesList = initListMutex();
 
     initResources();
-
 
     initLongTermPlanning();
     initShortTermPlanning();
@@ -66,33 +61,31 @@ int main()
     params.finishLoopSignal = &_finishAllServersSignal;
     pthread_t waitClientsLoopThread;
     pthread_create(&waitClientsLoopThread, NULL, (void*)waitClientsLoop, &params);
-    //pthread_detach(waitClientsLoopThread);
 
     // Mando un paquete inicial a memoria para tener conexion. 
     t_package* initialPackageM = createPackage(KERNEL_MODULE);
-    log_info(getLogger(), "Creando conexion con la Memoria. Se enviara un mensaje a la Memoria");
     socketClientMemory = createConection(getLogger(), getKernelConfig()->IP_MEMORIA, getKernelConfig()->PUERTO_MEMORIA);
     sendPackage(initialPackageM, socketClientMemory);
-    log_info(getLogger(), "Paquete enviado con exito a memoria.");
-
 
     // Mando un paquete inicial a CPUDispatch para tener conexion. 
     t_package* initialPackageToCpuInterrupt = createPackage(KERNEL_MODULE_TO_CPU_INTERRUPT);
-    log_info(getLogger(), "Creando conexion con CpuInterrupt. Se enviara un mensaje a CpuInterrupt");
     socketClientCPUInterrupt = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_INTERRUPT);
     sendPackage(initialPackageToCpuInterrupt, socketClientCPUInterrupt);
-    log_info(getLogger(), "Paquete enviado con exito a interrupt.");
 
     // Mando un paquete inicial a CPUInterrupt para tener conexion. 
     t_package* initialPackageToCpuDispatch = createPackage(KERNEL_MODULE_TO_CPU_DISPATCH);
-    log_info(getLogger(), "Creando conexion con CpuDispatch. Se enviara un mensaje a CpuDispatch");
     socketClientCPUDispatch = createConection(getLogger(), getKernelConfig()->IP_CPU, getKernelConfig()->PUERTO_CPU_DISPATCH);
     sendPackage(initialPackageToCpuDispatch, socketClientCPUDispatch);
-    log_info(getLogger(), "Paquete enviado con exito dispatch.");
+
+    destroyPackage(initialPackageM);
+    destroyPackage(initialPackageToCpuInterrupt);
+    destroyPackage(initialPackageToCpuDispatch);
 
     // Con el socket de CPUDispatch abro un server para escucharlo.
     initServerForASocket(socketClientCPUDispatch, serverKernelForCPU);
     initServerForASocket(socketClientMemory, serverKernelForMemory);
+
+    logInitial();
 
     // Inicio consola de Kernel. Si termina la consola termina todo el programa.
     pthread_t kernelConsoleThread;
@@ -161,10 +154,6 @@ int main()
     //sleep(60);
 
 */
-
-    destroyPackage(initialPackageToCpuDispatch);
-    destroyPackage(initialPackageToCpuInterrupt);
-    destroyPackage(initialPackageM);
 
     destroyResources();
     destroyInterfaces();

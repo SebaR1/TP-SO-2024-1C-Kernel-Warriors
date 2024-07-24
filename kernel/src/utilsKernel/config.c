@@ -45,7 +45,7 @@ void _getKernelData()
 
 void initKernelConfig(char* path)
 {
-    log_info(getLogger(), "Obteniendo los datos del archivo de configuracion");
+    //log_info(getLogger(), "Obteniendo los datos del archivo de configuracion");
 
     _configFile = config_create(path);
 
@@ -58,7 +58,7 @@ void initKernelConfig(char* path)
 
     _getKernelData();
 
-    log_info(getLogger(), "Datos obtenidos con exito");
+    //log_info(getLogger(), "Datos obtenidos con exito");
 }
 
 
@@ -66,13 +66,13 @@ void initKernelConfig(char* path)
 // Posible riesgo de memory leak en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak en los testeos.
 void freeKernelConfig()
 {
-    log_info(getLogger(), "Liberando la memoria usada para el archivo de configuracion");
+    //log_info(getLogger(), "Liberando la memoria usada para el archivo de configuracion");
 
     list_destroy_and_destroy_elements(getKernelConfig()->RECURSOS, free);
     list_destroy_and_destroy_elements(getKernelConfig()->INSTANCIAS_RECURSOS, free);
     config_destroy(_configFile);
     free(getKernelConfig());
 
-    log_info(getLogger(), "Memoria liberada con exito");
+    //log_info(getLogger(), "Memoria liberada con exito");
 }
 

@@ -121,13 +121,13 @@ extern sem_t semKillProcessInInterface;
 
 extern sem_t semKillProcessExec;
 
-extern sem_t semExitProgram;
-
 extern pthread_mutex_t mutexSendProcessToMemory;
 
 extern pthread_mutex_t mutexOrderProcessByScript;
 
 extern pthread_mutex_t mutexOrderReadyExecProcess;
+
+extern pthread_mutex_t mutexOrderPcbReadyPlus;
 
 extern bool flagMemoryResponse;
 
@@ -140,8 +140,6 @@ extern int socketClientCPUDispatch;
 extern int socketClientCPUInterrupt;
 
 extern t_algorithm algorithm;
-
-extern pthread_mutex_t mutex2;
 
 extern int diffBetweenNewAndPrevMultiprogramming;
 
