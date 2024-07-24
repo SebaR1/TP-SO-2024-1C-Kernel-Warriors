@@ -16,7 +16,7 @@ void sendResultsFromIOFSReadToMemory();
 
 void sendIOStdoutWriteResultsToKernel();
 
-void sendIOReadRequestToMemory();
+void sendIOReadRequestToMemory(uint32_t physicalDirection, uint32_t size);
 
 void sendIOFSCreateResultsToKernel(int sucess);
 

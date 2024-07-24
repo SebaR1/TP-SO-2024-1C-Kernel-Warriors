@@ -45,6 +45,8 @@ void sendIOStdoutWriteResultsToKernel()
     log_info(getLogger(), "Se enviaran los resultados de la operacion STDOUT_WRITE al Kernel.");
     t_package* package = createPackage(IO_OK);
 
+    addToPackage(package, interfaceData.name, string_length(interfaceData.name) + 1); // +1 por el caracter nulo \0
+
     sendPackage(package, socketKernel);
 
     log_info(getLogger(), "Resultados de la operacion STDOUT_WRITE enviados al Kernel.");
@@ -89,7 +91,7 @@ void sendResultsFromIOFSReadToMemory()
     destroyPackage(package);
 }
 
-void sendIOReadRequestToMemory()
+void sendIOReadRequestToMemory(uint32_t physicalDirection, uint32_t size)
 {   
     if (interfaceData.currentOperation.operation == IO_STDOUT_WRITE)
     {
@@ -98,8 +100,9 @@ void sendIOReadRequestToMemory()
 
         t_paramsForStdoutInterface *params = (t_paramsForStdoutInterface*)interfaceData.currentOperation.params;
 
-        addToPackage(package, &params->registerDirection, sizeof(uint32_t));
-        addToPackage(package, &params->registerSize, sizeof(uint32_t));
+        addToPackage(package, &interfaceData.currentOperation.pid, sizeof(uint32_t));
+        addToPackage(package, &physicalDirection, sizeof(uint32_t));
+        addToPackage(package, &size, sizeof(uint32_t));
 
         sendPackage(package, socketMemory);
 

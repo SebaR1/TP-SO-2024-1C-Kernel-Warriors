@@ -70,8 +70,9 @@ typedef struct
 
 typedef struct
 {
-    uint32_t registerDirection;
-    uint32_t registerSize;
+    uint32_t amountOfPhysicalAddresses;
+    physicalAddressInfo* addressesInfo;
+    uint32_t totalSize;
 } t_paramsForStdoutInterface;
 
 typedef struct
@@ -127,6 +128,8 @@ extern t_resultsForStdout resultsForStdout;
 extern t_resultsForIOFSWrite resultsForIOFSWrite;
 extern t_resultsForIOFSRead resultsForIOFSRead;
 
+extern void* dataReceivedFromMemory;
+
 extern sem_t semaphoreForStdin;
 extern sem_t semaphoreForStdout;
 extern sem_t semaphoreForIOFSWrite;
@@ -155,6 +158,11 @@ void destroyInterface();
 /// @param addressesInfo Array de physicalAddressInfo, donde cada indice contiene la direccion fisica y el tamaño a escribir en la misma.
 /// @param amountOfPhysicalAddresses La cantidad de direcciones fisicas (el tamaño del array).
 void writeToMemory(void* data, physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses);
+
+/// @brief Le pide a Memoria la data que está en la direccion fisica dada, con su tamaño.
+/// @param addressesInfo Array de physicalAddressInfo, donde cada indice contiene la direccion fisica y el tamaño a escribir en la misma.
+/// @param amountOfPhysicalAddresses La cantidad de direcciones fisicas (el tamaño del array).
+void readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses);
 
 t_fileData* openCreateMapFile(FILE* file, char* fileName, int fileSize);
 

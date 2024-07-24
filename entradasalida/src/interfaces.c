@@ -98,6 +98,21 @@ void writeToMemory(void* data, physicalAddressInfo* addressesInfo, int amountOfP
     }
 }
 
+void* dataReceivedFromMemory;
+
+void readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses)
+{
+    int offset = 0;
+    for (int i = 0; i < amountOfPhysicalAddresses; i++)
+    {
+        sendIOReadRequestToMemory(addressesInfo[i].physicalAddress, addressesInfo[i].size);
+        sem_wait(&semaphoreForStdout);
+        memcpy(resultsForStdout.resultsForWrite + offset, dataReceivedFromMemory, addressesInfo[i].size);
+        offset += addressesInfo[i].size;
+        free(dataReceivedFromMemory);
+    }
+}
+
 t_fileData* openCreateMapFile(FILE* file, char* fileName, int fileSize)
 {   
     char *fullName = string_new();

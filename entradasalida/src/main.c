@@ -1,4 +1,5 @@
 #include "interfaces.h"
+#include "utils/config.h"
 
 int main(int argc, char* argv[])
 {   
@@ -6,7 +7,9 @@ int main(int argc, char* argv[])
     initLogger("IO.log", "entrada salida", true, LOG_LEVEL_INFO);
 
     // Obtengo la configuracion general.
-    initIOConfig("IO.config");
+    char* path = askForConfigPath();
+    initIOConfig(path);
+    free(path);
 
     // Inicializacion de semaforos y reserva de memoria
     sem_init(&semaphoreForStdin, 0, 0);

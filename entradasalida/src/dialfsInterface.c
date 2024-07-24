@@ -169,7 +169,7 @@ void executeIOFSWriteAndSendResults()
 void executeIOFSWrite()
 {
     log_info(getLogger(), "PID: %d - Operacion: IO_FS_WRITE", (int)interfaceData.currentOperation.pid);
-    sendIOReadRequestToMemory();
+    //sendIOReadRequestToMemory(); // ES NECESARIO DESCOMENTAR ESTOOOOOOOO. LO COMENTE PORQUE NO COMPILABA Y QUERIA TESTEAR OTRA COSA.
     
     //Se espera a recibir el contenido de la memoria
     sem_wait(&semaphoreForIOFSWrite);
