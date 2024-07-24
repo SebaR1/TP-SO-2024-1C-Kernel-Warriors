@@ -14,7 +14,7 @@ interface_t *foundInterface(char* nameRequestInterface);
 
 bool comparePidAssignInInterface(void *data);
 
-interface_t *foundInterfaceByProcessPidAssign(uint32_t pid);
+interface_t *foundInterfaceByProcessPidAssign(pcb_t* pcb);
 
 bool compareSocketValAssignOfInterface(void *data);
 

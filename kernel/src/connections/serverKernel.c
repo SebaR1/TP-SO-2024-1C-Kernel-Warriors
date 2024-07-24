@@ -356,7 +356,6 @@ void ioSendEndOperation(int *socketClientIO)
     } else {
 
         interfaceFound->isBusy = false;
-        interfaceFound->processAssign = NULL;
 
         sem_post(&semKillProcessInInterface);
 
@@ -803,6 +802,8 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                log_info(getLogger(), "PASE POR ACA CON EL PROCESO: %d", processExec->pid);
 
                 processExec->params->param1 = *amountOfPhysicalAddresses;
                 processExec->params->param2 = *sizeToReadOrWrite;

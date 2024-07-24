@@ -291,11 +291,14 @@ void killProcess(uint32_t *paramkillProcessThread)
 
         if(processFound->isInInterface) // Esto es para el caso que se finalice un proceso y justo este operando algo en una interfaz, tiene que esperar hasta que termine para matarlo.
         { 
-            interface_t* interface = foundInterfaceByProcessPidAssign(processFound->pid);
+            pthread_mutex_lock(&mutex2);
+            interface_t* interface = foundInterfaceByProcessPidAssign(processFound);
 
             if(interface == NULL) log_error(getLogger(), "Este error no deberia pasar nunca.");
 
             interface->flagKillProcess = true;
+
+            pthread_mutex_unlock(&mutex2);
 
             sem_wait(&semKillProcessInInterface);
 

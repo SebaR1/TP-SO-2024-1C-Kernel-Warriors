@@ -7,6 +7,7 @@ interface_t *createInterface(char* nameInterface, interfaceType typeInterface)
     newInterface->name = malloc(string_length(nameInterface) + 1); // +1 por el nulo
     strcpy(newInterface->name, nameInterface);
 
+    newInterface->processAssign = NULL;
     newInterface->interfaceType = typeInterface;
     newInterface->flagKillProcess = false;
     newInterface->isBusy = false;
@@ -34,17 +35,17 @@ interface_t *foundInterface(char* nameRequestInterface)
     return interfaceFound;
 }
 
-int auxPid;
+pcb_t* auxPid;
 
 bool comparePidAssignInInterface(void *data)
 {
     interface_t *interface = (interface_t *)data;
-    return interface->processAssign->pid == auxPid;
+    return interface->processAssign == auxPid;
 }
 
-interface_t *foundInterfaceByProcessPidAssign(uint32_t pid)
+interface_t *foundInterfaceByProcessPidAssign(pcb_t* pcb)
 {
-    auxPid = pid;
+    auxPid = pcb;
 
     interface_t *interfaceFound = (interface_t*)list_find_mutex(interfacesList, comparePidAssignInInterface);
 
