@@ -1328,7 +1328,6 @@ void writeToMemory(void* data, uint32_t direction, int size, readWriteMemoryType
         offset += info[i].size;
         physicalAddresses[i] = info[i].physicalAddress; // Unicamente para los logs
         sem_wait(&semWaitConfirmationFromMemory);
-
     }
 
     ////// Solo para logs este switch

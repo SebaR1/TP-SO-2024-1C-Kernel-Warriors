@@ -31,7 +31,7 @@ void sendIOStdinReadResultsToKernel()
     log_info(getLogger(), "Se enviaran los resultados de la operacion STDIN_READ al Kernel.");
     t_package* package = createPackage(IO_OK);
 
-    addToPackage(package, resultsForStdin.resultsFromRead, string_length(resultsForStdin.resultsFromRead));
+    addToPackage(package, interfaceData.name, string_length(interfaceData.name) + 1); // +1 por el caracter nulo \0
 
     sendPackage(package, socketKernel);
 
@@ -52,18 +52,19 @@ void sendIOStdoutWriteResultsToKernel()
     destroyPackage(package);
 }
 
-void sendResultsFromStdinToMemory()
+void sendResultsFromStdinToMemory(void* data, uint32_t physicalDirection, uint32_t size)
 {   
     log_info(getLogger(), "Se enviara la lectura de la operacion STDIN_READ a la memoria.");
     t_package* package = createPackage(WRITE_MEMORY);
 
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
 
-    addToPackage(package, resultsForStdin.resultsForMemory, params->registerSize);
-    addToPackage(package, &params->registerDirection, sizeof(uint32_t));
-    addToPackage(package, &params->registerSize, sizeof(uint32_t));
+    addToPackage(package, &interfaceData.currentOperation.pid, sizeof(int));
+    addToPackage(package, data, size);
+    addToPackage(package, &physicalDirection, sizeof(uint32_t));
+    addToPackage(package, &size, sizeof(uint32_t));
 
-    sendPackage(package, socketKernel);
+    sendPackage(package, socketMemory);
 
     log_info(getLogger(), "Lectura de la operacion STDIN_READ enviada a la memoria.");
     

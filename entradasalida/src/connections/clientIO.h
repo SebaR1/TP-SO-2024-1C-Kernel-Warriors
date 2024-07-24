@@ -10,7 +10,7 @@ void sendIOGenSleepResultsToKernel();
 
 void sendIOStdinReadResultsToKernel();
 
-void sendResultsFromStdinToMemory();
+void sendResultsFromStdinToMemory(void* data, uint32_t physicalDirection, uint32_t size);
 
 void sendResultsFromIOFSReadToMemory();
 

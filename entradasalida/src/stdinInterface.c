@@ -4,10 +4,12 @@ void executeIOStdinReadAndSendResults()
 {   
     executeIOStdinRead();
 
-    sendResultsFromStdinToMemory();
+    t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
+
+    writeToMemory(resultsForStdin.resultsForMemory, params->addressesInfo, params->amountOfPhysicalAddresses);
 
     // Se espera a recibir confirmación de la memoria de que salió todo bien
-    sem_wait(&semaphoreForStdin);
+    //sem_wait(&semaphoreForStdin);
 
     sendIOStdinReadResultsToKernel();
 
@@ -15,9 +17,10 @@ void executeIOStdinReadAndSendResults()
     resultsForStdin.resultsFromRead = NULL;
     free(resultsForStdin.resultsForMemory);
     resultsForStdin.resultsForMemory = NULL;
+    free(params->addressesInfo);
 
     interfaceData.currentOperation.operation = IO_NULL;
-    free(interfaceData.currentOperation.params);
+    //free(interfaceData.currentOperation.params);
     interfaceData.currentOperation.pid = -1;
 }
 
@@ -28,5 +31,5 @@ void executeIOStdinRead()
     resultsForStdin.resultsFromRead = readline("> ");
 
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
-    memmove(resultsForStdin.resultsForMemory, resultsForStdin.resultsFromRead, params->registerSize);
+    memcpy(resultsForStdin.resultsForMemory, resultsForStdin.resultsFromRead, params->totalSize);
 }

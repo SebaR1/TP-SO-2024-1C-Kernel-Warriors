@@ -85,6 +85,19 @@ void destroyInterface()
     free(interfaceData.currentOperation.params);
 }
 
+void writeToMemory(void* data, physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses)
+{
+    t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
+    int offset = 0;
+
+    for (int i = 0; i < amountOfPhysicalAddresses; i++)
+    {
+        sendResultsFromStdinToMemory(data + offset, addressesInfo[i].physicalAddress, addressesInfo[i].size);
+        offset += addressesInfo[i].size;
+        sem_wait(&semaphoreForStdin);
+    }
+}
+
 t_fileData* openCreateMapFile(FILE* file, char* fileName, int fileSize)
 {   
     char *fullName = string_new();

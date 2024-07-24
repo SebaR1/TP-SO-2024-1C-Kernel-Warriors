@@ -135,12 +135,23 @@ void sendResultsFromIOStdinReadToKernel()
 {   
     t_list *listPackage = getPackage(socketKernel);
 
+    int listGetCounter = 0;
+
     interfaceData.currentOperation.operation = IO_STDIN_READ;
-    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
+    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, listGetCounter++));
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
-    params->registerDirection = *((uint32_t*)list_get(listPackage, 1));
-    params->registerSize = *((uint32_t*)list_get(listPackage, 2));
-    resultsForStdin.resultsForMemory = malloc(sizeof(char) * params->registerSize);
+    params->amountOfPhysicalAddresses = *((uint32_t*)list_get(listPackage, listGetCounter++));
+    params->addressesInfo = malloc(sizeof(physicalAddressInfo) * params->amountOfPhysicalAddresses);
+
+    for (int i = 0; i < params->amountOfPhysicalAddresses; i++)
+    {
+        params->addressesInfo[i].physicalAddress = *((int*)list_get(listPackage, listGetCounter++));
+        params->addressesInfo[i].size = *((int*)list_get(listPackage, listGetCounter++));
+    }
+    
+    params->totalSize = *((int*)list_get(listPackage, listGetCounter++));
+
+    resultsForStdin.resultsForMemory = malloc(sizeof(char) * params->totalSize);
 
     log_info(getLogger(), "Solicitud de operacion STDIN_READ recibida desde el Kernel.");
 
