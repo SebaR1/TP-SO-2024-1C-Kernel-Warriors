@@ -43,6 +43,7 @@ typedef struct
 	listMutex_t *resources;
 	pcbState_t state;
 	bool isInInterface;
+	bool processKilled;
 } pcb_t;
 
 // Estructura de un recurso en Kernel. 

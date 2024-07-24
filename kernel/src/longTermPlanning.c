@@ -32,20 +32,20 @@ void exitState()
     while(1){
         sem_wait(&semExit);
 
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         pcb_t *process = list_pop(pcbExitList);
 
         pcbState_t prevState = process->state;
 
         process->state = PCB_EXIT;
 
-        sem_wait(&semPausePlanning);
-        sem_post(&semPausePlanning);
-
         // Pido a memoria que libere todo lo asociado al proceso.
         pthread_mutex_lock(&mutex2);
         sendEndProcessToMemory(process);
-        pthread_mutex_unlock(&mutex2);
         destroyProcess(process);
+        pthread_mutex_unlock(&mutex2);
 
         if(prevState != PCB_NEW){
             if(diffBetweenNewAndPrevMultiprogramming > 0){
@@ -75,6 +75,7 @@ pcb_t* createProcess()
     sem_wait(&semAddPid);
     process->pid = ++pid;
     sem_post(&semAddPid);
+    process->processKilled = false;
     process->pc = 0;
     process->state = PCB_NEW;
     process->isInInterface = false;
@@ -168,6 +169,19 @@ void destroyProcess(pcb_t *process)
         }
     }
 
+    for(int i = 0; i < list_mutex_size(interfacesList); i++)
+    {
+        interface_t *interface = list_get(interfacesList->list, i);
+
+        bool flag = true;
+
+        while(flag)
+        {
+            flag = list_remove_element_mutex(interface->blockList, process);
+        }
+                
+    }
+
     for(int i = 0; i < list_size(process->params->listAux); i++)
     {
         physicalAddressInfoP *adresses = list_remove(process->params->listAux, 0);
@@ -187,17 +201,28 @@ void destroyProcess(pcb_t *process)
 
 void killProcess(uint32_t *paramkillProcessThread)
 {    
+
     uint32_t pid = *paramkillProcessThread;
+
     pcb_t* processFound = foundStatePcb(pid);
 
+
     if(processFound == NULL){
+
         log_info(getLogger(), "PID: %d - No encontrado", pid);
+
+        free(paramkillProcessThread);
+
         return;
+
     }
+
+    processFound->processKilled = true;
 
     switch (processFound->state)
     {
     case PCB_NEW:
+
         list_remove_element_mutex(pcbNewList, processFound);
 
         processFound->state = PCB_EXIT;
@@ -212,28 +237,23 @@ void killProcess(uint32_t *paramkillProcessThread)
         
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
         sem_post(&semExit);
+
         break;
     
     case PCB_READY:
+
         list_remove_element_mutex(pcbReadyList, processFound);
-
-        char* listPids = _listPids(pcbReadyList->list);
-        //Log Obligatorio
-        log_info(getLogger(), listPids, getKernelConfig()->ALGORITMO_PLANIFICACION);
-        free(listPids);
-
 
         processFound->state = PCB_EXIT; 
         list_push(pcbExitList, processFound);
 
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXIT", processFound->pid);
 
-        sem_wait(&semPausePlanning);
-        sem_post(&semPausePlanning);
-
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
 
         sem_post(&semExit);
+
+
         break;
 
     case PCB_EXEC:
@@ -257,10 +277,13 @@ void killProcess(uint32_t *paramkillProcessThread)
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
 
         sem_post(&semExit);
-        sem_post(&semMultiProcessing);        
+        sem_post(&semMultiProcessing);       
+
+ 
         break;
 
     case PCB_BLOCK:
+
 
         if(processFound->isInInterface) // Esto es para el caso que se finalice un proceso y justo este operando algo en una interfaz, tiene que esperar hasta que termine para matarlo.
         { 
@@ -301,7 +324,10 @@ void killProcess(uint32_t *paramkillProcessThread)
             list_push(pcbExitList, processFound);
             sem_post(&semExit);
 
+
         } 
+
+
         break;
 
     default:
@@ -310,6 +336,7 @@ void killProcess(uint32_t *paramkillProcessThread)
     }
 
     free(paramkillProcessThread);
+
 
 }
 

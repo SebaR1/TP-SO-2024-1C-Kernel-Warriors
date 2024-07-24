@@ -355,6 +355,9 @@ void ioSendEndOperation(int *socketClientIO)
 
     } else {
 
+        interfaceFound->isBusy = false;
+        interfaceFound->processAssign = NULL;
+
         sem_post(&semKillProcessInInterface);
 
     }
@@ -416,6 +419,7 @@ void ioSendEndOperation(int *socketClientIO)
 
     free(nameInterface);
     list_destroy(listPackage);
+
 }
 
 void ioInterfaceDisconnect(int *socketClientIO)
@@ -447,8 +451,22 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
     // Recibo la cantidad de tiempo a utilizar.
     uint32_t *timeOfOperation = (uint32_t*)list_remove(listPackage, 0);
 
+    if(processExec->processKilled)
+    {
+        list_push(pcbExecList, processExec);
+
+        sem_post(&semKillProcessExec);
+
+        free(timeOfOperation);
+        free(nameRequestInterface);
+        list_destroy(listPackage);
+
+        return;
+    }
+
     // Busco la interfaz por el nombre identificador.
     interface_t *interfaceFound = foundInterface(nameRequestInterface);
+
 
     if(interfaceFound == NULL){ // Si no existe se manda el proceso a exit.
         list_push(pcbExitList, processExec);
@@ -501,6 +519,8 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
+                log_info(getLogger(), "PASE POR ACA CON EL PROCESO: %d", processExec->pid);
+
                 processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
             }
         }
@@ -540,6 +560,33 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
     }
 
     int *sizeToReadOrWrite = list_remove(listPackage, 0);
+
+    if(processExec->processKilled)
+    {
+        list_push(pcbExecList, processExec);
+
+        sem_post(&semKillProcessExec);
+
+        free(nameRequestInterface);
+    
+        for(int i = 0; i < *amountOfPhysicalAddresses; i++)
+        {
+            physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
+
+            free(adresses->physicalAddress);
+            free(adresses->size);
+            free(adresses);
+        }
+
+        free(amountOfPhysicalAddresses);
+        list_destroy(listOfPhysicalAddresses);
+        free(sizeToReadOrWrite);
+
+        list_destroy(listPackage);
+
+        return;
+
+    }
 
     // Busco la interfaz por el nombre identificador.
     interface_t *interfaceFound = foundInterface(nameRequestInterface);
@@ -624,6 +671,7 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
 
     list_destroy(listPackage);
 
+
 }
 
 void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
@@ -654,6 +702,34 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
     }
 
     int *sizeToReadOrWrite = list_remove(listPackage, 0);
+
+
+    if(processExec->processKilled)
+    {
+        list_push(pcbExecList, processExec);
+
+        sem_post(&semKillProcessExec);
+
+        free(nameRequestInterface);
+    
+        for(int i = 0; i < *amountOfPhysicalAddresses; i++)
+        {
+            physicalAddressInfoP *adresses = list_remove(listOfPhysicalAddresses, 0);
+
+            free(adresses->physicalAddress);
+            free(adresses->size);
+            free(adresses);
+        }
+
+        free(amountOfPhysicalAddresses);
+        list_destroy(listOfPhysicalAddresses);
+        free(sizeToReadOrWrite);
+
+        list_destroy(listPackage);
+
+        return;
+
+    }
 
     // Busco la interfaz por el nombre identificador.
     interface_t *interfaceFound = foundInterface(nameRequestInterface);
@@ -736,6 +812,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
     free(sizeToReadOrWrite);
 
     list_destroy(listPackage);
+
 }
 
 void cpuSendRequestForIODialFsCreate(int *socketClientCPUDispatch)
@@ -1317,6 +1394,18 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
     pcb_t *processExec = assignContextToPcb(contextProcess);
 
     char* resourceName = (char*)list_remove(listPackage, 0);
+
+    if(processExec->processKilled)
+    {
+        list_push(pcbExecList, processExec);
+
+        sem_post(&semKillProcessExec);
+
+        free(resourceName);
+        list_destroy(listPackage);
+
+        return;
+    }
 
     resource_t* resourceFound = foundResource(resourceName);
 
