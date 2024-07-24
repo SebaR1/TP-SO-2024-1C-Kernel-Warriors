@@ -412,6 +412,34 @@ void ioSendEndOperation(int *socketClientIO)
             }
             break;
 
+        case DialFS:
+            switch (processBlocked->params->typeOpFs)
+            {
+            case FS_CREATE:
+                /* code */
+                break;
+
+            case FS_DELETE:
+                /* code */
+                break;
+
+            case FS_TRUNCATE:
+                /* code */
+                break;
+
+            case FS_READ:
+                /* code */
+                break;
+
+            case FS_WRITE:
+                /* code */
+                break;
+            
+            default:
+                break;
+            }
+
+
         default:
             break;
         }
@@ -639,7 +667,7 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
                 // Se guarda la informacion de la lista para tenerla al momento que se desoscupe la interfaz.
                 for (int i = 0; i < *amountOfPhysicalAddresses; i++)
                 {
-                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfo));
+                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
                     adresses->physicalAddress = malloc(sizeof(int));
                     adresses->size = malloc(sizeof(int));
 
@@ -782,7 +810,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
                 // Se guarda la informacion de la lista para tenerla al momento que se desoscupe la interfaz.
                 for (int i = 0; i < *amountOfPhysicalAddresses; i++)
                 {
-                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfo));
+                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
                     adresses->physicalAddress = malloc(sizeof(int));
                     adresses->size = malloc(sizeof(int));
 
@@ -881,9 +909,14 @@ void cpuSendRequestForIODialFsCreate(int *socketClientCPUDispatch)
                 sendIODialFsCreateOperationToIO(interfaceFound, nameFileForCreate);
                 
             } else {
-                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                processExec->params->isFs = true;
+                processExec->params->typeOpFs = FS_CREATE;
+                processExec->params->param3 = malloc(string_length(nameFileForCreate) + 1);
+                strcpy(processExec->params->param3, nameFileForCreate);
+
             }
         }
     }
@@ -960,9 +993,14 @@ void cpuSendRequestForIODialFsDelete(int *socketClientCPUDispatch)
                 sendIODialFsDeleteOperationToIO(interfaceFound, nameFileForDelete);
                 
             } else {
-                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+
+                processExec->params->isFs = true;
+                processExec->params->typeOpFs = FS_DELETE;
+                processExec->params->param3 = malloc(string_length(nameFileForDelete) + 1);
+                strcpy(processExec->params->param3, nameFileForDelete);
+
             }
         }
     }
@@ -1043,9 +1081,13 @@ void cpuSendRequestForIODialFsTruncate(int *socketClientCPUDispatch)
                 sendIODialFsTruncateOperationToIO(interfaceFound, nameOfFile, *size);
                 
             } else {
-                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+                processExec->params->isFs = true;
+                processExec->params->typeOpFs = FS_TRUNCATE;
+                processExec->params->param3 = malloc(string_length(nameOfFile) + 1);
+                strcpy(processExec->params->param3, nameOfFile);
+                processExec->params->param1 = *size;
             }
         }
     }
@@ -1141,9 +1183,32 @@ void cpuSendRequestForIODialFsRead(int *socketClientCPUDispatch)
                 sendIODialFsReadOperationToIO(interfaceFound, nameOfFile, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite, *pointer);
                 
             } else {
-                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+                processExec->params->isFs = true;
+                processExec->params->typeOpFs = FS_READ;
+                processExec->params->param3 = malloc(string_length(nameOfFile) + 1);
+                strcpy(processExec->params->param3, nameOfFile);
+                processExec->params->param1 = *amountOfPhysicalAddresses;
+                
+                // Se guarda la informacion de la lista para tenerla al momento que se desoscupe la interfaz.
+                for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+                {
+                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
+                    adresses->physicalAddress = malloc(sizeof(int));
+                    adresses->size = malloc(sizeof(int));
+
+                    physicalAddressInfoP *adressesAux = list_get(listOfPhysicalAddresses, i);
+
+                    *(adresses->physicalAddress) = *(adressesAux->physicalAddress);
+                    *(adresses->size) = *(adressesAux->size);
+
+                    list_add(processExec->params->listAux, adresses);
+                }
+
+                processExec->params->param2 = *sizeToReadOrWrite;
+                processExec->params->param4 = *pointer;
+
             }
         }
     }
@@ -1252,9 +1317,32 @@ void cpuSendRequestForIODialFsWrite(int *socketClientCPUDispatch)
                 sendIODialFsWriteOperationToIO(interfaceFound, nameOfFile, listOfPhysicalAddresses, *amountOfPhysicalAddresses, *sizeToReadOrWrite, *pointer);
                 
             } else {
-                //list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
+                list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
 
-                //processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
+                processExec->params->isFs = true;
+                processExec->params->typeOpFs = FS_WRITE;
+                processExec->params->param3 = malloc(string_length(nameOfFile) + 1);
+                strcpy(processExec->params->param3, nameOfFile);
+                processExec->params->param1 = *amountOfPhysicalAddresses;
+                
+                // Se guarda la informacion de la lista para tenerla al momento que se desoscupe la interfaz.
+                for (int i = 0; i < *amountOfPhysicalAddresses; i++)
+                {
+                    physicalAddressInfoP *adresses = malloc(sizeof(physicalAddressInfoP));
+                    adresses->physicalAddress = malloc(sizeof(int));
+                    adresses->size = malloc(sizeof(int));
+
+                    physicalAddressInfoP *adressesAux = list_get(listOfPhysicalAddresses, i);
+
+                    *(adresses->physicalAddress) = *(adressesAux->physicalAddress);
+                    *(adresses->size) = *(adressesAux->size);
+
+                    list_add(processExec->params->listAux, adresses);
+                }
+
+                processExec->params->param2 = *sizeToReadOrWrite;
+                processExec->params->param4 = *pointer;
+
             }
         }
     }

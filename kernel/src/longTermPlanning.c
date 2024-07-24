@@ -191,6 +191,10 @@ void destroyProcess(pcb_t *process)
         free(adresses);
     }
 
+    if(process->params->isFs){
+        free(process->params->param3);
+    }
+
     temporal_destroy(process->quantumForVRR);
     destroyListMutex(process->resources); 
     list_destroy(process->params->listAux);

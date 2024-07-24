@@ -21,14 +21,23 @@ typedef enum
 	PCB_EXIT
 } pcbState_t;
 
+typedef enum
+{
+	FS_CREATE,
+	FS_DELETE,
+	FS_TRUNCATE,
+	FS_READ,
+	FS_WRITE,
+} typeOfOperationFS;
+
 typedef struct
 {
 	uint32_t param1;
 	uint32_t param2;
 	char* param3;
-	char* param4;
-	char* param5;
-	char* param6;
+	uint32_t param4;
+	typeOfOperationFS typeOpFs;
+	bool isFs;
 	t_list* listAux;
 } paramsKernelForIO;
 
