@@ -29,7 +29,7 @@ bool executeIOFSCreate()
 
 
         // Creo el archivo si no existe.
-        FILE *file = fopen(fileName, "a+");
+        FILE *file = fopen(fullFileName, "a+");
         fclose(file);
 
         // Creo la estructura de archivo y le agrego la data.
@@ -39,14 +39,18 @@ bool executeIOFSCreate()
         fileData->filePointer = 0;
         fileData->size = 0;
         fileData->metaData = config_create(fullFileName);
-        config_set_value(fileData->metaData, "BLOQUE_INICIAL", string_itoa(firstFreeBlockIndex));
-        config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", string_itoa(0));
+        char* firstFreeBlockIndexString = string_itoa(firstFreeBlockIndex);
+        config_set_value(fileData->metaData, "BLOQUE_INICIAL", firstFreeBlockIndexString);
+        char* sizeFileString = string_itoa(0);
+        config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", sizeFileString);
         config_save(fileData->metaData);
 
         // Agrego la estructura del archivo al diccionario que contiene todos los archivos.
         dictionary_put(fsData.files, fileName, fileData);
 
         free(fullFileName);
+        free(firstFreeBlockIndexString);
+        free(sizeFileString);
     }
 
     return success;
@@ -242,7 +246,7 @@ bool takeFirstFreeBlock(int* blockIndex)
     // Se fija cual es el primer bloque libre.
     while(*blockIndex < getIOConfig()->BLOCK_COUNT && bitarray_test_bit(fsData.bitmap.bitmap, *blockIndex) != 0)
     {
-        *blockIndex++;
+        (*blockIndex)++;
     }
 
 
