@@ -364,11 +364,15 @@ void ioSendEndOperation(int *socketClientIO)
 
     } else {
 
+        pthread_mutex_lock(&mutexOrderPcbReadyPlus);
+
+        sem_post(&semKillProcessInInterface);
+
         interfaceFound->isBusy = false;
 
         interfaceFound->flagKillProcess = false;
 
-        sem_post(&semKillProcessInInterface);
+        pthread_mutex_unlock(&mutexOrderPcbReadyPlus);
 
     }
 
@@ -489,8 +493,6 @@ void ioSendEndOperation(int *socketClientIO)
 
     free(nameInterface);
     list_destroy(listPackage);
-
-
 }
 
 void ioInterfaceDisconnect(int *socketClientIO)

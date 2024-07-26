@@ -323,14 +323,17 @@ void killProcess(uint32_t *paramkillProcessThread)
 
         if(processFound->isInInterface) // Esto es para el caso que se finalice un proceso y justo este operando algo en una interfaz, tiene que esperar hasta que termine para matarlo.
         { 
-
             interface_t* interface = foundInterfaceByProcessPidAssign(processFound);
-
-            if(interface == NULL) log_error(getLogger(), "Este error no deberia pasar nunca.");
 
             interface->flagKillProcess = true;
 
             sem_wait(&semKillProcessInInterface);
+
+            pthread_mutex_lock(&mutexOrderPcbReadyPlus);
+
+
+            if(interface == NULL) log_error(getLogger(), "Este error no deberia pasar nunca.");
+
 
             list_remove_element_mutex(pcbBlockList, processFound);
 
@@ -344,6 +347,8 @@ void killProcess(uint32_t *paramkillProcessThread)
             log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
             list_push(pcbExitList, processFound);
             sem_post(&semExit);
+
+            pthread_mutex_unlock(&mutexOrderPcbReadyPlus);
         } else {
 
             list_remove_element_mutex(pcbBlockList, processFound);
@@ -351,6 +356,19 @@ void killProcess(uint32_t *paramkillProcessThread)
             processFound->state = PCB_EXIT;
 
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_BLOCK - Estado Actual: PCB_EXIT", processFound->pid);
+
+            for(int i = 0; i < list_mutex_size(interfacesList); i++)
+            {
+                interface_t *interface = list_get(interfacesList->list, i);
+
+                bool flag = true;
+
+                while(flag)
+                {
+                    flag = list_remove_element_mutex(interface->blockList, processFound);
+                }
+                        
+            }
 
             sem_wait(&semPausePlanning);
             sem_post(&semPausePlanning);
@@ -391,6 +409,9 @@ pcb_t* foundStatePcb(uint32_t pid)
     if(processFound != NULL) return processFound;
     
     processFound = (pcb_t *)list_find_mutex(pcbReadyList, compare_pid);
+    if(processFound != NULL) return processFound;
+
+    processFound = (pcb_t *)list_find_mutex(pcbReadyPriorityList, compare_pid);
     if(processFound != NULL) return processFound;
 
     processFound = (pcb_t *)list_find_mutex(pcbBlockList, compare_pid);
