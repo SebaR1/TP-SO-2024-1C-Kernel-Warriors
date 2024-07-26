@@ -18,6 +18,7 @@ void initResources()
         resource->name = (char*)list_get(resourcesList, i);
         resource->instances = *(int*)list_get(resourcesInstancesList, i);
         resource->blockList = initListMutex();
+        pthread_mutex_init(&(resource->mutexForInstances), NULL);
         list_push(resourcesBlockList, resource);        
     }
 }

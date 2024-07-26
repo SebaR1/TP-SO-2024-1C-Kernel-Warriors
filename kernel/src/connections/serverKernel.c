@@ -303,6 +303,7 @@ void ioSendInterface(int *socketClientIO)
 
 void ioSendEndOperation(int *socketClientIO)
 {
+
     t_list *listPackage = getPackage(*socketClientIO);
 
     // Recibo el nombre y tipo de la interfaz.
@@ -337,7 +338,11 @@ void ioSendEndOperation(int *socketClientIO)
 
             sem_post(&semReady);
 
+            pthread_mutex_unlock(&mutexOrderReadyExecProcess);
+
         } else {
+
+            pthread_mutex_lock(&mutexOrderReadyExecProcess);
 
             list_push(pcbReadyPriorityList, processBlockToReady); // Pasa a pcbReadyPriorityList porque es casi seguro que no se va a dar la casualidad de que haya entrado a block justo en el tiempo que se termino el Quantum.
 
@@ -351,13 +356,17 @@ void ioSendEndOperation(int *socketClientIO)
 
             free(listPids);
 
-            sem_post(&semReady);
+            sem_post(&semExec);
+
+            pthread_mutex_unlock(&mutexOrderReadyExecProcess);
 
         }
 
     } else {
 
         interfaceFound->isBusy = false;
+
+        interfaceFound->flagKillProcess = false;
 
         sem_post(&semKillProcessInInterface);
 
@@ -415,6 +424,7 @@ void ioSendEndOperation(int *socketClientIO)
             break;
 
         case DialFS:
+
             processBlocked->params->isWaitingFs = false;
             switch (processBlocked->params->typeOpFs)
             {
@@ -466,11 +476,11 @@ void ioSendEndOperation(int *socketClientIO)
                     free(adresses);
                 }
                 break;
-            
+
             default:
                 break;
             }
-
+        break;
 
         default:
             break;
@@ -479,6 +489,7 @@ void ioSendEndOperation(int *socketClientIO)
 
     free(nameInterface);
     list_destroy(listPackage);
+
 
 }
 
@@ -558,7 +569,7 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -578,8 +589,6 @@ void cpuSendRequestForIOGenSleep(int *socketClientCPUDispatch)
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
-
-                log_info(getLogger(), "PASE POR ACA CON EL PROCESO: %d", processExec->pid);
 
                 processExec->params->param1 = *timeOfOperation; // Se guarda el tiempo de operacion para usarse despues que la interfaz este liberada. 
             }
@@ -673,7 +682,7 @@ void cpuSendRequestForIOStdinRead(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -816,7 +825,7 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -835,8 +844,6 @@ void cpuSendRequestForIOStdoutWrite(int *socketClientCPUDispatch)
                 
             } else {
                 list_push(interfaceFound->blockList, processExec); // Se agrega el proceso a la lista de espera de esa interfaz.
-
-                log_info(getLogger(), "PASE POR ACA CON EL PROCESO: %d", processExec->pid);
 
                 processExec->params->param1 = *amountOfPhysicalAddresses;
                 processExec->params->param2 = *sizeToReadOrWrite;
@@ -924,7 +931,7 @@ void cpuSendRequestForIODialFsCreate(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -1009,7 +1016,7 @@ void cpuSendRequestForIODialFsDelete(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -1098,7 +1105,7 @@ void cpuSendRequestForIODialFsTruncate(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -1201,7 +1208,7 @@ void cpuSendRequestForIODialFsRead(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -1336,7 +1343,7 @@ void cpuSendRequestForIODialFsWrite(int *socketClientCPUDispatch)
         } else {
             list_push(pcbBlockList, processExec); // Una vez dada las validaciones el kernel envia el proceso a pcbBlockList.
             log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
-            log_info(getLogger(), "PID: %d - Bloqueado por INTERFAZ : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
+            log_info(getLogger(), "PID: %d - Bloqueado por : %s", processExec->pid, interfaceFound->name); // Para testeos puse el nombre de la interfaz para que sea mas claro.
 
             processExec->state = PCB_BLOCK;
 
@@ -1486,6 +1493,8 @@ void cpuSendInterruptKillProcess(int *socketClientCPUDispatch)
 
 void cpuSendInterruptQ(int *socketClientCPUDispatch)
 {
+    pthread_mutex_lock(&mutexOrderReadyExecProcess);
+
     t_list *listPackage = getPackage(*socketClientCPUDispatch);
 
     // Recibo el contexto del paquete
@@ -1493,8 +1502,6 @@ void cpuSendInterruptQ(int *socketClientCPUDispatch)
 
     // Asigno todo el contexto que recibi de CPU al proceso popeado en Exec.
     pcb_t *processExecToReady = assignContextToPcb(contextProcess);
-
-    pthread_mutex_lock(&mutexOrderReadyExecProcess);
 
     list_push(pcbReadyList, processExecToReady);
     processExecToReady->state = PCB_READY;
@@ -1510,10 +1517,13 @@ void cpuSendInterruptQ(int *socketClientCPUDispatch)
 
     sem_post(&semMultiProcessing);
     sem_post(&semReady);
+
+    pthread_mutex_unlock(&mutexOrderReadyExecProcess);
 }
 
 void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
 {
+    
     t_list *listPackage = getPackage(*socketClientCPUDispatch);
 
     // Recibo el contexto del paquete
@@ -1559,9 +1569,6 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
 
         if(resourceFound->instances >= 0){ //Si el recurso queda >= 0 se le asigna ese recurso al proceso
 
-            //Para debuggear
-            log_info(getLogger(), "Se hizo un wait de %s, le quedan %d instancias", resourceFound->name, resourceFound->instances);
-
             list_push(processExec->resources, resourceFound); // Asigna el recurso al proceso
 
             list_push(pcbExecList, processExec); // El proceso tiene que volver devuelta a exec PORQUE PUEDE. (Podria generar segmentacion fault sino)
@@ -1571,10 +1578,10 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
         } else { 
             list_push(resourceFound->blockList, processExec); // Pasa a la lista de bloqueados del recurso, esperando que se libere.
 
-            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, resourceFound->name);
+            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
             processExec->state = PCB_BLOCK;
             list_push(pcbBlockList, processExec);
-            log_info(getLogger(), "PID: %d - Estado Anterior: PCB_EXEC - Estado Actual: PCB_BLOCK", processExec->pid);
+            log_info(getLogger(), "PID: %d - Bloqueado por: %s", processExec->pid, resourceFound->name);
 
             sem_post(&semMultiProcessing);
             
@@ -1583,10 +1590,13 @@ void cpuSendWaitOfProcess(int *socketClientCPUDispatch)
 
     free(resourceName);
     list_destroy(listPackage);
+
 }
 
 void cpuSendSignalofProcess(int *socketClientCPUDispatch)
 {
+    pthread_mutex_lock(&mutexOrderReadyExecProcess);
+    
     t_list *listPackage = getPackage(*socketClientCPUDispatch);
 
     // Recibo el contexto del paquete
@@ -1616,23 +1626,14 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
         addInstanceResource(resourceFound); // Suma uno a la instancia del recurso.
 
         // Se fija si el proceso tenia el recurso asignado, si lo tiene lo libera.
-        if(list_remove_element_mutex(processExec->resources, resourceFound)){ 
-            //PARA DEBUGGEAR
-            log_info(getLogger(), "Se libero el recurso %s que tenia en WAIT, ahora tiene %d instancias", resourceFound->name, resourceFound->instances);
-        }
+        list_remove_element_mutex(processExec->resources, resourceFound);
 
         // Se fija si hay algun proceso que este bloqueado para asignarlo por el signal.
         if(list_mutex_size(resourceFound->blockList) > 0){
             pcb_t* processBlockToReady = list_pop(resourceFound->blockList);
             list_push(processBlockToReady->resources, resourceFound);
 
-        
-            //PARA DEBUGGEAR
-            log_info(getLogger(), "El recurso se asigno al proceso %d", processBlockToReady->pid);
-
             list_remove_element_mutex(pcbBlockList, processBlockToReady);
-
-            pthread_mutex_lock(&mutexOrderReadyExecProcess);
 
             processBlockToReady->state = PCB_READY;
             list_push(pcbReadyList, processBlockToReady);
@@ -1650,6 +1651,8 @@ void cpuSendSignalofProcess(int *socketClientCPUDispatch)
 
     free(resourceName);
     list_destroy(listPackage);
+
+    pthread_mutex_unlock(&mutexOrderReadyExecProcess);
 }
 
 contextProcess recieveContextFromPackage(t_list* package)

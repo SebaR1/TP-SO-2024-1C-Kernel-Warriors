@@ -16,10 +16,9 @@ void readyState()
         log_info(getLogger(), listPids, "Ready" ,getKernelConfig()->ALGORITMO_PLANIFICACION);
 
         free(listPids);
-
-        pthread_mutex_unlock(&mutexOrderReadyExecProcess);
     
         sem_post(&semExec);
+
     }
 }
 
@@ -38,8 +37,6 @@ void execState()
         pcb_t *pcbToExec;
         bool flagAuxVRR = false; // Utilizo esto para saber si el proceso estaba anteriormente en pcbReadyPriorityList o no
         
-        pthread_mutex_lock(&mutexOrderReadyExecProcess);
-
         if(!list_mutex_is_empty(pcbReadyList) || !list_mutex_is_empty(pcbReadyPriorityList))
         {
             if(algorithm != VRR){ // FIFO Y RR tienen practicamente el mismo comportamiento. 
@@ -124,8 +121,6 @@ void execState()
             sem_post(&semMultiProcessing);
 
         }
-
-        pthread_mutex_unlock(&mutexOrderReadyExecProcess);
 
     }
   

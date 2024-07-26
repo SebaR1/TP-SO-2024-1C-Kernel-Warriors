@@ -8,16 +8,20 @@ void newState()
 {
     while(1)
     {
+
         sem_wait(&semMultiProgramming);
         sem_wait(&semNew);
 
+
         if(!list_mutex_is_empty(pcbNewList)){
+
+        pthread_mutex_lock(&mutexOrderReadyExecProcess);
+
         pcb_t* pcbToReady = list_pop(pcbNewList);
 
         sem_wait(&semPausePlanning);
         sem_post(&semPausePlanning);
 
-        pthread_mutex_lock(&mutexOrderReadyExecProcess);
 
         list_push(pcbReadyList, pcbToReady);
         pcbToReady->state = PCB_READY;
@@ -25,7 +29,10 @@ void newState()
         //Log obligatorio
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_NEW - Estado Actual: PCB_READY", pcbToReady->pid);
         sem_post(&semReady);
+
+        pthread_mutex_unlock(&mutexOrderReadyExecProcess);
         }
+
     }
 }
 
@@ -33,8 +40,9 @@ void newState()
 void exitState()
 {
     while(1){
-        sem_wait(&semExit);
 
+        sem_wait(&semExit);
+        
         sem_wait(&semPausePlanning);
         sem_post(&semPausePlanning);
 
@@ -255,6 +263,28 @@ void killProcess(uint32_t *paramkillProcessThread)
 
         log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY - Estado Actual: PCB_EXIT", processFound->pid);
 
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
+        log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
+
+        sem_post(&semExit);
+
+
+        break;
+
+    case PCB_READY_PLUS:
+
+        list_remove_element_mutex(pcbReadyPriorityList, processFound);
+
+        processFound->state = PCB_EXIT; 
+        list_push(pcbExitList, processFound);
+
+        log_info(getLogger(), "PID: %d - Estado Anterior: PCB_READY_PLUS - Estado Actual: PCB_EXIT", processFound->pid);
+
+        sem_wait(&semPausePlanning);
+        sem_post(&semPausePlanning);
+
         log_info(getLogger(), "Finaliza el proceso %d - Motivo: INTERRUPTED_BY_USER", processFound->pid);
 
         sem_post(&semExit);
@@ -301,8 +331,6 @@ void killProcess(uint32_t *paramkillProcessThread)
             interface->flagKillProcess = true;
 
             sem_wait(&semKillProcessInInterface);
-
-            interface->flagKillProcess = false;
 
             list_remove_element_mutex(pcbBlockList, processFound);
 
