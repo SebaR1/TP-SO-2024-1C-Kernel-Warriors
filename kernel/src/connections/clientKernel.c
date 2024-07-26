@@ -123,7 +123,7 @@ void sendIODialFsCreateOperationToIO(interface_t *interface, char* nameOfFile)
     t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_CREATE);
 
     addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
-    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+    addToPackage(package, nameOfFile, string_length(nameOfFile) + 1);
 
     // Uso el socket de la interfaz.
     sendPackage(package, *interface->socket);
@@ -136,7 +136,7 @@ void sendIODialFsDeleteOperationToIO(interface_t *interface, char* nameOfFIle)
     t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_DELETE);
 
     addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
-    addToPackage(package, nameOfFIle, sizeof(string_length(nameOfFIle) + 1));
+    addToPackage(package, nameOfFIle, string_length(nameOfFIle) + 1);
 
     // Uso el socket de la interfaz.
     sendPackage(package, *interface->socket);
@@ -149,7 +149,7 @@ void sendIODialFsTruncateOperationToIO(interface_t *interface, char* nameOfFile,
     t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_TRUNCATE);
 
     addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
-    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+    addToPackage(package, nameOfFile, string_length(nameOfFile) + 1);
     addToPackage(package, &size, sizeof(uint32_t));
 
     // Uso el socket de la interfaz.
@@ -163,7 +163,7 @@ void sendIODialFsReadOperationToIO(interface_t *interface, char* nameOfFile, t_l
     t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_READ);
 
     addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
-    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+    addToPackage(package, nameOfFile, string_length(nameOfFile) + 1);
 
     addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
 
@@ -190,7 +190,7 @@ void sendIODialFsWriteOperationToIO(interface_t *interface, char* nameOfFile, t_
     t_package* package = createPackage(KERNEL_SEND_OPERATION_FOR_IO_FS_WRITE);
 
     addToPackage(package, &(interface->processAssign->pid), sizeof(uint32_t));
-    addToPackage(package, nameOfFile, sizeof(string_length(nameOfFile) + 1));
+    addToPackage(package, nameOfFile, string_length(nameOfFile) + 1);
 
     addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
 
