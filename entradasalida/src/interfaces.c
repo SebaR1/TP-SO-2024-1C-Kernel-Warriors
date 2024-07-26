@@ -120,14 +120,17 @@ void createDictionaryFileNames()
 
             if (entry->d_type == DT_REG && isFileInFS(name))
             {
+                char* fullFileName = getFullFileName(name);
                 t_fileData* fileData = malloc(sizeof(t_fileData));
-                fileData->metaData = config_create(name);
+                fileData->metaData = config_create(fullFileName);
                 fileData->firstBlockIndex = config_get_int_value(fileData->metaData, "BLOQUE_INICIAL");
                 fileData->size = config_get_int_value(fileData->metaData, "TAMANIO_ARCHIVO");
                 fileData->amountOfBlocks = ceil( (double)fileData->size / (double)getIOConfig()->BLOCK_SIZE );
                 fileData->filePointer = 0;
 
                 dictionary_put(fsData.files, name, fileData);
+
+                free(fullFileName);
             }
         }
 

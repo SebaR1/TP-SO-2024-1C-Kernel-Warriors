@@ -2,7 +2,7 @@
 #include "utils/config.h"
 
 int main(int argc, char* argv[])
-{   
+{
     // Inicio el logger general del modulo. Siempre deberia ser la primera sentencia a ejecutar del main.
     initLogger("IO.log", "entrada salida", true, LOG_LEVEL_INFO);
 

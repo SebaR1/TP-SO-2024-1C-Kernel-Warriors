@@ -825,11 +825,11 @@ void IO_FS_TRUNCATE(char* interface, char* fileName, registerType size)
     switch (_typeToRegister(size, size1bytes, size4bytes))
     {
     case REGISTER_1_BYTE:
-        _IO_FS_TRUNCATE1(interface, fileName, size1bytes);
+        _IO_FS_TRUNCATE1(interface, fileName, *size1bytes);
         break;
 
     case REGISTER_4_BYTES:
-        _IO_FS_TRUNCATE4(interface, fileName, size4bytes);
+        _IO_FS_TRUNCATE4(interface, fileName, *size4bytes);
         break;
     }
 

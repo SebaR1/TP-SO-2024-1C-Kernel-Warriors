@@ -116,6 +116,11 @@ void executeIOFSTruncate()
     // Si no hay que agregarle ni quitarle bloques, no hace nada, simplemente retorna porque se queda igual
     if (newAmountOfBlocks == fileData->amountOfBlocks)
     {
+        fileData->size = params->size;
+        char* sizeString = string_itoa(params->size);
+        config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", sizeString);
+        config_save(fileData->metaData);
+
         return;
     }
 
@@ -129,6 +134,12 @@ void executeIOFSTruncate()
         }
         
         msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
+
+        fileData->size = params->size;
+        fileData->amountOfBlocks = newAmountOfBlocks;
+        char* sizeString = string_itoa(params->size);
+        config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", sizeString);
+        config_save(fileData->metaData);
 
         return;
     }
@@ -165,8 +176,11 @@ void executeIOFSTruncate()
 
     fileData->size = params->size;
     fileData->amountOfBlocks = newAmountOfBlocks;
-    config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", string_itoa(params->size));
+    char* sizeString = string_itoa(params->size);
+    config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", sizeString);
     config_save(fileData->metaData);
+
+    free(sizeString);
 }
 
 void executeIOFSWriteAndSendResults()
@@ -271,7 +285,7 @@ bool takeFirstFreeBlock(int* blockIndex)
 bool comparator(void* element1, void* element2)
 {
     t_fileData* fileData1 = (t_fileData*)element1;
-    t_fileData* fileData2 = (t_fileData*)element1;
+    t_fileData* fileData2 = (t_fileData*)element2;
 
     // Se ordena segun lo siguiente: el primero de la lista es el que tiene el bloque mas al principio del archivo de bloques, y el ultimo es el que tiene el bloque mas al final del archivo de bloques
     return fileData1->firstBlockIndex < fileData2->firstBlockIndex; //////////////// FIJARSE SI ESTÁ BIEN, QUIZAS DEBA SER CON EL SIGNO AL REVES (>).
@@ -314,12 +328,14 @@ void compactAndSendFileToLast(char* fileNameToSendToLast)
 
         // Actualizo la informacion del archivo
         fileElement->firstBlockIndex = blocksOffset;
-        config_set_value(fileElement->metaData, "BLOQUE_INICIAL", string_itoa(blocksOffset));
+        char* blockOffsetString = string_itoa(blocksOffset);
+        config_set_value(fileElement->metaData, "BLOQUE_INICIAL", blockOffsetString);
         config_save(fileElement->metaData);
 
         // El blocksOffset es el primer bloque del siguiente archivo de la iteracion.
         blocksOffset += fileElement->amountOfBlocks;
         free(fileBytesElement);
+        free(blockOffsetString);
     }
 
     // Pongo al final el archivo que queria poner al final.
@@ -327,14 +343,15 @@ void compactAndSendFileToLast(char* fileNameToSendToLast)
 
     // Actualizo la informacion del archivo.
     fileDataToSendToLast->firstBlockIndex = blocksOffset;
-    config_set_value(fileDataToSendToLast->metaData, "BLOQUE_INICIAL", string_itoa(blocksOffset));
+    char* blockOffsetString = string_itoa(blocksOffset);
+    config_set_value(fileDataToSendToLast->metaData, "BLOQUE_INICIAL", blockOffsetString);
     config_save(fileDataToSendToLast->metaData);
 
     msync(fsData.blocks.mappedFile, fsData.blocks.size, MS_SYNC);
 
     free(fileBytesToSendToLast);
     free(filesList);
-
+    free(blockOffsetString);
 
 
 
