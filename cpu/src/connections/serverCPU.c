@@ -396,8 +396,8 @@ void receiveContext(int* socketClient)
     contextProcess.registersCpu.EBX = *(uint32_t *)list_get(listPackage, 6);
     contextProcess.registersCpu.ECX = *(uint32_t *)list_get(listPackage, 7);
     contextProcess.registersCpu.EDX = *(uint32_t *)list_get(listPackage, 8);
-    contextProcess.registersCpu.SI = *(uint32_t *)list_get(listPackage, 9);
-    contextProcess.registersCpu.DI = *(uint32_t *)list_get(listPackage, 10);
+    contextProcess.registersCpu.DI = *(uint32_t *)list_get(listPackage, 9);
+    contextProcess.registersCpu.SI = *(uint32_t *)list_get(listPackage, 10);
 
     int pid = *(uint32_t *)list_get(listPackage, 11);
 
@@ -410,8 +410,8 @@ void receiveContext(int* socketClient)
     setEBX(contextProcess.registersCpu.EBX);
     setECX(contextProcess.registersCpu.ECX);
     setEDX(contextProcess.registersCpu.EDX);
-    setSI(contextProcess.registersCpu.SI);
     setDI(contextProcess.registersCpu.DI);
+    setSI(contextProcess.registersCpu.SI);
 
 
     setCurrentPID(pid);
