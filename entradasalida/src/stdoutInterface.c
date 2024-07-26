@@ -24,7 +24,7 @@ void executeIOStdoutWrite()
 
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
 
-    resultsForStdout.resultsForWrite = (char*)readFromMemory(params->addressesInfo, params->amountOfPhysicalAddresses);
+    resultsForStdout.resultsForWrite = (char*)readFromMemory(params->addressesInfo, params->amountOfPhysicalAddresses, params->totalSize);
 
     resultsForStdout.resultsForWrite[params->totalSize] = '\0';
     

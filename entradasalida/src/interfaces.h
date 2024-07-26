@@ -198,8 +198,9 @@ void writeToMemory(void* data, physicalAddressInfo* addressesInfo, int amountOfP
 /// @brief Le pide a Memoria la data que está en la direccion fisica dada, con su tamaño.
 /// @param addressesInfo Array de physicalAddressInfo, donde cada indice contiene la direccion fisica y el tamaño a escribir en la misma.
 /// @param amountOfPhysicalAddresses La cantidad de direcciones fisicas (el tamaño del array).
+/// @param size Tamaño total a leer.
 /// @return Retorna la data leida.
-void* readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses);
+void* readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses, int size);
 
 
 /// @brief Retorna el path + fileName, siendo el path el indicado por el atributo PATH_BASE_DIALFS del archivo de configuracion de la IO.

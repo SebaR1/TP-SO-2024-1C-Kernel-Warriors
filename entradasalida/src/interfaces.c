@@ -188,9 +188,9 @@ void writeToMemory(void* data, physicalAddressInfo* addressesInfo, int amountOfP
 
 void* dataReceivedFromMemory;
 
-void* readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses)
+void* readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses, int size)
 {
-    void* data;
+    void* data = malloc(size);
     int offset = 0;
     for (int i = 0; i < amountOfPhysicalAddresses; i++)
     {

@@ -186,7 +186,7 @@ void executeIOFSWrite()
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
 
     log_info(getLogger(), "PID: %d - Operacion: IO_FS_WRITE", (int)interfaceData.currentOperation.pid);
-    resultsForIOFSWrite.resultsForWrite = (char*)readFromMemory(params->addressesInfo, params->amountOfPhysicalAddresses); // ES NECESARIO DESCOMENTAR ESTOOOOOOOO. LO COMENTE PORQUE NO COMPILABA Y QUERIA TESTEAR OTRA COSA.
+    resultsForIOFSWrite.resultsForWrite = (char*)readFromMemory(params->addressesInfo, params->amountOfPhysicalAddresses, params->totalSize);
     
     //Se espera a recibir el contenido de la memoria
     //sem_wait(&semaphoreReceiveDataFromMemory);
