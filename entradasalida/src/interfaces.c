@@ -86,9 +86,9 @@ void destroyInterface()
 void* openCreateMapFile(FILE** file, char* fileName, int fileSize)
 {   
     char *fullName = getFullFileName(fileName);
-    *file = fopen(fullName, "a+");
+    *file = fopen(fullName, "ab+");
 
-    int fd = fileno(file);
+    int fd = fileno(*file);
 
     ftruncate(fd, fileSize);
 
