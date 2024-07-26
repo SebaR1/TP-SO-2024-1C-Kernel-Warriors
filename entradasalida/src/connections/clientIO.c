@@ -73,6 +73,7 @@ void sendResultsFromStdinToMemory(void* data, uint32_t physicalDirection, uint32
     destroyPackage(package);
 }
 
+/*
 void sendResultsFromIOFSReadToMemory()
 {
     log_info(getLogger(), "Se enviara la lectura de la operacion IO_FS_READ a la memoria.");
@@ -90,12 +91,13 @@ void sendResultsFromIOFSReadToMemory()
     
     destroyPackage(package);
 }
+*/
 
 void sendIOReadRequestToMemory(uint32_t physicalDirection, uint32_t size)
 {   
     if (interfaceData.currentOperation.operation == IO_STDOUT_WRITE)
     {
-        log_info(getLogger(), "Se enviara la solicitud de lectura a la memoria para la operacion STDOUT_WRITE.");
+        log_info(getLogger(), "Se enviara la solicitud de lectura a la memoria.");
         t_package* package = createPackage(READ_MEMORY);
 
         t_paramsForStdoutInterface *params = (t_paramsForStdoutInterface*)interfaceData.currentOperation.params;
@@ -106,23 +108,24 @@ void sendIOReadRequestToMemory(uint32_t physicalDirection, uint32_t size)
 
         sendPackage(package, socketMemory);
 
-        log_info(getLogger(), "Solicitud de lectura a la memoria para la operacion STDOUT_WRITE enviada.");
+        log_info(getLogger(), "Solicitud de lectura a la memoria enviada.");
         
         destroyPackage(package);
     }
     else if (interfaceData.currentOperation.operation == IO_FS_WRITE)
     {
-        log_info(getLogger(), "Se enviara la solicitud de lectura a la memoria para la operacion IO_FS_WRITE.");
+        log_info(getLogger(), "Se enviara la solicitud de lectura a la memoria.");
         t_package* package = createPackage(READ_MEMORY);
 
         t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
 
-        addToPackage(package, &params->registerDirection, sizeof(uint32_t));
-        addToPackage(package, &params->registerSize, sizeof(uint32_t));
+        addToPackage(package, &interfaceData.currentOperation.pid, sizeof(uint32_t));
+        addToPackage(package, &physicalDirection, sizeof(uint32_t));
+        addToPackage(package, &size, sizeof(uint32_t));
 
         sendPackage(package, socketMemory);
 
-        log_info(getLogger(), "Solicitud de lectura a la memoria para la operacion IO_FS_WRITE enviada.");
+        log_info(getLogger(), "Solicitud de lectura a la memoria enviada.");
         
         destroyPackage(package);
     }
@@ -132,8 +135,11 @@ void sendIOFSCreateResultsToKernel(int success)
 {
     log_info(getLogger(), "Se enviaran los resultados de la operacion IO_FS_CREATE al Kernel.");
     t_package* package;
-    if (success) package = createPackage(IO_OK);
+    
+    //if (success) package = createPackage(IO_OK);
     //else package = createPackage(IO_NOT_OK);
+
+    package = createPackage(IO_OK);
 
     addToPackage(package, interfaceData.name, string_length(interfaceData.name) + 1);
 

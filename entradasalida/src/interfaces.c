@@ -1,4 +1,5 @@
 #include "interfaces.h"
+#include "math.h"
 
 t_interfaceData interfaceData;
 t_resultsForStdin resultsForStdin;
@@ -6,21 +7,11 @@ t_resultsForStdout resultsForStdout;
 t_resultsForIOFSWrite resultsForIOFSWrite;
 t_resultsForIOFSRead resultsForIOFSRead;
 
-sem_t semaphoreForStdin;
-sem_t semaphoreForStdout;
-sem_t semaphoreForIOFSWrite;
-sem_t semaphoreForIOFSRead;
+sem_t semaphoreSendDataToMemory;
+sem_t semaphoreReceiveDataFromMemory;
 sem_t semaphoreForModule;
 
-FILE* blocks = NULL;
-FILE* bitmap = NULL;
-
-t_fileData* blocksData = NULL;
-t_fileData* bitmapData = NULL;
-
-t_bitarray* mappedBitmap = NULL;
-
-t_list* listFileNames = NULL;
+t_FSData fsData;
 
 int socketKernel;
 int socketMemory;
@@ -66,11 +57,18 @@ void createInterface(char *name)
         case DialFS:
             const char *dir = getIOConfig()->PATH_BASE_DIALFS;
             mkdir(dir, 0777);
-            blocksData = openCreateMapFile(blocks, "bloques.dat", getIOConfig()->BLOCK_COUNT * getIOConfig()->BLOCK_SIZE);
-            bitmapData = openCreateMapFile(bitmap, "bitmap.dat", getIOConfig()->BLOCK_COUNT / 8);
-            mappedBitmap = bitarray_create_with_mode(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8, LSB_FIRST);
+
+            int sizeBlocksFile = getIOConfig()->BLOCK_COUNT * getIOConfig()->BLOCK_SIZE;
+            fsData.blocks.mappedFile = openCreateMapFile(&(fsData.blocks.file), "bloques.dat", sizeBlocksFile);
+            fsData.blocks.size = sizeBlocksFile;
+
+            int sizeBitmapFile = ceil((double)getIOConfig()->BLOCK_COUNT / 8);
+            fsData.bitmap.mappedFile = openCreateMapFile(&(fsData.bitmap.file), "bitmap.dat", sizeBitmapFile);
+            fsData.bitmap.bitmap = bitarray_create_with_mode(fsData.bitmap.mappedFile, sizeBitmapFile, LSB_FIRST);
+            fsData.bitmap.size = sizeBitmapFile;
+
             log_info(getLogger(), "Creada interfaz de tipo DialFS, con nombre \"%s\"", interfaceData.name);
-            createListFileNames();
+            createDictionaryFileNames();
 
             break;
 
@@ -85,6 +83,96 @@ void destroyInterface()
     free(interfaceData.currentOperation.params);
 }
 
+void* openCreateMapFile(FILE** file, char* fileName, int fileSize)
+{   
+    char *fullName = getFullFileName(fileName);
+    *file = fopen(fullName, "a+");
+
+    int fd = fileno(file);
+
+    ftruncate(fd, fileSize);
+
+    void *mappedFile;
+    mappedFile = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+    msync(mappedFile, fileSize, MS_SYNC);
+
+    free(fullName);
+    return mappedFile;
+}
+
+void createDictionaryFileNames()
+{
+        fsData.files = dictionary_create();
+        DIR* dir;
+        struct dirent* entry;
+
+        dir = opendir(getIOConfig()->PATH_BASE_DIALFS);
+
+        while ((entry = readdir(dir)) != NULL)
+        {   
+            char* name = string_duplicate(entry->d_name);
+
+            if (entry->d_type == DT_REG && isFileInFS(name))
+            {
+                t_fileData* fileData = malloc(sizeof(t_fileData));
+                fileData->metaData = config_create(name);
+                fileData->firstBlockIndex = config_get_int_value(fileData->metaData, "BLOQUE_INICIAL");
+                fileData->size = config_get_int_value(fileData->metaData, "TAMANIO_ARCHIVO");
+                fileData->amountOfBlocks = ceil( (double)fileData->size / (double)getIOConfig()->BLOCK_SIZE );
+                fileData->filePointer = 0;
+
+                dictionary_put(fsData.files, name, fileData);
+            }
+        }
+
+        closedir(dir);
+}
+
+void closeBlocksFile()
+{   
+    if (fsData.blocks.file != NULL)
+    {
+        msync(fsData.blocks.mappedFile, fsData.blocks.size, MS_SYNC);
+        munmap(fsData.blocks.mappedFile, fsData.blocks.size);
+        fclose(fsData.blocks.file);
+    }
+}
+
+void closeBitmapFile()
+{   
+    if (fsData.bitmap.file != NULL)
+    {   
+        msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
+        munmap(fsData.bitmap.mappedFile, fsData.bitmap.size);
+        fclose(fsData.bitmap.file);
+        bitarray_destroy(fsData.bitmap.bitmap);
+    }
+}
+
+void closeSingleFileClosure(char* key, void* value)
+{
+    t_fileData* fileData = (t_fileData*)value;
+
+    config_save(fileData->metaData);
+    config_destroy(fileData->metaData);
+    free(value);
+}
+
+void closeAllFiles()
+{
+    dictionary_iterator(fsData.files, closeSingleFileClosure);
+    dictionary_destroy(fsData.files);
+}
+
+
+
+
+
+/////////////////////////////// FUNCIONES AUXILIARES ///////////////////////////////
+
+
+
 void writeToMemory(void* data, physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses)
 {
     t_paramsForStdinInterface *params = (t_paramsForStdinInterface*)interfaceData.currentOperation.params;
@@ -94,86 +182,57 @@ void writeToMemory(void* data, physicalAddressInfo* addressesInfo, int amountOfP
     {
         sendResultsFromStdinToMemory(data + offset, addressesInfo[i].physicalAddress, addressesInfo[i].size);
         offset += addressesInfo[i].size;
-        sem_wait(&semaphoreForStdin);
+        sem_wait(&semaphoreSendDataToMemory);
     }
 }
 
 void* dataReceivedFromMemory;
 
-void readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses)
+void* readFromMemory(physicalAddressInfo* addressesInfo, int amountOfPhysicalAddresses)
 {
+    void* data;
     int offset = 0;
     for (int i = 0; i < amountOfPhysicalAddresses; i++)
     {
         sendIOReadRequestToMemory(addressesInfo[i].physicalAddress, addressesInfo[i].size);
-        sem_wait(&semaphoreForStdout);
-        memcpy(resultsForStdout.resultsForWrite + offset, dataReceivedFromMemory, addressesInfo[i].size);
+        sem_wait(&semaphoreReceiveDataFromMemory);
+        memcpy(data + offset, dataReceivedFromMemory, addressesInfo[i].size);
         offset += addressesInfo[i].size;
         free(dataReceivedFromMemory);
     }
+
+    return data;
 }
 
-t_fileData* openCreateMapFile(FILE* file, char* fileName, int fileSize)
-{   
+
+char* getFullFileName(char* fileName)
+{
     char *fullName = string_new();
     string_append(&fullName, getIOConfig()->PATH_BASE_DIALFS);
     string_append(&fullName, "/");
     string_append(&fullName, fileName);
-    file = fopen(fullName, "a+");
 
-    int fd = fileno(file);
-
-    ftruncate(fd, fileSize);
-
-    char *mappedFile;
-    mappedFile = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-
-    msync(mappedFile, fileSize, MS_SYNC);
-
-    t_fileData* fileData = malloc(sizeof(t_fileData));
-    fileData->fd = fd;
-    fileData->mappedFile = mappedFile;
-
-    free(fullName);
-    return fileData;
+    return fullName;
 }
 
-void createListFileNames()
+
+int getFirstByteOfBlock(int blockIndex)
 {
-        listFileNames = list_create();
-        DIR* dir;
-        struct dirent* entry;
-
-        dir = opendir(getIOConfig()->PATH_BASE_DIALFS);
-
-        while ((entry = readdir(dir)) != NULL)
-        {   
-            char* name = string_new();
-            string_append(&name, entry->d_name);
-            if (entry->d_type == DT_REG && string_equals_ignore_case(name + string_length(name) - 7, ".config"))
-                list_add(listFileNames, name);
-        }
-
-        closedir(dir);
+    return blockIndex * getIOConfig()->BLOCK_SIZE;
 }
 
-void closeBlocksFile()
-{   
-    if (blocks != NULL)
-    {
-        msync(blocksData->mappedFile, getIOConfig()->BLOCK_COUNT * getIOConfig()->BLOCK_SIZE, MS_SYNC);
-        munmap(blocksData->mappedFile, getIOConfig()->BLOCK_COUNT * getIOConfig()->BLOCK_SIZE);
-        fclose(blocks);
-    }
+
+int getAmountOfBlocks(int fileSize)
+{
+    return ceil((double)fileSize / (double)getIOConfig()->BLOCK_SIZE);
 }
 
-void closeBitmapFile()
-{   
-    if (bitmap != NULL)
-    {   
-        msync(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8, MS_SYNC);
-        munmap(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8);
-        fclose(bitmap);
-        bitarray_destroy(mappedBitmap);
-    }
+void delayCompacting()
+{
+    usleep(getIOConfig()->RETRASO_COMPACTACION * 1000);
+}
+
+void delayFS()
+{
+    usleep(getIOConfig()->TIEMPO_UNIDAD_TRABAJO * 1000);
 }

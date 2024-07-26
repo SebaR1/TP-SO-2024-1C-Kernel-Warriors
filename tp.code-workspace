@@ -16,7 +16,8 @@
 			"typeinfo": "c",
 			"random": "c",
 			"memory_resource": "c",
-			"ratio": "c"
+			"ratio": "c",
+			"algorithm": "c"
 		},
 		"C_Cpp.errorSquiggles": "disabled",
 	},

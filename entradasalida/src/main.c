@@ -12,10 +12,10 @@ int main(int argc, char* argv[])
     free(path);
 
     // Inicializacion de semaforos y reserva de memoria
-    sem_init(&semaphoreForStdin, 0, 0);
-    sem_init(&semaphoreForStdout, 0, 0);
-    sem_init(&semaphoreForIOFSWrite, 0, 0);
-    sem_init(&semaphoreForIOFSRead, 0, 0);
+    sem_init(&semaphoreReceiveDataFromMemory, 0, 0);
+    sem_init(&semaphoreSendDataToMemory, 0, 0);
+    //sem_init(&semaphoreForIOFSWrite, 0, 0);
+    //sem_init(&semaphoreForIOFSRead, 0, 0);
     sem_init(&semaphoreForModule, 0, 0);
 
     // Se crea el nombre de la interfaz
@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
     destroyLogger();
     closeBlocksFile();
     closeBitmapFile();
+    closeAllFiles();
 
     // Señal para todos los servidores para que dejen de escuchar clientes
     finishAllServersSignal();
@@ -67,10 +68,8 @@ int main(int argc, char* argv[])
     releaseConnection(socketMemory);
 
     // Destrucción de semáforos
-    sem_destroy(&semaphoreForStdin);
-    sem_destroy(&semaphoreForStdout);
-    sem_destroy(&semaphoreForIOFSWrite);
-    sem_destroy(&semaphoreForIOFSRead);
+    sem_destroy(&semaphoreSendDataToMemory);
+    sem_destroy(&semaphoreReceiveDataFromMemory);
     sem_destroy(&semaphoreForModule);
 
     return 0;

@@ -95,8 +95,7 @@ void serverIOForMemory(int *socketClient)
             case MEMORY_WRITE_OK:
                 log_info(getLogger(), "Recibida confirmacion desde la memoria.");
                 // Una vez recibida la confirmación de la memoria, se habilita a que se confirme al Kernel que se completó la operación
-                if(interfaceData.currentOperation.operation == IO_STDIN_READ) sem_post(&semaphoreForStdin);
-                else if(interfaceData.currentOperation.operation == IO_FS_READ) sem_post(&semaphoreForIOFSRead);
+                sem_post(&semaphoreSendDataToMemory);
                 break;
 
             case ERROR:
@@ -236,7 +235,7 @@ void sendResultsFromIOFSTruncateToKernel()
     interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
     t_paramsForIOFSTruncate *params = (t_paramsForIOFSTruncate*)interfaceData.currentOperation.params;
     params->fileName = (char*)list_get(listPackage, 1);
-    params->registerSize = *((uint32_t*)list_get(listPackage, 2));
+    params->size = *((uint32_t*)list_get(listPackage, 2));
 
     log_info(getLogger(), "Solicitud de operacion IO_FS_TRUNCATE recibida desde el Kernel.");
 
@@ -249,15 +248,27 @@ void sendResultsFromIOFSWriteToKernel()
 {
     t_list *listPackage = getPackage(socketKernel);
 
+    int listGetCounter = 0;
+
     interfaceData.currentOperation.params = malloc(sizeof(t_paramsForIOFSWriteOrRead));
 
     interfaceData.currentOperation.operation = IO_FS_WRITE;
-    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
+    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, listGetCounter++));
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
-    params->fileName = (char*)list_get(listPackage, 1);
-    params->registerDirection = *((uint32_t*)list_get(listPackage, 2));
-    params->registerSize = *((uint32_t*)list_get(listPackage, 3));
-    params->registerFilePointer = *((uint32_t*)list_get(listPackage, 4));
+    params->fileName = (char*)list_get(listPackage, listGetCounter++);
+    params->amountOfPhysicalAddresses = *((uint32_t*)list_get(listPackage, listGetCounter++));
+
+    params->addressesInfo = malloc(sizeof(physicalAddressInfo) * params->amountOfPhysicalAddresses);
+
+    for (int i = 0; i < params->amountOfPhysicalAddresses; i++)
+    {
+        params->addressesInfo[i].physicalAddress = *((int*)list_get(listPackage, listGetCounter++));
+        params->addressesInfo[i].size = *((int*)list_get(listPackage, listGetCounter++));
+    }
+
+    params->totalSize = *((uint32_t*)list_get(listPackage, listGetCounter++));
+
+    params->filePointer = *((uint32_t*)list_get(listPackage, listGetCounter++));
 
     log_info(getLogger(), "Solicitud de operacion IO_FS_WRITE recibida desde el Kernel.");
 
@@ -270,15 +281,28 @@ void sendResultsFromIOFSReadToKernel()
 {
     t_list *listPackage = getPackage(socketKernel);
 
+    int listGetCounter = 0;
+
     interfaceData.currentOperation.params = malloc(sizeof(t_paramsForIOFSWriteOrRead));
 
     interfaceData.currentOperation.operation = IO_FS_READ;
-    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
+    interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, listGetCounter++));
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
-    params->fileName = (char*)list_get(listPackage, 1);
-    params->registerDirection = *((uint32_t*)list_get(listPackage, 2));
-    params->registerSize = *((uint32_t*)list_get(listPackage, 3));
-    params->registerFilePointer = *((uint32_t*)list_get(listPackage, 4));
+    params->fileName = (char*)list_get(listPackage, listGetCounter++);
+    params->amountOfPhysicalAddresses = *((uint32_t*)list_get(listPackage, listGetCounter++));
+
+    params->addressesInfo = malloc(sizeof(physicalAddressInfo) * params->amountOfPhysicalAddresses);
+
+    for (int i = 0; i < params->amountOfPhysicalAddresses; i++)
+    {
+        params->addressesInfo[i].physicalAddress = *((int*)list_get(listPackage, listGetCounter++));
+        params->addressesInfo[i].size = *((int*)list_get(listPackage, listGetCounter++));
+    }
+
+    params->totalSize = *((uint32_t*)list_get(listPackage, listGetCounter++));
+
+    params->filePointer = *((uint32_t*)list_get(listPackage, listGetCounter++));
+
 
     log_info(getLogger(), "Solicitud de operacion IO_FS_READ recibida desde el Kernel.");
 
@@ -289,32 +313,16 @@ void sendResultsFromIOFSReadToKernel()
 
 void receiveDataFromMemory()
 {   
-    if (interfaceData.currentOperation.operation == IO_STDOUT_WRITE)
-    {
-        t_list *listPackage = getPackage(socketMemory);
+    t_list *listPackage = getPackage(socketMemory);
 
-        dataReceivedFromMemory = list_get(listPackage, 0);
+    dataReceivedFromMemory = list_get(listPackage, 0);
 
-        log_info(getLogger(), "Contenido solicitado a la memoria recibido.");
+    log_info(getLogger(), "Contenido solicitado a la memoria recibido.");
 
-        // Una vez recibido el contenido de la memoria, se habilita a que se imprima en pantalla en otro hilo
-        sem_post(&semaphoreForStdout);
+    // Una vez recibido el contenido de la memoria, se habilita a que se imprima en pantalla en otro hilo
+    sem_post(&semaphoreReceiveDataFromMemory);
 
-        list_destroy(listPackage);
-    }
-    else if (interfaceData.currentOperation.operation == IO_FS_WRITE)
-    {
-        t_list *listPackage = getPackage(socketKernel);
-
-        resultsForIOFSWrite.resultsForWrite = (char*)list_get(listPackage, 0);
-
-        log_info(getLogger(), "Contenido solicitado a la memoria recibido.");
-
-        // Una vez recibido el contenido de la memoria, se habilita a que se imprima en pantalla en otro hilo
-        sem_post(&semaphoreForIOFSWrite);
-
-        list_destroy(listPackage);
-    }
+    list_destroy(listPackage);
 }
 
 void finishAllServersSignal()

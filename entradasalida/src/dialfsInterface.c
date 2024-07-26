@@ -2,6 +2,8 @@
 
 void executeIOFSCreateAndSendResults()
 {
+    delayFS();
+
     int success = executeIOFSCreate();
 
     sendIOFSCreateResultsToKernel(success);
@@ -11,41 +13,49 @@ void executeIOFSCreateAndSendResults()
     interfaceData.currentOperation.pid = -1;
 }
 
-int executeIOFSCreate()
+bool executeIOFSCreate()
 {
-    int firstFreeBlock = lookForFirstFreeBlock();
+    int firstFreeBlockIndex;
+    bool success;
+    
+    success = takeFirstFreeBlock(&firstFreeBlockIndex);
 
-    if (firstFreeBlock < getIOConfig()->BLOCK_COUNT)
+    if (success)
     {
-        bitarray_set_bit(mappedBitmap, firstFreeBlock);
-
-        msync(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8, MS_SYNC);
-
         t_paramsForIOFSCreateOrDelete *params = (t_paramsForIOFSCreateOrDelete*)interfaceData.currentOperation.params;
         
-        char *nameForMetaDataFile = string_new();
-        string_append(&nameForMetaDataFile, getIOConfig()->PATH_BASE_DIALFS);
-        string_append(&nameForMetaDataFile, "/");
-        string_append(&nameForMetaDataFile, params->fileName);
-        string_append(&nameForMetaDataFile, ".config");
-        FILE *metaData = fopen(nameForMetaDataFile, "a+");
-        t_config *metaDataFile = config_create(nameForMetaDataFile);
+        char *fileName = string_duplicate(params->fileName);
+        char *fullFileName = getFullFileName(fileName);
 
-        config_set_value(metaDataFile, "BLOQUE_INICIAL", string_itoa(firstFreeBlock));
-        config_set_value(metaDataFile, "TAMANIO_ARCHIVO", string_itoa(0));
 
-        config_save(metaDataFile);
-        fclose(metaData);
-        free(nameForMetaDataFile);
+        // Creo el archivo si no existe.
+        FILE *file = fopen(fileName, "a+");
+        fclose(file);
 
-        return 1;
+        // Creo la estructura de archivo y le agrego la data.
+        t_fileData* fileData = malloc(sizeof(t_fileData));
+        fileData->firstBlockIndex = firstFreeBlockIndex;
+        fileData->amountOfBlocks = 1;
+        fileData->filePointer = 0;
+        fileData->size = 0;
+        fileData->metaData = config_create(fullFileName);
+        config_set_value(fileData->metaData, "BLOQUE_INICIAL", string_itoa(firstFreeBlockIndex));
+        config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", string_itoa(0));
+        config_save(fileData->metaData);
+
+        // Agrego la estructura del archivo al diccionario que contiene todos los archivos.
+        dictionary_put(fsData.files, fileName, fileData);
+
+        free(fullFileName);
     }
 
-    else return 0;
+    return success;
 }
 
 void executeIOFSDeleteAndSendResults()
 {
+    delayFS();
+
     executeIOFSDelete();
 
     sendIOFSDeleteResultsToKernel();
@@ -58,31 +68,27 @@ void executeIOFSDeleteAndSendResults()
 void executeIOFSDelete()
 {   
     t_paramsForIOFSCreateOrDelete *params = (t_paramsForIOFSCreateOrDelete*)interfaceData.currentOperation.params;
-        
-    char *nameForMetaDataFile = string_new();
-    string_append(&nameForMetaDataFile, getIOConfig()->PATH_BASE_DIALFS);
-    string_append(&nameForMetaDataFile, "/");
-    string_append(&nameForMetaDataFile, params->fileName);
-    string_append(&nameForMetaDataFile, ".config");
-    t_config *metaDataFile = config_create(nameForMetaDataFile);
+    
+    t_fileData* fileData = (t_fileData*)dictionary_remove(fsData.files, params->fileName);
 
-    int initialBlock = config_get_int_value(metaDataFile, "BLOQUE_INICIAL");
-    int byteSize = config_get_int_value(metaDataFile, "TAMANIO_ARCHIVO");
+    for (int i = fileData->firstBlockIndex; i < fileData->firstBlockIndex + fileData->amountOfBlocks; i++)
+    {
+        bitarray_clean_bit(fsData.bitmap.bitmap, i);
+    }
 
-    int blockAmount = ceil(byteSize / getIOConfig()->BLOCK_SIZE);
+    msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
 
-    for (int i = initialBlock; i < initialBlock + blockAmount; i++)
-        bitarray_clean_bit(mappedBitmap, i);
-
-    msync(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8, MS_SYNC);
-
-    remove(nameForMetaDataFile);
-
-    free(nameForMetaDataFile);
+    char* fullFileName = getFullFileName(params->fileName);
+    config_destroy(fileData->metaData);
+    remove(fullFileName);
+    free(fileData);
+    free(fullFileName);
 }
 
 void executeIOFSTruncateAndSendResults()
 {
+    delayFS();
+
     executeIOFSTruncate();
 
     sendIOFSTruncateResultsToKernel();
@@ -96,64 +102,73 @@ void executeIOFSTruncate()
 {
     t_paramsForIOFSTruncate *params = (t_paramsForIOFSTruncate*)interfaceData.currentOperation.params;
         
-    char *nameForMetaDataFile = string_new();
-    string_append(&nameForMetaDataFile, getIOConfig()->PATH_BASE_DIALFS);
-    string_append(&nameForMetaDataFile, "/");
-    string_append(&nameForMetaDataFile, params->fileName);
-    string_append(&nameForMetaDataFile, ".config");
-    t_config *metaDataFile = config_create(nameForMetaDataFile);
+    char *nameForMetaDataFile = getFullFileName(params->fileName);
 
-    int initialBlock = config_get_int_value(metaDataFile, "BLOQUE_INICIAL");
-    int byteSize = config_get_int_value(metaDataFile, "TAMANIO_ARCHIVO");
+    t_fileData* fileData = dictionary_get(fsData.files, params->fileName);
 
-    int blockAmount = ceil(byteSize / getIOConfig()->BLOCK_SIZE);
-    int newBlockAmount = ceil(params->registerSize / getIOConfig()->BLOCK_SIZE);
+    int newAmountOfBlocks = getAmountOfBlocks(params->size);
 
-    if (params->registerSize < byteSize)
+
+    // Si no hay que agregarle ni quitarle bloques, no hace nada, simplemente retorna porque se queda igual
+    if (newAmountOfBlocks == fileData->amountOfBlocks)
     {
-        for (int i = initialBlock + newBlockAmount; i < initialBlock + blockAmount; i++)
-            bitarray_clean_bit(mappedBitmap, i);
+        return;
+    }
+
+
+    // Si solo hay que reducirle la cantidad de bloques, solamente pongo como libres los bloques del final que tengo que quitarle al archivo.
+    if (newAmountOfBlocks < fileData->amountOfBlocks)
+    {
+        for (int i = fileData->firstBlockIndex + fileData->amountOfBlocks - 1; i >= fileData->firstBlockIndex + newAmountOfBlocks; i--)
+        {
+            bitarray_clean_bit(fsData.bitmap.bitmap, i);
+        }
         
-        msync(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8, MS_SYNC);
+        msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
 
-        config_set_value(metaDataFile, "TAMANIO_ARCHIVO", string_itoa(params->registerSize));
+        return;
     }
-    else if (params->registerSize > byteSize)
+
+
+    ///////// A partir de aca, se sabe que se debe ampliar el archivo, es decir, asignarle más bloques contiguos.
+
+
+    ///////// COMPRUEBO SI ES NECESARIO COMPACTAR PORQUE EL ARCHIVO ENTRA EN LOS BLOQUES CONTIGUOS
+
+    bool needsCompacting = false;
+
+    for (int i = fileData->firstBlockIndex + fileData->amountOfBlocks; i < fileData->firstBlockIndex + newAmountOfBlocks && !needsCompacting; i++)
     {
-        int availableSpace = 1;
-
-        for (int i = initialBlock + blockAmount; i < initialBlock + newBlockAmount; i++)
-        {
-            if (bitarray_test_bit(mappedBitmap, i))
-            {
-                availableSpace = 0;
-                break;
-            }
-        }
-
-        if (availableSpace)
-        {
-            for (int i = initialBlock + blockAmount; i < initialBlock + newBlockAmount; i++)
-                bitarray_set_bit(mappedBitmap, i);
-            
-            config_set_value(metaDataFile, "TAMANIO_ARCHIVO", string_itoa(params->registerSize));
-        }
-        else
-        {
-            compactFSAndSendFileToLastPosition(params->fileName, &initialBlock, byteSize, blockAmount);
-
-            for (int i = initialBlock + blockAmount; i < initialBlock + newBlockAmount; i++)
-                bitarray_set_bit(mappedBitmap, i);
-            
-            config_set_value(metaDataFile, "TAMANIO_ARCHIVO", string_itoa(params->registerSize));
-        }
+        needsCompacting = bitarray_test_bit(fsData.bitmap.bitmap, i);
+    }
+    
+    
+    // Si es necesario compactar los archivos porque no hay espacio para aumentarle el tamaño a uno, entonces lo compacta.
+    if (needsCompacting)
+    {
+        compactAndSendFileToLast(params->fileName);
     }
 
-    usleep(1000 * getIOConfig()->RETRASO_COMPACTACION);
+    // En este punto ya me aseguro que el archivo tiene la maxima cantidad de bloques libres contiguos para aumentarle el tamaño ocupandolos.
+    // No se tiene en cuenta si el archivo pide más bytes de los que le quedan libres al File System. En ese caso, el comportamiento es indefinido.
+
+    for (int i = fileData->firstBlockIndex + fileData->amountOfBlocks; i < fileData->firstBlockIndex + newAmountOfBlocks; i++)
+    {
+        bitarray_set_bit(fsData.bitmap.bitmap, i);
+    }
+    
+    msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
+
+    fileData->size = params->size;
+    fileData->amountOfBlocks = newAmountOfBlocks;
+    config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", string_itoa(params->size));
+    config_save(fileData->metaData);
 }
 
 void executeIOFSWriteAndSendResults()
 {
+    delayFS();
+
     executeIOFSWrite();
 
     sendIOFSWriteResultsToKernel();
@@ -168,32 +183,34 @@ void executeIOFSWriteAndSendResults()
 
 void executeIOFSWrite()
 {
+    t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
+
     log_info(getLogger(), "PID: %d - Operacion: IO_FS_WRITE", (int)interfaceData.currentOperation.pid);
-    //sendIOReadRequestToMemory(); // ES NECESARIO DESCOMENTAR ESTOOOOOOOO. LO COMENTE PORQUE NO COMPILABA Y QUERIA TESTEAR OTRA COSA.
+    resultsForIOFSWrite.resultsForWrite = (char*)readFromMemory(params->addressesInfo, params->amountOfPhysicalAddresses); // ES NECESARIO DESCOMENTAR ESTOOOOOOOO. LO COMENTE PORQUE NO COMPILABA Y QUERIA TESTEAR OTRA COSA.
     
     //Se espera a recibir el contenido de la memoria
-    sem_wait(&semaphoreForIOFSWrite);
+    //sem_wait(&semaphoreReceiveDataFromMemory);
 
-    t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
-    char *nameForMetaDataFile = string_new();
-    string_append(&nameForMetaDataFile, getIOConfig()->PATH_BASE_DIALFS);
-    string_append(&nameForMetaDataFile, "/");
-    string_append(&nameForMetaDataFile, params->fileName);
-    string_append(&nameForMetaDataFile, ".config");
-    t_config *metaDataFile = config_create(nameForMetaDataFile);
-    int fileBeginning = config_get_int_value(metaDataFile, "BLOQUE_INICIAL") * getIOConfig()->BLOCK_SIZE;
-    memcpy(blocksData->mappedFile + fileBeginning + params->registerFilePointer, resultsForIOFSWrite.resultsForWrite, params->registerSize);
-    msync(blocksData->mappedFile, getIOConfig()->BLOCK_COUNT * getIOConfig()->BLOCK_SIZE, MS_SYNC);
+    t_fileData* fileData = (t_fileData*)dictionary_get(fsData.files, params->fileName);
+    char* fullFileName = getFullFileName(params->fileName);
+
+    int fileOffset = getFirstByteOfBlock(fileData->firstBlockIndex);
+    memcpy(fsData.blocks.mappedFile + fileOffset + params->filePointer, resultsForIOFSWrite.resultsForWrite, params->totalSize);
+    msync(fsData.blocks.mappedFile, fsData.blocks.size, MS_SYNC);
 }
 
 void executeIOFSReadAndSendResults()
 {
+    delayFS();
+
     executeIOFSRead();
 
-    sendResultsFromIOFSReadToMemory();
+    t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
+
+    writeToMemory(resultsForIOFSRead.resultsFromRead, params->addressesInfo, params->amountOfPhysicalAddresses);
 
     // Se espera a recibir confirmación de la memoria de que salió todo bien
-    sem_wait(&semaphoreForIOFSRead);
+    //sem_wait(&semaphoreForIOFSRead);
 
     sendIOFSReadResultsToKernel();
 
@@ -210,87 +227,134 @@ void executeIOFSRead()
     log_info(getLogger(), "PID: %d - Operacion: IO_FS_READ", (int)interfaceData.currentOperation.pid);
 
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
-    char *nameForMetaDataFile = string_new();
-    string_append(&nameForMetaDataFile, getIOConfig()->PATH_BASE_DIALFS);
-    string_append(&nameForMetaDataFile, "/");
-    string_append(&nameForMetaDataFile, params->fileName);
-    string_append(&nameForMetaDataFile, ".config");
-    t_config *metaDataFile = config_create(nameForMetaDataFile);
-    int fileBeginning = config_get_int_value(metaDataFile, "BLOQUE_INICIAL") * getIOConfig()->BLOCK_SIZE;
-    memcpy(resultsForIOFSRead.resultsFromRead, blocksData->mappedFile + fileBeginning + params->registerFilePointer, params->registerSize);
+    char *fullFileName = getFullFileName(params->fileName);
+
+    t_fileData* fileData = dictionary_get(fsData.files, params->fileName);
+
+    int fileOffset = getFirstByteOfBlock(fileData->firstBlockIndex);
+    memcpy(resultsForIOFSRead.resultsFromRead, fsData.blocks.mappedFile + fileOffset + params->filePointer, params->totalSize);
 }
 
-int lookForFirstFreeBlock()
+bool takeFirstFreeBlock(int* blockIndex)
 {
-    int block = 0;
+    *blockIndex = 0;
 
-    while(block < getIOConfig()->BLOCK_COUNT && bitarray_test_bit(mappedBitmap, block) != 0)
-        block++;
-
-    return block;
-}
-
-void compactFSAndSendFileToLastPosition(char* name, int* initialBlock, int byteSize, int blockAmount)
-{
-    for (int i = 0; i < getIOConfig()->BLOCK_COUNT; i++)
-        bitarray_clean_bit(mappedBitmap, i);
-    msync(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8, MS_SYNC);
-    
-    char* bufferBlocks = malloc(sizeof(char) * getIOConfig()->BLOCK_COUNT * getIOConfig()->BLOCK_SIZE);
-    int bufferPointer = 0;
-    int newInitialBlock = 0;
-    int totalSize = 0;
-
-    for (int i = 0; i < list_size(listFileNames); i++)
-    {   
-        char* currentName = list_get(listFileNames, i);
-        if (!string_equals_ignore_case(currentName, name))
-        {
-            char *nameForMetaDataFile = string_new();
-            string_append(&nameForMetaDataFile, getIOConfig()->PATH_BASE_DIALFS);
-            string_append(&nameForMetaDataFile, "/");
-            string_append(&nameForMetaDataFile, currentName);
-            string_append(&nameForMetaDataFile, ".config");
-            t_config *metaDataFile = config_create(nameForMetaDataFile);
-
-            int initialBlockCurrent = config_get_int_value(metaDataFile, "BLOQUE_INICIAL");
-            int byteSizeCurrent = config_get_int_value(metaDataFile, "TAMANIO_ARCHIVO");
-            totalSize += byteSizeCurrent;
-            int blockAmountCurrent = ceil(byteSizeCurrent / getIOConfig()->BLOCK_SIZE);
-
-
-            memcpy(bufferBlocks + bufferPointer, blocksData->mappedFile + (initialBlockCurrent * getIOConfig()->BLOCK_SIZE), byteSizeCurrent);
-            bufferPointer += byteSizeCurrent;
-
-            for (int j = newInitialBlock; j < newInitialBlock + blockAmountCurrent; j++)
-                bitarray_set_bit(mappedBitmap, j);
-            newInitialBlock += blockAmountCurrent;
-            msync(bitmapData->mappedFile, getIOConfig()->BLOCK_COUNT / 8, MS_SYNC);
-
-            config_set_value(metaDataFile, "BLOQUE_INICIAL", string_itoa(newInitialBlock));
-
-            config_destroy(metaDataFile);
-        }
+    // Se fija cual es el primer bloque libre.
+    while(*blockIndex < getIOConfig()->BLOCK_COUNT && bitarray_test_bit(fsData.bitmap.bitmap, *blockIndex) != 0)
+    {
+        *blockIndex++;
     }
 
-    char *nameForMetaDataFile = string_new();
-    string_append(&nameForMetaDataFile, getIOConfig()->PATH_BASE_DIALFS);
-    string_append(&nameForMetaDataFile, "/");
-    string_append(&nameForMetaDataFile, name);
-    string_append(&nameForMetaDataFile, ".config");
-    t_config *metaDataFile = config_create(nameForMetaDataFile);
 
-    totalSize += config_get_int_value(metaDataFile, "TAMANIO_ARCHIVO");
+    // Caso de error, no hay ningun bloque libre para reservar.
+    if (*blockIndex >= getIOConfig()->BLOCK_COUNT)
+    {
+        return false;
+    }
 
-    memcpy(bufferBlocks + bufferPointer, blocksData->mappedFile + ((*initialBlock) * getIOConfig()->BLOCK_SIZE), byteSize);
 
-    for (int j = newInitialBlock; j < newInitialBlock + blockAmount; j++)
-        bitarray_set_bit(mappedBitmap, j);
+    // Caso de exito. Hay un bloque libre para reservar. A continuacion se marca como ocupado ese bloque, para reservarlo.
 
-    config_set_value(metaDataFile, "BLOQUE_INICIAL", string_itoa(newInitialBlock));
+    bitarray_set_bit(fsData.bitmap.bitmap, *blockIndex);
+    msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
 
-    (*initialBlock) = newInitialBlock;
+    return true;
+}
 
-    memcpy(blocksData->mappedFile, bufferBlocks, totalSize);
-    msync(blocksData->mappedFile, getIOConfig()->BLOCK_COUNT * getIOConfig()->BLOCK_SIZE, MS_SYNC);
+
+
+// Funcion auxiliar para comparar cuál archivo deberia ir primero en una lista. Sirve para ordenar la lista de archivos.
+bool comparator(void* element1, void* element2)
+{
+    t_fileData* fileData1 = (t_fileData*)element1;
+    t_fileData* fileData2 = (t_fileData*)element1;
+
+    // Se ordena segun lo siguiente: el primero de la lista es el que tiene el bloque mas al principio del archivo de bloques, y el ultimo es el que tiene el bloque mas al final del archivo de bloques
+    return fileData1->firstBlockIndex < fileData2->firstBlockIndex; //////////////// FIJARSE SI ESTÁ BIEN, QUIZAS DEBA SER CON EL SIGNO AL REVES (>).
+}
+
+void compactAndSendFileToLast(char* fileNameToSendToLast)
+{
+    delayCompacting();
+
+    // Obtengo el archivo que voy a mandar al final como ultimo archivo.
+    t_fileData* fileDataToSendToLast = dictionary_get(fsData.files, fileNameToSendToLast);
+
+    // Copio los bytes del archivo en una variable interna.
+    void* fileBytesToSendToLast = malloc(fileDataToSendToLast->size);
+    memcpy(fileBytesToSendToLast, fsData.blocks.mappedFile + getFirstByteOfBlock(fileDataToSendToLast->firstBlockIndex), fileDataToSendToLast->size);
+
+    // Uso una lista para poder ordenarla y poder compactar los archivos desde el principio hasta el final, segun como estan puestos en los bloques.dat del FS.
+    t_list* filesList = dictionary_elements(fsData.files);
+    list_remove_element(filesList, (void*)fileDataToSendToLast);
+
+    // Se ordena segun lo siguiente: el primero de la lista es el que tiene el bloque mas al principio del archivo de bloques, 
+    // y el ultimo es el que tiene el bloque mas al final del archivo de bloques
+    list_sort(filesList, comparator);
+
+
+    // Compacto todos los archivos.
+
+    t_list_iterator* iterator = list_iterator_create(filesList);
+
+    int blocksOffset = 0;
+    while (list_iterator_has_next(iterator))
+    {
+        // Obtengo el elemento actual
+        t_fileData* fileElement = (t_fileData*)list_iterator_next(iterator);
+        
+        // "Corro" los bytes del archivo hacia lo más al principio posible sin pisarse con otros archivos, así compactandolos.
+        void* fileBytesElement = malloc(fileElement->size);
+        memcpy(fileBytesElement, fsData.blocks.mappedFile + getFirstByteOfBlock(fileElement->firstBlockIndex), fileElement->size);
+        memcpy(fsData.blocks.mappedFile + getFirstByteOfBlock(blocksOffset), fileBytesElement, fileElement->size);
+
+        // Actualizo la informacion del archivo
+        fileElement->firstBlockIndex = blocksOffset;
+        config_set_value(fileElement->metaData, "BLOQUE_INICIAL", string_itoa(blocksOffset));
+        config_save(fileElement->metaData);
+
+        // El blocksOffset es el primer bloque del siguiente archivo de la iteracion.
+        blocksOffset += fileElement->amountOfBlocks;
+        free(fileBytesElement);
+    }
+
+    // Pongo al final el archivo que queria poner al final.
+    memcpy(fsData.blocks.mappedFile + getFirstByteOfBlock(blocksOffset), fileBytesToSendToLast, fileDataToSendToLast->size);
+
+    // Actualizo la informacion del archivo.
+    fileDataToSendToLast->firstBlockIndex = blocksOffset;
+    config_set_value(fileDataToSendToLast->metaData, "BLOQUE_INICIAL", string_itoa(blocksOffset));
+    config_save(fileDataToSendToLast->metaData);
+
+    msync(fsData.blocks.mappedFile, fsData.blocks.size, MS_SYNC);
+
+    free(fileBytesToSendToLast);
+    free(filesList);
+
+
+
+
+    // Actualizo el bitmap.
+
+    for (int i = 0; i < fileDataToSendToLast->firstBlockIndex + fileDataToSendToLast->amountOfBlocks; i++)
+    {
+        bitarray_set_bit(fsData.bitmap.bitmap, i);
+    }
+    
+    msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
+}
+
+
+
+
+
+
+
+//////////////////////// FUNCIONES AUXILIARES ////////////////////////
+
+
+
+bool isFileInFS(char* fileName)
+{
+    return strcmp(fileName, "bloques.dat") != 0 && strcmp(fileName, "bitmap.dat") != 0;
 }
