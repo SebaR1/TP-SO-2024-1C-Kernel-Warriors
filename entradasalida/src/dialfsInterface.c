@@ -221,9 +221,12 @@ void executeIOFSReadAndSendResults()
 {
     delayFS();
 
+    t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
+    resultsForIOFSRead.resultsFromRead = malloc(params->totalSize);
+
     executeIOFSRead();
 
-    t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
+
 
     writeToMemory(resultsForIOFSRead.resultsFromRead, params->addressesInfo, params->amountOfPhysicalAddresses);
 

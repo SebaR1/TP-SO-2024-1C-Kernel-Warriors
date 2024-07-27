@@ -66,10 +66,10 @@ void createInterface(char *name)
             fsData.bitmap.mappedFile = openCreateMapFile(&(fsData.bitmap.file), "bitmap.dat", sizeBitmapFile);
             fsData.bitmap.bitmap = bitarray_create_with_mode(fsData.bitmap.mappedFile, sizeBitmapFile, LSB_FIRST);
             fsData.bitmap.size = sizeBitmapFile;
-            for (int i = 0; i < fsData.bitmap.size * 8; i++) // * 8 porque 1 byte son 8 bits
-            {
-                bitarray_clean_bit(fsData.bitmap.bitmap, i);
-            }
+            //for (int i = 0; i < fsData.bitmap.size * 8; i++) // * 8 porque 1 byte son 8 bits
+            //{
+            //    bitarray_clean_bit(fsData.bitmap.bitmap, i);
+            //}
             
 
             log_info(getLogger(), "Creada interfaz de tipo DialFS, con nombre \"%s\"", interfaceData.name);

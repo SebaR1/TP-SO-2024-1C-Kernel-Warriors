@@ -168,12 +168,12 @@ void sendIODialFsReadOperationToIO(interface_t *interface, char* nameOfFile, t_l
     addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
 
     for(int i = 0; i < amountOfPhysicalAddresses; i++){
-        physicalAddressInfo adresses;
+        physicalAddressInfoP *adresses;
 
-        adresses = *(physicalAddressInfo*)list_get(listOfPhysicalAdressesInfo, i);
+        adresses = (physicalAddressInfoP*)list_get(listOfPhysicalAdressesInfo, i);
 
-        addToPackage(package, &(adresses.physicalAddress), sizeof(int));
-        addToPackage(package, &(adresses.size), sizeof(int));
+        addToPackage(package, adresses->physicalAddress, sizeof(int));
+        addToPackage(package, adresses->size, sizeof(int));
     }
 
     addToPackage(package, &sizeToReadOrWrite, sizeof(uint32_t));
@@ -195,12 +195,12 @@ void sendIODialFsWriteOperationToIO(interface_t *interface, char* nameOfFile, t_
     addToPackage(package, &(amountOfPhysicalAddresses), sizeof(int));
 
     for(int i = 0; i < amountOfPhysicalAddresses; i++){
-        physicalAddressInfo adresses;
+        physicalAddressInfoP *adresses;
 
-        adresses = *(physicalAddressInfo*)list_get(listOfPhysicalAdressesInfo, i);
+        adresses = (physicalAddressInfoP*)list_get(listOfPhysicalAdressesInfo, i);
 
-        addToPackage(package, &(adresses.physicalAddress), sizeof(int));
-        addToPackage(package, &(adresses.size), sizeof(int));
+        addToPackage(package, adresses->physicalAddress, sizeof(int));
+        addToPackage(package, adresses->size, sizeof(int));
     }
 
     addToPackage(package, &sizeToReadOrWrite, sizeof(uint32_t));
