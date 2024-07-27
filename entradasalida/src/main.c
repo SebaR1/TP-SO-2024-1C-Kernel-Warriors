@@ -47,6 +47,10 @@ int main(int argc, char* argv[])
     sendInterfaceToKernel();
     //log_info(getLogger(), "Tipo y nombre de la interfaz enviado al Kernel.");
     
+    log_info(getLogger(), "-----------------------------------------------");
+    log_info(getLogger(), "MODULO IO INICIADO ;) <3");
+    log_info(getLogger(), "-----------------------------------------------");
+
     // Se espera en el main a que los hilos de servidor terminen (que cualquiera de los dos termine)
     sem_wait(&semaphoreForModule);
 
