@@ -391,7 +391,6 @@ void compactAndSendFileToLast(char* fileNameToSendToLast)
     msync(fsData.blocks.mappedFile, fsData.blocks.size, MS_SYNC);
 
     free(fileBytesToSendToLast);
-    free(filesList);
     free(blockOffsetString);
 
 
