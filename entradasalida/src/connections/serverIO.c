@@ -175,7 +175,7 @@ void sendResultsFromIOStdoutWriteToKernel()
     params->totalSize = *((int*)list_get(listPackage, listGetCounter++));
 
 
-    resultsForStdout.resultsForWrite = malloc(sizeof(char) * params->totalSize + 1); // + 1 para imprimir la cadena con el '\0'
+    //resultsForStdout.resultsForWrite = malloc(sizeof(char) * params->totalSize + 1); // + 1 para imprimir la cadena con el '\0'
 
     executeIOStdoutWriteAndSendResults();
 

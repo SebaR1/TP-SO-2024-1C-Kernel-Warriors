@@ -111,11 +111,9 @@ void createDictionaryFileNames()
 
         while ((entry = readdir(dir)) != NULL)
         {   
-            char* name = string_duplicate(entry->d_name);
-
-            if (entry->d_type == DT_REG && isFileInFS(name))
+            if (entry->d_type == DT_REG && isFileInFS(entry->d_name))
             {
-                char* fullFileName = getFullFileName(name);
+                char* fullFileName = getFullFileName(entry->d_name);
                 t_fileData* fileData = malloc(sizeof(t_fileData));
                 fileData->metaData = config_create(fullFileName);
                 fileData->firstBlockIndex = config_get_int_value(fileData->metaData, "BLOQUE_INICIAL");
@@ -123,7 +121,7 @@ void createDictionaryFileNames()
                 fileData->amountOfBlocks = ceil( (double)fileData->size / (double)getIOConfig()->BLOCK_SIZE );
                 fileData->filePointer = 0;
 
-                dictionary_put(fsData.files, name, fileData);
+                dictionary_put(fsData.files, entry->d_name, fileData);
 
                 free(fullFileName);
             }

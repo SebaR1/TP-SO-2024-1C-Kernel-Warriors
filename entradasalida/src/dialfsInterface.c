@@ -31,8 +31,7 @@ bool executeIOFSCreate()
     {
         t_paramsForIOFSCreateOrDelete *params = (t_paramsForIOFSCreateOrDelete*)interfaceData.currentOperation.params;
         
-        char *fileName = string_duplicate(params->fileName);
-        char *fullFileName = getFullFileName(fileName);
+        char *fullFileName = getFullFileName(params->fileName);
 
 
         // Creo el archivo si no existe.
@@ -53,7 +52,7 @@ bool executeIOFSCreate()
         config_save(fileData->metaData);
 
         // Agrego la estructura del archivo al diccionario que contiene todos los archivos.
-        dictionary_put(fsData.files, fileName, fileData);
+        dictionary_put(fsData.files, params->fileName, fileData);
 
         free(fullFileName);
         free(firstFreeBlockIndexString);
@@ -139,6 +138,8 @@ void executeIOFSTruncate()
         char* sizeString = string_itoa(params->size);
         config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", sizeString);
         config_save(fileData->metaData);
+        free(sizeString);
+        free(nameForMetaDataFile);
 
         return;
     }
@@ -159,6 +160,8 @@ void executeIOFSTruncate()
         char* sizeString = string_itoa(params->size);
         config_set_value(fileData->metaData, "TAMANIO_ARCHIVO", sizeString);
         config_save(fileData->metaData);
+        free(sizeString);
+        free(nameForMetaDataFile);
 
         return;
     }
@@ -200,6 +203,7 @@ void executeIOFSTruncate()
     config_save(fileData->metaData);
 
     free(sizeString);
+    free(nameForMetaDataFile);
 }
 
 void executeIOFSWriteAndSendResults()
@@ -219,6 +223,7 @@ void executeIOFSWriteAndSendResults()
     free(resultsForIOFSWrite.resultsForWrite);
     resultsForIOFSWrite.resultsForWrite = NULL;
 
+    free(params->addressesInfo);
     interfaceData.currentOperation.operation = IO_NULL;
     free(interfaceData.currentOperation.params);
     interfaceData.currentOperation.pid = -1;
@@ -239,6 +244,7 @@ void executeIOFSWrite()
     int fileOffset = getFirstByteOfBlock(fileData->firstBlockIndex);
     memcpy(fsData.blocks.mappedFile + fileOffset + params->filePointer, resultsForIOFSWrite.resultsForWrite, params->totalSize);
     msync(fsData.blocks.mappedFile, fsData.blocks.size, MS_SYNC);
+    free(fullFileName);
 }
 
 void executeIOFSReadAndSendResults()
@@ -267,6 +273,7 @@ void executeIOFSReadAndSendResults()
     free(resultsForIOFSRead.resultsFromRead);
     resultsForIOFSRead.resultsFromRead = NULL;
 
+    free(params->addressesInfo);
     interfaceData.currentOperation.operation = IO_NULL;
     free(interfaceData.currentOperation.params);
     interfaceData.currentOperation.pid = -1;
@@ -275,7 +282,7 @@ void executeIOFSReadAndSendResults()
 void executeIOFSRead()
 {
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
-    char *fullFileName = getFullFileName(params->fileName);
+    //char *fullFileName = getFullFileName(params->fileName);
 
     t_fileData* fileData = dictionary_get(fsData.files, params->fileName);
 
@@ -370,6 +377,8 @@ void compactAndSendFileToLast(char* fileNameToSendToLast)
         free(blockOffsetString);
     }
 
+    list_iterator_destroy(iterator);
+
     // Pongo al final el archivo que queria poner al final.
     memcpy(fsData.blocks.mappedFile + getFirstByteOfBlock(blocksOffset), fileBytesToSendToLast, fileDataToSendToLast->size);
 
@@ -395,6 +404,8 @@ void compactAndSendFileToLast(char* fileNameToSendToLast)
     }
     
     msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
+
+    list_destroy(filesList);
 
     log_info(getLogger(), "PID: %d - Fin Compactación.", (int)interfaceData.currentOperation.pid);
 }
