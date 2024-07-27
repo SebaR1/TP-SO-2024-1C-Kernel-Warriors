@@ -29,23 +29,23 @@ int main(int argc, char* argv[])
     }
 
     t_package* initialPackageForKernel = createPackage(IO_MODULE);
-    log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel.");
+    //log_info(getLogger(), "Creando conexion con el Kernel. Se enviara un mensaje al Kernel.");
     socketKernel = createConection(getLogger(), getIOConfig()->IP_KERNEL, getIOConfig()->PUERTO_KERNEL);
     sendPackage(initialPackageForKernel, socketKernel);
-    log_info(getLogger(), "Paquete enviado con exito al Kernel.");
+    //log_info(getLogger(), "Paquete enviado con exito al Kernel.");
 
     t_package* initialPackageForMemory = createPackage(IO_MODULE);
-    log_info(getLogger(), "Creando conexion con la memoria. Se enviara un mensaje a la Memoria.");
+    //log_info(getLogger(), "Creando conexion con la memoria. Se enviara un mensaje a la Memoria.");
     socketMemory = createConection(getLogger(), getIOConfig()->IP_MEMORIA, getIOConfig()->PUERTO_MEMORIA);
     sendPackage(initialPackageForMemory, socketMemory);
-    log_info(getLogger(), "Paquete enviado con exito a la memoria.");
+    //log_info(getLogger(), "Paquete enviado con exito a la memoria.");
 
     initServerForASocket(socketKernel, serverIOForKernel);
     initServerForASocket(socketMemory, serverIOForMemory);
 
-    log_info(getLogger(), "Se enviara el tipo y nombre de la interfaz al Kernel.");
+    //log_info(getLogger(), "Se enviara el tipo y nombre de la interfaz al Kernel.");
     sendInterfaceToKernel();
-    log_info(getLogger(), "Tipo y nombre de la interfaz enviado al Kernel.");
+    //log_info(getLogger(), "Tipo y nombre de la interfaz enviado al Kernel.");
     
     // Se espera en el main a que los hilos de servidor terminen (que cualquiera de los dos termine)
     sem_wait(&semaphoreForModule);

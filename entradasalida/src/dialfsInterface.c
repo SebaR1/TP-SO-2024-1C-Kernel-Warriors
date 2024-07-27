@@ -2,7 +2,14 @@
 
 void executeIOFSCreateAndSendResults()
 {
+    log_info(getLogger(), "PID: %d - Operacion: IO_FS_CREATE", (int)interfaceData.currentOperation.pid);
+
     delayFS();
+
+    t_paramsForIOFSCreateOrDelete *params = (t_paramsForIOFSCreateOrDelete*)interfaceData.currentOperation.params;
+
+    log_info(getLogger(), "PID: %d - Crear Archivo: %s", (int)interfaceData.currentOperation.pid, params->fileName);
+
 
     int success = executeIOFSCreate();
 
@@ -58,7 +65,13 @@ bool executeIOFSCreate()
 
 void executeIOFSDeleteAndSendResults()
 {
+    log_info(getLogger(), "PID: %d - Operacion: IO_FS_DELETE", (int)interfaceData.currentOperation.pid);
+    
     delayFS();
+
+    t_paramsForIOFSCreateOrDelete *params = (t_paramsForIOFSCreateOrDelete*)interfaceData.currentOperation.params;
+
+    log_info(getLogger(), "PID: %d - Eliminar Archivo: %s", (int)interfaceData.currentOperation.pid, params->fileName);
 
     executeIOFSDelete();
 
@@ -91,7 +104,13 @@ void executeIOFSDelete()
 
 void executeIOFSTruncateAndSendResults()
 {
+    log_info(getLogger(), "PID: %d - Operacion: IO_FS_TRUNCATE", (int)interfaceData.currentOperation.pid);
+
     delayFS();
+
+    t_paramsForIOFSTruncate *params = (t_paramsForIOFSTruncate*)interfaceData.currentOperation.params;
+
+    log_info(getLogger(), "PID: %d - Truncar Archivo: %s - Tamaño: %d", (int)interfaceData.currentOperation.pid, params->fileName, (int)params->size);
 
     executeIOFSTruncate();
 
@@ -185,7 +204,13 @@ void executeIOFSTruncate()
 
 void executeIOFSWriteAndSendResults()
 {
+    log_info(getLogger(), "PID: %d - Operacion: IO_FS_WRITE", (int)interfaceData.currentOperation.pid);
+
     delayFS();
+
+    t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
+
+    log_info(getLogger(), "PID: %d - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", (int)interfaceData.currentOperation.pid, params->fileName, (int)params->totalSize, (int)params->filePointer);
 
     executeIOFSWrite();
 
@@ -203,7 +228,6 @@ void executeIOFSWrite()
 {
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
 
-    log_info(getLogger(), "PID: %d - Operacion: IO_FS_WRITE", (int)interfaceData.currentOperation.pid);
     resultsForIOFSWrite.resultsForWrite = (char*)readFromMemory(params->addressesInfo, params->amountOfPhysicalAddresses, params->totalSize);
     
     //Se espera a recibir el contenido de la memoria
@@ -219,9 +243,14 @@ void executeIOFSWrite()
 
 void executeIOFSReadAndSendResults()
 {
+    log_info(getLogger(), "PID: %d - Operacion: IO_FS_READ", (int)interfaceData.currentOperation.pid);
+
     delayFS();
 
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
+
+    log_info(getLogger(), "PID: %d - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d", (int)interfaceData.currentOperation.pid, params->fileName, (int)params->totalSize, (int)params->filePointer);
+
     resultsForIOFSRead.resultsFromRead = malloc(params->totalSize);
 
     executeIOFSRead();
@@ -245,8 +274,6 @@ void executeIOFSReadAndSendResults()
 
 void executeIOFSRead()
 {
-    log_info(getLogger(), "PID: %d - Operacion: IO_FS_READ", (int)interfaceData.currentOperation.pid);
-
     t_paramsForIOFSWriteOrRead *params = (t_paramsForIOFSWriteOrRead*)interfaceData.currentOperation.params;
     char *fullFileName = getFullFileName(params->fileName);
 
@@ -296,6 +323,8 @@ bool comparator(void* element1, void* element2)
 
 void compactAndSendFileToLast(char* fileNameToSendToLast)
 {
+    log_info(getLogger(), "PID: %d - Inicio Compactación.", (int)interfaceData.currentOperation.pid);
+
     delayCompacting();
 
     // Obtengo el archivo que voy a mandar al final como ultimo archivo.
@@ -366,6 +395,8 @@ void compactAndSendFileToLast(char* fileNameToSendToLast)
     }
     
     msync(fsData.bitmap.mappedFile, fsData.bitmap.size, MS_SYNC);
+
+    log_info(getLogger(), "PID: %d - Fin Compactación.", (int)interfaceData.currentOperation.pid);
 }
 
 

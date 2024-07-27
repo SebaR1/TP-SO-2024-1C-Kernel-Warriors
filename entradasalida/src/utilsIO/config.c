@@ -51,24 +51,16 @@ void _getIOData()
 
 void initIOConfig(char* path)
 {
-    log_info(getLogger(), "Obteniendo los datos del archivo de configuracion");
-
     _configFile = config_create(path);
 
     _ioConfig = (ioConfig*) malloc(sizeof(ioConfig));
 
     _getIOData();
-
-    log_info(getLogger(), "Datos obtenidos con exito");
 }
 
 // Posible riesgo de memory leak o de Segmentation Fault en esta funcion. No deberia haber ninguno, pero revisar esta funcion en caso de que se detecte un memory leak o un Segmentation Fault en los testeos
 void freeIOConfig()
 {
-    log_info(getLogger(), "Liberando la memoria usada para el archivo de configuracion");
-
     config_destroy(_configFile);
     free(getIOConfig());
-
-    log_info(getLogger(), "Memoria liberada con exito");
 }

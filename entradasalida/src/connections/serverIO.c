@@ -93,7 +93,6 @@ void serverIOForMemory(int *socketClient)
                 break;
 
             case MEMORY_WRITE_OK:
-                log_info(getLogger(), "Recibida confirmacion desde la memoria.");
                 // Una vez recibida la confirmación de la memoria, se habilita a que se confirme al Kernel que se completó la operación
                 sem_post(&semaphoreSendDataToMemory);
                 break;
@@ -123,8 +122,6 @@ void sendResultsFromIOGenSleepToKernel()
     t_paramsForGenericInterface *params = (t_paramsForGenericInterface*)interfaceData.currentOperation.params;
     params->workUnits = *((uint32_t*)list_get(listPackage, 1));
 
-    log_info(getLogger(), "Solicitud de operacion IO_GEN_SLEEP recibida desde el Kernel.");
-
     executeIOGenSleepAndSendResults();
 
     list_destroy_and_destroy_elements(listPackage, free);
@@ -151,8 +148,6 @@ void sendResultsFromIOStdinReadToKernel()
     params->totalSize = *((int*)list_get(listPackage, listGetCounter++));
 
     resultsForStdin.resultsForMemory = malloc(sizeof(char) * params->totalSize);
-
-    log_info(getLogger(), "Solicitud de operacion STDIN_READ recibida desde el Kernel.");
 
     executeIOStdinReadAndSendResults();
 
@@ -182,8 +177,6 @@ void sendResultsFromIOStdoutWriteToKernel()
 
     resultsForStdout.resultsForWrite = malloc(sizeof(char) * params->totalSize + 1); // + 1 para imprimir la cadena con el '\0'
 
-    log_info(getLogger(), "Solicitud de operacion STDOUT_WRITE recibida desde el Kernel.");
-
     executeIOStdoutWriteAndSendResults();
 
     list_destroy_and_destroy_elements(listPackage, free);
@@ -199,8 +192,6 @@ void sendResultsFromIOFSCreateToKernel()
     interfaceData.currentOperation.pid = *((uint32_t*)list_get(listPackage, 0));
     t_paramsForIOFSCreateOrDelete *params = (t_paramsForIOFSCreateOrDelete*)interfaceData.currentOperation.params;
     params->fileName = (char*)list_get(listPackage, 1);
-
-    log_info(getLogger(), "Solicitud de operacion IO_FS_CREATE recibida desde el Kernel.");
 
     executeIOFSCreateAndSendResults();
 
@@ -218,8 +209,6 @@ void sendResultsFromIOFSDeleteToKernel()
     t_paramsForIOFSCreateOrDelete *params = (t_paramsForIOFSCreateOrDelete*)interfaceData.currentOperation.params;
     params->fileName = (char*)list_get(listPackage, 1);
 
-    log_info(getLogger(), "Solicitud de operacion IO_FS_DELETE recibida desde el Kernel.");
-
     executeIOFSDeleteAndSendResults();
 
     list_destroy_and_destroy_elements(listPackage, free);
@@ -236,8 +225,6 @@ void sendResultsFromIOFSTruncateToKernel()
     t_paramsForIOFSTruncate *params = (t_paramsForIOFSTruncate*)interfaceData.currentOperation.params;
     params->fileName = (char*)list_get(listPackage, 1);
     params->size = *((uint32_t*)list_get(listPackage, 2));
-
-    log_info(getLogger(), "Solicitud de operacion IO_FS_TRUNCATE recibida desde el Kernel.");
 
     executeIOFSTruncateAndSendResults();
 
@@ -269,8 +256,6 @@ void sendResultsFromIOFSWriteToKernel()
     params->totalSize = *((uint32_t*)list_get(listPackage, listGetCounter++));
 
     params->filePointer = *((uint32_t*)list_get(listPackage, listGetCounter++));
-
-    log_info(getLogger(), "Solicitud de operacion IO_FS_WRITE recibida desde el Kernel.");
 
     executeIOFSWriteAndSendResults();
 
@@ -304,8 +289,6 @@ void sendResultsFromIOFSReadToKernel()
     params->filePointer = *((uint32_t*)list_get(listPackage, listGetCounter++));
 
 
-    log_info(getLogger(), "Solicitud de operacion IO_FS_READ recibida desde el Kernel.");
-
     executeIOFSReadAndSendResults();
 
     list_destroy_and_destroy_elements(listPackage, free);
@@ -316,8 +299,6 @@ void receiveDataFromMemory()
     t_list *listPackage = getPackage(socketMemory);
 
     dataReceivedFromMemory = list_get(listPackage, 0);
-
-    log_info(getLogger(), "Contenido solicitado a la memoria recibido.");
 
     // Una vez recibido el contenido de la memoria, se habilita a que se imprima en pantalla en otro hilo
     sem_post(&semaphoreReceiveDataFromMemory);

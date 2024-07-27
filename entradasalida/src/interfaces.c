@@ -38,20 +38,17 @@ void createInterface(char *name)
     {
         case Generic:
             interfaceData.currentOperation.params = malloc(sizeof(t_paramsForGenericInterface));
-            log_info(getLogger(), "Creada interfaz de tipo Generica, con nombre \"%s\"", interfaceData.name);
             break;
 
         case STDIN:
             interfaceData.currentOperation.params = malloc(sizeof(t_paramsForStdinInterface));
             resultsForStdin.resultsFromRead = NULL;
             resultsForStdin.resultsForMemory = NULL;
-            log_info(getLogger(), "Creada interfaz de tipo STDIN, con nombre \"%s\"", interfaceData.name);
             break;
 
         case STDOUT:
             interfaceData.currentOperation.params = malloc(sizeof(t_paramsForStdoutInterface));
             resultsForStdout.resultsForWrite = NULL;
-            log_info(getLogger(), "Creada interfaz de tipo STDOUT, con nombre \"%s\"", interfaceData.name);
             break;
 
         case DialFS:
@@ -71,8 +68,6 @@ void createInterface(char *name)
             //    bitarray_clean_bit(fsData.bitmap.bitmap, i);
             //}
             
-
-            log_info(getLogger(), "Creada interfaz de tipo DialFS, con nombre \"%s\"", interfaceData.name);
             createDictionaryFileNames();
 
             break;

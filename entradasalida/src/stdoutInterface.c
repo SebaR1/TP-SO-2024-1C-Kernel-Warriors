@@ -31,5 +31,6 @@ void executeIOStdoutWrite()
     //Se espera a recibir el contenido de la memoria
     //sem_wait(&semaphoreForStdout);
 
-    log_info(getLogger(), "%s", resultsForStdout.resultsForWrite);
+    printf("%s", resultsForStdout.resultsForWrite);
+    //log_info(getLogger(), "%s", resultsForStdout.resultsForWrite);
 }
